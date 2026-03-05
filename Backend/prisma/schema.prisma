@@ -7,6 +7,405 @@ datasource db {
   provider = "postgresql"
 }
 
+
+enum Role {
+  ADMIN
+  CUSTOMER
+  WORKER
+  ORGANISATION
+}
+
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum JobStatus {
+  POSTED
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  PICKED_UP
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  INITIATED
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum EscrowStatus {
+  HELD
+  RELEASED
+  REFUNDED
+}
+
+enum DocumentType {
+  AADHAAR
+  PAN
+  DRIVING_LICENSE
+  PASSPORT
+  PROFILE_PHOTO
+  SKILL_CERTIFICATE
+}
+
+enum DocumentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+
+
+//// USERS
+
+
 model User {
-  id String @id
+  id            String   @id @default(uuid())
+  email         String   @unique
+  phone         String   @unique
+  passwordHash  String
+  role          Role
+
+  profileImage  String?
+
+  isActive      Boolean  @default(true)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  
+
+  customer      Customer?
+  worker        Worker?
+  organisation  Organisation?
+
+  payments      Payment[]
+
+  @@index([role])
+  refreshTokens RefreshToken[]
+}
+
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token     String   @unique
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  revoked   Boolean  @default(false)
+
+  @@index([userId])
+}
+
+//// CUSTOMER
+
+model Customer {
+  id          String @id @default(uuid())
+
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  jobs        Job[]
+  reservations Reservation[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+}
+
+
+//// WORKER
+
+
+model Worker {
+  id           String @id @default(uuid())
+
+  userId       String @unique
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  skills       Json?
+  experience   Int?
+
+  bio          String?
+
+  isAvailable  Boolean @default(true)
+
+  ratingAvg    Float   @default(0)
+  ratingCount  Int     @default(0)
+
+  serviceRadius Int?
+
+  kycStatus    KycStatus @default(NOT_STARTED)
+
+  jobs         Job[]
+
+  documents    WorkerDocument[]
+  kycRequests  KycRequest[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  @@index([isAvailable])
+  @@index([kycStatus])
+}
+
+
+//// ORGANISATIONS
+
+
+model Organisation {
+  id            String @id @default(uuid())
+
+  userId        String @unique
+  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  businessName  String
+  businessType  String
+
+  description   String?
+
+  ratingAvg     Float @default(0)
+  ratingCount   Int   @default(0)
+
+  products      Product[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+}
+
+
+//// JOBS
+
+
+model Job {
+  id          String @id @default(uuid())
+
+  customerId  String
+  workerId    String?
+
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  worker      Worker?  @relation(fields: [workerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  title       String
+  description String
+
+  category    String
+
+  budget      Float?
+
+  status      JobStatus @default(POSTED)
+
+  scheduledAt DateTime?
+
+  escrow      Escrow?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@index([customerId])
+  @@index([workerId])
+  @@index([status])
+}
+
+
+//// PRODUCTS
+
+
+model Product {
+  id             String @id @default(uuid())
+
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  name           String
+  description    String?
+
+  price          Float
+
+  stockQuantity  Int
+
+  isActive       Boolean @default(true)
+
+  images         ProductImage[]
+
+  reservations   Reservation[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  @@index([organisationId])
+  @@index([isActive])
+}
+
+
+//// PRODUCT IMAGES
+
+
+model ProductImage {
+  id        String @id @default(uuid())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  imageUrl  String
+
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+
+//// RESERVATIONS
+
+
+model Reservation {
+  id          String @id @default(uuid())
+
+  productId   String
+  customerId  String
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  quantity    Int
+
+  status      ReservationStatus @default(PENDING)
+
+  expiresAt   DateTime?
+
+  escrow      Escrow?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([customerId])
+  @@index([status])
+}
+
+
+//// PAYMENTS
+
+
+model Payment {
+  id                String @id @default(uuid())
+
+  userId            String
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  amount            Float
+
+  type              String
+
+  status            PaymentStatus @default(INITIATED)
+
+  providerReference String?
+
+  idempotencyKey    String @unique
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+
+//// ESCROW
+
+
+model Escrow {
+  id            String @id @default(uuid())
+
+  jobId         String? @unique
+  reservationId String? @unique
+
+  job           Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  amount        Float
+
+  status        EscrowStatus @default(HELD)
+
+  releasedAt    DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([jobId])
+  @@index([reservationId])
+}
+
+
+//// WORKER DOCUMENTS
+
+
+model WorkerDocument {
+  id            String @id @default(uuid())
+
+  workerId      String
+  worker        Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  documentType  DocumentType
+
+  documentUrl   String
+
+  status        DocumentStatus @default(PENDING)
+
+  verifiedBy    String?
+  verifiedAt    DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([workerId])
+  @@index([status])
+}
+
+
+//// KYC REQUESTS
+
+
+model KycRequest {
+  id          String @id @default(uuid())
+
+  workerId    String
+  worker      Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  provider    String
+
+  status      KycStatus @default(PENDING)
+
+  submittedAt DateTime?
+  verifiedAt  DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workerId])
+  @@index([status])
 }
