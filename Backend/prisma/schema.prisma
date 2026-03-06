@@ -1,12 +1,10 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
-
 
 enum Role {
   ADMIN
@@ -66,52 +64,46 @@ enum DocumentStatus {
   REJECTED
 }
 
-
-
 //// USERS
 
-
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  phone         String   @unique
-  passwordHash  String
-  role          Role
+  id           String @id @default(uuid())
+  email        String @unique
+  phone        String @unique
+  passwordHash String
+  role         Role
 
-  profileImage  String?
+  profileImage String?
 
-  isActive      Boolean  @default(true)
+  isActive Boolean @default(true)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  deletedAt     DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  
-
-  customer      Customer?
-  worker        Worker?
-  organisation  Organisation?
+  customer     Customer?
+  worker       Worker?
+  organisation Organisation?
 
   payments      Payment[]
+  refreshTokens RefreshToken[]
 
   @@index([role])
-  refreshTokens RefreshToken[]
 }
 
-
 model RefreshToken {
-  id        String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  token     String   @unique
+  token String @unique
 
   expiresAt DateTime
 
   createdAt DateTime @default(now())
 
-  revoked   Boolean  @default(false)
+  revoked Boolean @default(false)
 
   @@index([userId])
 }
@@ -119,292 +111,272 @@ model RefreshToken {
 //// CUSTOMER
 
 model Customer {
-  id          String @id @default(uuid())
+  id String @id @default(uuid())
 
-  userId      String @unique
-  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  jobs        Job[]
+  jobs         Job[]
   reservations Reservation[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
-
 
 //// WORKER
 
-
 model Worker {
-  id           String @id @default(uuid())
+  id String @id @default(uuid())
 
-  userId       String @unique
-  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  skills       Json?
-  experience   Int?
+  skills     String[]
+  experience Int?
 
-  bio          String?
+  bio String?
 
-  isAvailable  Boolean @default(true)
+  isAvailable Boolean @default(true)
 
-  ratingAvg    Float   @default(0)
-  ratingCount  Int     @default(0)
+  ratingAvg   Float @default(0)
+  ratingCount Int   @default(0)
 
   serviceRadius Int?
 
-  kycStatus    KycStatus @default(NOT_STARTED)
+  kycStatus KycStatus @default(NOT_STARTED)
 
-  jobs         Job[]
+  jobs Job[]
 
-  documents    WorkerDocument[]
-  kycRequests  KycRequest[]
+  documents   WorkerDocument[]
+  kycRequests KycRequest[]
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  deletedAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([isAvailable])
   @@index([kycStatus])
 }
 
-
 //// ORGANISATIONS
 
-
 model Organisation {
-  id            String @id @default(uuid())
+  id String @id @default(uuid())
 
-  userId        String @unique
-  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  businessName  String
-  businessType  String
+  businessName String
+  businessType String
 
-  description   String?
+  description String?
 
-  ratingAvg     Float @default(0)
-  ratingCount   Int   @default(0)
+  ratingAvg   Float @default(0)
+  ratingCount Int   @default(0)
 
-  products      Product[]
+  products Product[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  deletedAt     DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
-
 
 //// JOBS
 
-
 model Job {
-  id          String @id @default(uuid())
+  id String @id @default(uuid())
 
-  customerId  String
-  workerId    String?
+  customerId String
+  workerId   String?
 
-  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  worker      Worker?  @relation(fields: [workerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  worker Worker? @relation(fields: [workerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   title       String
   description String
 
-  category    String
+  category String
 
-  budget      Float?
+  budget Float?
 
-  status      JobStatus @default(POSTED)
+  status JobStatus @default(POSTED)
 
   scheduledAt DateTime?
 
-  escrow      Escrow?
+  escrow Escrow?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([customerId])
   @@index([workerId])
   @@index([status])
 }
 
-
 //// PRODUCTS
 
-
 model Product {
-  id             String @id @default(uuid())
+  id String @id @default(uuid())
 
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  name           String
-  description    String?
+  name        String
+  description String?
 
-  price          Float
+  price Float
 
-  stockQuantity  Int
+  stockQuantity Int
 
-  isActive       Boolean @default(true)
+  isActive Boolean @default(true)
 
-  images         ProductImage[]
+  images ProductImage[]
 
-  reservations   Reservation[]
+  reservations Reservation[]
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  deletedAt      DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([organisationId])
   @@index([isActive])
 }
 
-
 //// PRODUCT IMAGES
 
-
 model ProductImage {
-  id        String @id @default(uuid())
+  id String @id @default(uuid())
 
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  imageUrl  String
+  imageUrl String
 
   createdAt DateTime @default(now())
 
   @@index([productId])
 }
 
-
 //// RESERVATIONS
 
-
 model Reservation {
-  id          String @id @default(uuid())
+  id String @id @default(uuid())
 
-  productId   String
-  customerId  String
+  productId  String
+  customerId String
 
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  quantity    Int
+  quantity Int
 
-  status      ReservationStatus @default(PENDING)
+  status ReservationStatus @default(PENDING)
 
-  expiresAt   DateTime?
+  expiresAt DateTime?
 
-  escrow      Escrow?
+  escrow Escrow?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([productId])
   @@index([customerId])
   @@index([status])
 }
 
-
 //// PAYMENTS
 
-
 model Payment {
-  id                String @id @default(uuid())
+  id String @id @default(uuid())
 
-  userId            String
-  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  amount            Float
+  amount Float
 
-  type              String
+  type String
 
-  status            PaymentStatus @default(INITIATED)
+  status PaymentStatus @default(INITIATED)
 
   providerReference String?
 
-  idempotencyKey    String @unique
+  idempotencyKey String @unique
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
 }
 
-
 //// ESCROW
 
-
 model Escrow {
-  id            String @id @default(uuid())
+  id String @id @default(uuid())
 
   jobId         String? @unique
   reservationId String? @unique
 
-  job           Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  job         Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
-  amount        Float
+  amount Float
 
-  status        EscrowStatus @default(HELD)
+  status EscrowStatus @default(HELD)
 
-  releasedAt    DateTime?
+  releasedAt DateTime?
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([jobId])
   @@index([reservationId])
 }
 
-
 //// WORKER DOCUMENTS
 
-
 model WorkerDocument {
-  id            String @id @default(uuid())
+  id String @id @default(uuid())
 
-  workerId      String
-  worker        Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workerId String
+  worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  documentType  DocumentType
+  documentType DocumentType
 
-  documentUrl   String
+  documentUrl String
 
-  status        DocumentStatus @default(PENDING)
+  status DocumentStatus @default(PENDING)
 
-  verifiedBy    String?
-  verifiedAt    DateTime?
+  verifiedBy String?
+  verifiedAt DateTime?
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([workerId])
   @@index([status])
 }
 
-
 //// KYC REQUESTS
 
-
 model KycRequest {
-  id          String @id @default(uuid())
+  id String @id @default(uuid())
 
-  workerId    String
-  worker      Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workerId String
+  worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  provider    String
+  provider String
 
-  status      KycStatus @default(PENDING)
+  status KycStatus @default(PENDING)
 
   submittedAt DateTime?
   verifiedAt  DateTime?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([workerId])
   @@index([status])
