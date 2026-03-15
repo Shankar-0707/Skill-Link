@@ -4,6 +4,7 @@ import { OrganisationsService } from './organisations.service';
 
 @Module({
   controllers: [OrganisationsController],
-  providers: [OrganisationsService]
+  providers: [OrganisationsService],
+  exports: [OrganisationsService], // Products module will need resolveOrgid
 })
 export class OrganisationsModule {}
