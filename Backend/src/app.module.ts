@@ -8,6 +8,7 @@ import { EscrowModule } from './escrow/escrow.module'
 import { OrganisationsModule } from './organisations/organisations.module'
 import { ProductsModule } from './products/products.module'
 import { ReservationsModule } from './reservations/reservations.module'
+import { JobsModule } from './jobs/jobs.module'
 
 
 // To be commented when vidhits work is done
@@ -53,7 +54,7 @@ import { MockAuthGuard } from './common/guards/mock-auth.guard'
     ReservationsModule,
 
     // AuthModule,     // Vidhit
-    // JobsModule,     // Udit
+    JobsModule,     // Udit
     // WorkersModule,  // Udit
     
   ],
