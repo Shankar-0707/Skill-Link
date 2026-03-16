@@ -23,6 +23,7 @@ import {
   ApiConflictResponse,
 } from '@nestjs/swagger'
 import { Role } from '@prisma/client'
+import { MockAuthGuard } from '../common/guards/mock-auth.guard'
 
 import { ReservationsService } from './reservations.service'
 import {
@@ -35,7 +36,8 @@ import * as common from '../common'
 
 @ApiTags('Reservations')
 @ApiBearerAuth()
-@UseGuards(common.JwtAuthGuard) // All reservation endpoints require auth
+// @UseGuards(common.JwtAuthGuard) // All reservation endpoints require auth
+@UseGuards(MockAuthGuard)
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}

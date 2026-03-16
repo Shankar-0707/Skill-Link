@@ -9,12 +9,22 @@ import { OrganisationsModule } from './organisations/organisations.module'
 import { ProductsModule } from './products/products.module'
 import { ReservationsModule } from './reservations/reservations.module'
 
+
+// To be commented when vidhits work is done
+import { APP_GUARD } from '@nestjs/core'
+import { MockAuthGuard } from './common/guards/mock-auth.guard'
 // Vidhit's module — import once it's ready
 // import { AuthModule } from './auth/auth.module'
 // Udit's module — import once it's ready
 // import { JobsModule } from './jobs/jobs.module'
 
 @Module({
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: MockAuthGuard, // Overrides JwtAuthGuard Gloabally
+    }
+  ],
   imports: [
     // ── Config (must be first so all modules can read env vars) ──────────
     ConfigModule.forRoot({
@@ -45,6 +55,7 @@ import { ReservationsModule } from './reservations/reservations.module'
     // AuthModule,     // Vidhit
     // JobsModule,     // Udit
     // WorkersModule,  // Udit
+    
   ],
 })
 export class AppModule {}

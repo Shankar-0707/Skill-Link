@@ -23,6 +23,7 @@ import {
   ApiBadRequestResponse,
 } from '@nestjs/swagger'
 import { Role } from '@prisma/client'
+import { MockAuthGuard } from "../common/guards/mock-auth.guard"
 
 import { ProductsService } from './products.service'
 import {
@@ -36,7 +37,7 @@ import * as common from '../common'
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
   // ─── Public endpoints ─────────────────────────────────────────────────────
 
@@ -58,7 +59,8 @@ export class ProductsController {
   // ─── Organisation-only endpoints ─────────────────────────────────────────
 
   @Get('me/all')
-  @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  // @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  @UseGuards(MockAuthGuard, common.RolesGuard)
   @common.Roles(Role.ORGANISATION)
   @ApiBearerAuth()
   @ApiOperation({ summary: "List the authenticated org's own products (all states)" })
@@ -67,7 +69,8 @@ export class ProductsController {
   }
 
   @Post()
-  @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  // @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  @UseGuards(MockAuthGuard, common.RolesGuard)
   @common.Roles(Role.ORGANISATION)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
@@ -79,7 +82,8 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  // @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  @UseGuards(MockAuthGuard, common.RolesGuard)
   @common.Roles(Role.ORGANISATION)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
@@ -96,7 +100,8 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  // @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  @UseGuards(MockAuthGuard, common.RolesGuard)
   @common.Roles(Role.ORGANISATION)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
@@ -110,7 +115,8 @@ export class ProductsController {
   // ─── Product image management ─────────────────────────────────────────────
 
   @Post(':id/images')
-  @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  // @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  @UseGuards(MockAuthGuard, common.RolesGuard)
   @common.Roles(Role.ORGANISATION)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
@@ -124,7 +130,9 @@ export class ProductsController {
   }
 
   @Delete(':id/images/:imageId')
-  @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  // @UseGuards(common.JwtAuthGuard, common.RolesGuard)
+  @UseGuards(MockAuthGuard, common.RolesGuard)
+
   @common.Roles(Role.ORGANISATION)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
