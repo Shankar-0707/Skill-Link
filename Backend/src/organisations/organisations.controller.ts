@@ -7,7 +7,7 @@ import * as common from '../common'
 import { CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../common';
 
 @ApiTags('Organisations')
-@Controller('v0/organisations')
+@Controller('organisations')
 export class OrganisationsController {
     constructor(private readonly organisationsService: OrganisationsService) { }
 
