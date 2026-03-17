@@ -1,10 +1,11 @@
 import 'dotenv/config'
 import { PrismaClient, Role, KycStatus, JobStatus, ReservationStatus } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
-import pg from 'pg'
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE })
-const adapter = new PrismaPg(pool)
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!
+})
+
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
