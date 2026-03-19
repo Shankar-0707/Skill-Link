@@ -9,9 +9,10 @@ import { ReservationsModule } from './reservations/reservations.module';
 import { PaymentsModule } from './payments/payments.module';
 import { EscrowModule } from './escrow/escrow.module';
 import { KycModule } from './kyc/kyc.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, WorkersModule, OrganisationsModule, ProductsModule, JobsModule, ReservationsModule, PaymentsModule, EscrowModule, KycModule],
+  imports: [PrismaModule, AuthModule, UsersModule, WorkersModule, OrganisationsModule, ProductsModule, JobsModule, ReservationsModule, PaymentsModule, EscrowModule, KycModule],
   controllers: [],
   providers: [],
 })
