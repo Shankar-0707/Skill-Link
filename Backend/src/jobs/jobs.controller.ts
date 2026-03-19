@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 // import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { MockAuthGuard } from 'src/common/guards/mock-auth.guard';
+import { MockAuthGuard } from '../common/guards/mock-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guards';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
