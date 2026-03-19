@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{BASE_URL}}/jobs/available/category/Electrical"
+method: GET
+headers:
+  - key: x-mock-role
+    value: WORKER
+  - key: x-mock-user-id
+    value: 6476fec4-b759-4fd9-a29a-70424497682e
+    disabled: true
+order: 2000

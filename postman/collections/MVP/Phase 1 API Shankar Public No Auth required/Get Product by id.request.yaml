@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{BASE_URL}}/products/c7833a01-6979-4386-9dff-0b71876a613b"
+method: GET
+auth:
+  type: noauth
+order: 6000

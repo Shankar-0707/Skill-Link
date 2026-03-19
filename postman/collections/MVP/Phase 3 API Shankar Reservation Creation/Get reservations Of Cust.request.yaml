@@ -1,0 +1,9 @@
+$kind: http-request
+url: "{{BASE_URL}}/reservations/my"
+method: GET
+headers:
+  x-mock-role: CUSTOMER
+  x-mock-user-id: 0929ea22-f735-4e9a-8d3f-3fb0ae205315
+auth:
+  type: noauth
+order: 3000

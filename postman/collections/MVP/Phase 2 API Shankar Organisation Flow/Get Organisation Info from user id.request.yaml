@@ -1,0 +1,9 @@
+$kind: http-request
+url: "{{BASE_URL}}/organisations/me/profile"
+method: GET
+headers:
+  x-mock-role: "ORGANISATION  "
+  x-mock-user-id: 9bc692ba-0944-4de0-bb75-6eb919059620
+auth:
+  type: noauth
+order: 1000

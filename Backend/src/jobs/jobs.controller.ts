@@ -12,15 +12,15 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
-// import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { MockAuthGuard } from '../common/guards/mock-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+// import { MockAuthGuard } from '../common/guards/mock-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guards';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 
-@UseGuards(MockAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('jobs')
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
