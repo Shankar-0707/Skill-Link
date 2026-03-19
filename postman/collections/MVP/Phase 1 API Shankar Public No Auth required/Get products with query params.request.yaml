@@ -1,8 +1,0 @@
-$kind: http-request
-url: "{{BASE_URL}}/products?search=Eco"
-method: GET
-queryParams:
-  search: Eco
-auth:
-  type: noauth
-order: 5000

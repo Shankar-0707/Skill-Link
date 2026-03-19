@@ -1,4 +1,0 @@
-$kind: http-request
-url: "{{BASE_URL}}/organisations"
-method: GET
-order: 1000

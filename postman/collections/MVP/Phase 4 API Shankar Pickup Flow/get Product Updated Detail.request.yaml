@@ -1,6 +1,0 @@
-$kind: http-request
-url: "{{BASE_URL}}/products/c29eb206-1482-4e05-94ae-b1bfbb5ded32"
-method: GET
-auth:
-  type: noauth
-order: 3000

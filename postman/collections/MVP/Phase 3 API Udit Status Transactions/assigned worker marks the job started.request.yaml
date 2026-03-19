@@ -1,7 +1,0 @@
-$kind: http-request
-url: "{{BASE_URL}}/jobs/2810ba8a-33e5-4813-8f49-3fcb9ac9f524/start"
-method: PATCH
-headers:
-  x-mock-role: WORKER
-  x-mock-user-id: 6476fec4-b759-4fd9-a29a-70424497682e
-order: 2000

@@ -4,8 +4,9 @@ import { Role } from '@prisma/client'
 import { OrganisationsService } from './organisations.service'
 import { UpdateOrganisationDto, ListOrganisationsDto } from './organisation.dto'
 import * as common from '../common'
-import { CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../common';
+import { CurrentUser, Roles, RolesGuard } from '../common';
 import { MockAuthGuard } from "../common/guards/mock-auth.guard"
+import { JwtAuthGuard } from ".././auth/guards/jwt-auth.guard"
 
 @ApiTags('Organisations')
 @Controller('organisations')
@@ -33,8 +34,8 @@ export class OrganisationsController {
     // Authenticated: Organisation-only endpoints
 
     @Get('me/profile')
-    // @UseGuards(common.JwtAuthGuard, common.RolesGuard)
-    @UseGuards(MockAuthGuard, common.RolesGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    // @UseGuards(MockAuthGuard, common.RolesGuard)
     @common.Roles(Role.ORGANISATION)
     @ApiBearerAuth()
     @ApiOperation({ summary: "Get the authenticated organisation's own profile" })
@@ -44,8 +45,8 @@ export class OrganisationsController {
     }
 
     @Patch('me/profile')
-    // @UseGuards(JwtAuthGuard, RolesGuard)
-    @UseGuards(MockAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    // @UseGuards(MockAuthGuard, RolesGuard)
     @Roles(Role.ORGANISATION)
     @ApiBearerAuth()
     @HttpCode(HttpStatus.OK)

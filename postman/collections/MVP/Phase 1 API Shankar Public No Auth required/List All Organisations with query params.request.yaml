@@ -1,8 +1,0 @@
-$kind: http-request
-url: "{{BASE_URL}}/organisations?search=Green"
-method: GET
-queryParams:
-  search: Green
-auth:
-  type: noauth
-order: 2000

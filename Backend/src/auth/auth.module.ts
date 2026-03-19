@@ -25,4 +25,4 @@ import { RolesGuard } from '../common/guards/roles.guards';
   providers: [AuthService, MailService, JwtAuthGuard, GoogleOauthGuard, GoogleStrategy, RolesGuard],
   exports: [AuthService, JwtAuthGuard, JwtModule, RolesGuard],
 })
-export class AuthModule {}
+export class AuthModule { }

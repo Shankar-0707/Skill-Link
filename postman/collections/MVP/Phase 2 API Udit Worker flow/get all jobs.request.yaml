@@ -1,7 +1,0 @@
-$kind: http-request
-url: "{{BASE_URL}}/jobs/available/"
-method: GET
-headers:
-  x-mock-role: WORKER
-  x-mock-user-id: 3f40849d-9d77-4f5e-92ec-618bbed2b59b
-order: 1000
