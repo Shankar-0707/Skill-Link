@@ -1,0 +1,25 @@
+import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+
+export interface JwtPayload {
+    sub : string  // userId
+    email : string
+    role : string
+    iat? : number
+    exp? : number
+}
+
+export const CurrentUser = createParamDecorator(
+    (data: keyof JwtPayload | undefined, ctx: ExecutionContext): any => {
+        const request = ctx.switchToHttp().getRequest()
+        const user = request.user;
+        return data ? user?.[data] : user;
+    },
+)
+
+
+
+
+// Ye code NestJs me ek custom parameter decorator (@currentUser)
+// create krta hai jo controller methods me directly authenticated user ka data 
+// access karne ke liye use hota h 
+// JwtPayload interface define karta hai ki JWT token ke payload me kaun-kaun se fields (jaise sub, email, role, iat, exp) honge.
