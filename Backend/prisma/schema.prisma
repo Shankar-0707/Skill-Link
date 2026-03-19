@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  
 }
 
 enum Role {
@@ -11,6 +12,11 @@ enum Role {
   CUSTOMER
   WORKER
   ORGANISATION
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
 }
 
 enum KycStatus {
@@ -67,11 +73,15 @@ enum DocumentStatus {
 //// USERS
 
 model User {
-  id           String @id @default(uuid())
-  email        String @unique
-  phone        String @unique
-  passwordHash String
-  role         Role
+  id            String @id @default(uuid())
+  email         String @unique
+  name          String?
+  phone         String? @unique
+  passwordHash  String?
+  role          Role         @default(CUSTOMER)
+  authProvider  AuthProvider @default(LOCAL)
+  googleId      String?      @unique
+  emailVerified Boolean @default(false)
 
   profileImage String?
 
@@ -85,8 +95,10 @@ model User {
   worker       Worker?
   organisation Organisation?
 
-  payments      Payment[]
-  refreshTokens RefreshToken[]
+  payments                Payment[]
+  refreshTokens           RefreshToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
 
   @@index([role])
 }
@@ -97,13 +109,41 @@ model RefreshToken {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  token String @unique
+  tokenHash String @unique
 
   expiresAt DateTime
 
   createdAt DateTime @default(now())
 
   revoked Boolean @default(false)
+
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tokenHash String @unique
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tokenHash String @unique
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime @default(now())
 
   @@index([userId])
 }

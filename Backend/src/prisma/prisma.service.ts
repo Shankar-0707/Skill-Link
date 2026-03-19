@@ -1,46 +1,46 @@
-// service of prisma here 
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common'
-import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
+import 'dotenv/config';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-    private readonly logger = new Logger(PrismaService.name)
+  private readonly logger = new Logger(PrismaService.name);
 
-    constructor() {
-        const adapter = new PrismaPg({ connectionString: process.env.DATABASE })
-        super({
-            adapter,
-            log: [
-                { emit: 'event', level: 'query' },
-                { emit: 'stdout', level: 'error' },
-                { emit: 'stdout', level: 'warn' },
-            ],
-        })
+  constructor() {
+    const connectionString = process.env.DATABASE;
+
+    if (!connectionString) {
+      throw new Error('DATABASE environment variable is not set.');
     }
 
-    async onModuleInit(): Promise<void> {
-        await this.$connect()
-        this.logger.log('Database connected')
+    super({
+      adapter: new PrismaPg({ connectionString }),
+      log: [
+        { emit: 'event', level: 'query' },
+        { emit: 'stdout', level: 'error' },
+        { emit: 'stdout', level: 'warn' },
+      ],
+    });
+  }
 
-        // Log slow queries in development
-        if (process.env.NODE_ENV !== 'production') {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (this as any).$on('query', (e: { query: string; duration: number }) => {
-                if (e.duration > 200) {
-                    this.logger.warn(`Slow query (${e.duration}ms): ${e.query}`)
-                }
-            })
+  async onModuleInit(): Promise<void> {
+    await this.$connect();
+    this.logger.log('Database connected');
+
+    if (process.env.NODE_ENV !== 'production') {
+      (this as PrismaClient & {
+        $on(eventType: 'query', callback: (event: { query: string; duration: number }) => void): void;
+      }).$on('query', (event) => {
+        if (event.duration > 200) {
+          this.logger.warn(`Slow query (${event.duration}ms): ${event.query}`);
         }
+      });
     }
+  }
 
-    async onModuleDestroy(): Promise<void> {
-        await this.$disconnect()
-        this.logger.log('Database disconnected')
-    }
-
-     /**
-   * Use inside services for atomic operations.
-   * Example: await this.prisma.$transaction(async (tx) => { ... })
-   */
+  async onModuleDestroy(): Promise<void> {
+    await this.$disconnect();
+    this.logger.log('Database disconnected');
+  }
 }
