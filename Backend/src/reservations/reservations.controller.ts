@@ -24,7 +24,7 @@ import {
 } from '@nestjs/swagger'
 import { Role } from '@prisma/client'
 import { MockAuthGuard } from '../common/guards/mock-auth.guard'
-
+import { JwtAuthGuard } from ".././auth/guards/jwt-auth.guard"
 import { ReservationsService } from './reservations.service'
 import {
   CreateReservationDto,
@@ -33,11 +33,12 @@ import {
   ListIncomingReservationsDto,
 } from './dto/reservation.dto'
 import * as common from '../common'
+import { RolesGuard, Roles, CurrentUser, JwtPayload } from '../common'
 
 @ApiTags('Reservations')
 @ApiBearerAuth()
-// @UseGuards(common.JwtAuthGuard) // All reservation endpoints require auth
-@UseGuards(MockAuthGuard)
+@UseGuards(JwtAuthGuard) // All reservation endpoints require auth
+// @UseGuards(MockAuthGuard)
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
@@ -45,8 +46,8 @@ export class ReservationsController {
   // ─── Customer endpoints ───────────────────────────────────────────────────
 
   @Post()
-  @UseGuards(common.RolesGuard)
-  @common.Roles(Role.CUSTOMER)
+  @UseGuards(RolesGuard)
+  @Roles(Role.CUSTOMER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a reservation for a product',
@@ -61,8 +62,8 @@ export class ReservationsController {
   }
 
   @Get('my')
-  @UseGuards(common.RolesGuard)
-  @common.Roles(Role.CUSTOMER)
+  @UseGuards(RolesGuard)
+  @Roles(Role.CUSTOMER)
   @ApiOperation({ summary: "List the authenticated customer's own reservations" })
   @ApiOkResponse({ description: 'Paginated reservation list' })
   findMy(
@@ -73,8 +74,8 @@ export class ReservationsController {
   }
 
   @Patch(':id/pickup')
-  @UseGuards(common.RolesGuard)
-  @common.Roles(Role.CUSTOMER)
+  @UseGuards(RolesGuard)
+  @Roles(Role.CUSTOMER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Mark a reservation as picked up',
@@ -93,8 +94,8 @@ export class ReservationsController {
   // ─── Organisation endpoints ───────────────────────────────────────────────
 
   @Get('incoming')
-  @UseGuards(common.RolesGuard)
-  @common.Roles(Role.ORGANISATION)
+  @UseGuards(RolesGuard)
+  @Roles(Role.ORGANISATION)
   @ApiOperation({ summary: "List reservations for the org's products" })
   @ApiOkResponse({ description: 'Paginated incoming reservations' })
   findIncoming(
@@ -105,8 +106,8 @@ export class ReservationsController {
   }
 
   @Patch(':id/confirm')
-  @UseGuards(common.RolesGuard)
-  @common.Roles(Role.ORGANISATION)
+  @UseGuards(RolesGuard)
+  @Roles(Role.ORGANISATION)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Confirm a pending reservation',
