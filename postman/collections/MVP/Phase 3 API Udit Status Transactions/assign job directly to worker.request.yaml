@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{BASE_URL}}/jobs/2bc20b71-f502-4bfa-bf81-165b0fb62418/assign/3f40849d-9d\
+  77-4f5e-92ec-618bbed2b59b"
+method: PATCH
+headers:
+  x-mock-user-id: 851f6af7-5906-4d9b-827a-65c4ae783bca
+  x-mock-role: CUSTOMER
+order: 1000

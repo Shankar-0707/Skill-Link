@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{BASE_URL}}/jobs/65c8f4d4-ae45-4e1c-93be-f1d0bb95a834"
+method: GET
+headers:
+  x-mock-role: CUSTOMER
+  x-mock-user-id: 851f6af7-5906-4d9b-827a-65c4ae783bca
+order: 3000

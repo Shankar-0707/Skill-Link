@@ -1,0 +1,17 @@
+$kind: http-request
+url: http://localhost:3000/auth/profile
+method: PATCH
+headers:
+  Authorization: Bearer
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZTViZjllMy1kYmRiLTQ3MmEtODA4My1lNWU4YTlhZmYyZmUiLCJlbWFpbCI6ImpvaG5AdGVzdC5jb20iLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NzM3MzAzNTcsImV4cCI6MTc3MzczMTI1N30.BUF2iTo9dbvR_-R0YhLNRJdKosifhHbuZ_gqE0tqFeE
+  Content-Type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"Customer One Updated\",\r
+
+    \  \"phone\": \"9999999999\"\r
+
+    }"
+order: 4000

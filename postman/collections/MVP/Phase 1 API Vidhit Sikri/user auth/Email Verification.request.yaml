@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://localhost:3000/api/v1/auth/verify-email/confirm
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"token\":
+    \"4532fde8a39859386a84fa6b784fc6e98be057e2845af2c2da2dc46f7ee293096db5e392d\
+    ad03ad39866fc4b543461cf\"\r
+
+    }\r\n"
+order: 2000

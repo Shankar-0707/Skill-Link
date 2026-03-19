@@ -1,0 +1,20 @@
+$kind: http-request
+name: New Request
+url: http://localhost:3000/auth/profile
+method: PATCH
+headers:
+  Authorization: Bearer
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZTE2MWMxNS1hOGUxLTQ0ODEtYjI0Mi1hYmMxMjgwZDE4OGIiLCJlbWFpbCI6InZpZGloaXRAdGVzdC5jb20iLCJyb2xlIjoiV09SS0VSIiwiaWF0IjoxNzczNzM3NjE2LCJleHAiOjE3NzM3Mzg1MTZ9.dLpPOp_mqXigeGWKL618kh4CYBbJFUd-q_ekukiTHwE
+  Content-Type: application/json
+body:
+  type: text
+  content: "{\r
+
+    \    \"experience\": 5,\r
+
+    \    \"skills\": [\"plumbing\",\r
+
+    \            \"electrician\", \"carpenter\"]\r
+
+    }"
+order: 5000

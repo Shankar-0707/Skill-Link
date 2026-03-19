@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{BASE_URL}}/organisations/7c234d52-d022-41fb-a1aa-eb3734c99bcd"
+method: GET
+auth:
+  type: noauth
+order: 3000
