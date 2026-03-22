@@ -1,0 +1,125 @@
+import type { Config } from "tailwindcss"
+import animate from "tailwindcss-animate"
+
+const config: Config = {
+  darkMode: "class",
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+  ],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "#f8f9fb",
+        foreground: "hsl(var(--foreground))",
+        primary: "#000613",
+        "on-primary": "#ffffff",
+        "primary-container": "#001f3f",
+        "on-primary-container": "#6f88ad",
+        secondary: "#4f6073",
+        "on-secondary": "#ffffff",
+        "secondary-container": "#d2e4fb",
+        "on-secondary-container": "#556679",
+        tertiary: "#110200",
+        "on-tertiary": "#ffffff",
+        "tertiary-container": "#391303",
+        "on-tertiary-container": "#b5785f",
+        error: "#ba1a1a",
+        "on-error": "#ffffff",
+        "error-container": "#ffdad6",
+        "on-error-container": "#93000a",
+        "outline": "#74777f",
+        "outline-variant": "#c4c6cf",
+        "surface": "#f8f9fb",
+        "on-surface": "#191c1e",
+        "surface-variant": "#e0e3e5",
+        "on-surface-variant": "#43474e",
+        "inverse-surface": "#2d3133",
+        "inverse-on-surface": "#eff1f3",
+        "inverse-primary": "#afc8f0",
+        "surface-tint": "#476083",
+        "surface-bright": "#f8f9fb",
+        "surface-dim": "#d8dadc",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f2f4f6",
+        "surface-container": "#eceef0",
+        "surface-container-high": "#e6e8ea",
+        "surface-container-highest": "#e0e3e5",
+        "on-background": "#191c1e",
+        "primary-fixed": "#d4e3ff",
+        "on-primary-fixed": "#001c3a",
+        "primary-fixed-dim": "#afc8f0",
+        "on-primary-fixed-variant": "#2f486a",
+        "secondary-fixed": "#d2e4fb",
+        "on-secondary-fixed": "#0b1d2d",
+        "secondary-fixed-dim": "#b7c8de",
+        "on-secondary-fixed-variant": "#38485a",
+        "tertiary-fixed": "#ffdbce",
+        "on-tertiary-fixed": "#351002",
+        "tertiary-fixed-dim": "#fdb69a",
+        "on-tertiary-fixed-variant": "#6b3a25",
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+        },
+      },
+      fontFamily: {
+        headline: ["Manrope", "sans-serif"],
+        body: ["Inter", "sans-serif"],
+        label: ["Inter", "sans-serif"],
+      },
+      borderRadius: {
+        DEFAULT: "0.125rem",
+        lg: "0.25rem",
+        xl: "0.5rem",
+        full: "0.75rem",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
+  },
+  plugins: [animate],
+}
+
+export default config
