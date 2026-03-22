@@ -1,14 +1,5 @@
-import axios from 'axios';
-import type { AuthResponse, Role } from '../types';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+import { api } from '../../../services/api/api';
+import type { AuthResponse } from '../types';
 
 export const authApi = {
   login: async (data: any): Promise<AuthResponse> => {
