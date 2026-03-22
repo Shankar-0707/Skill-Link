@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Lock, User, Phone, Building2, Briefcase, ChevronRight } from 'lucide-react';
 import { Role } from '../types';
 import { cn } from '../../../shared/utils/cn';
+import { Button } from '@/shared/components/ui/button';
 
 export const RegisterForm: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -155,18 +156,18 @@ export const RegisterForm: React.FC = () => {
 
       {step > 1 && (
         <div className="flex gap-4 pt-4">
-          <button
+          <Button
             type="button" onClick={prevStep}
             className="flex-1 py-4 rounded-2xl bg-secondary text-primary font-bold hover:bg-muted transition-all"
           >
             Back
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit" disabled={isLoading}
             className="flex-[2] py-4 rounded-2xl bg-primary text-primary-foreground font-bold hover:opacity-90 shadow-lg shadow-primary/20 transition-all"
           >
             {step === 3 ? (isLoading ? 'Creating...' : 'Finalize') : 'Continue'}
-          </button>
+          </Button>
         </div>
       )}
 
