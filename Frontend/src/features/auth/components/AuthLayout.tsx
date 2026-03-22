@@ -35,21 +35,21 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
 
         <div className="relative z-10 text-center">
           <div className="p-4 bg-white/10 rounded-3xl inline-block mb-8 backdrop-blur-sm border border-white/20">
-            <span className="text-primary-foreground font-black tracking-widest text-3xl">
+            <span className="text-on-primary font-black tracking-widest text-3xl">
               SKILL-LINK
             </span>
           </div>
           <h1 className="text-5xl font-black text-white mb-6 leading-tight">
             Connect with<br/>Excellence.
           </h1>
-          <p className="text-primary-foreground/70 text-xl font-medium max-w-sm mx-auto">
+          <p className="text-on-primary/70 text-xl font-medium max-w-sm mx-auto">
             The premium marketplace for skilled workers and growing businesses.
           </p>
         </div>
 
         {/* Bottom Curve for Mobile Transition */}
         <div className="absolute bottom-0 left-0 w-full md:hidden">
-          <svg viewBox="0 0 500 150" preserveAspectRatio="none" className="h-20 w-full" fill="hsl(var(--background))">
+          <svg viewBox="0 0 500 150" preserveAspectRatio="none" className="h-20 w-full" fill="#f8f9fb">
             <path d="M0,150 L500,150 L500,0 C250,150 0,0 0,0 Z"></path>
           </svg>
         </div>
@@ -74,7 +74,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
         {showBackButton && (
            <button 
              onClick={() => navigate(-1)}
-             className="hidden md:flex absolute top-8 left-8 p-3 bg-secondary rounded-2xl hover:bg-muted transition-colors text-primary items-center gap-2 font-bold"
+             className="hidden md:flex absolute top-8 left-8 p-3 bg-secondary-container rounded-2xl hover:bg-surface-container-high transition-colors text-primary items-center gap-2 font-bold"
            >
              <ArrowLeft className="w-5 h-5" />
              Back
@@ -87,7 +87,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
               {title}
             </h2>
             {subtitle && (
-              <p className="text-muted-foreground font-semibold text-lg">
+              <p className="text-on-surface-variant font-semibold text-lg">
                 {subtitle}
               </p>
             )}
