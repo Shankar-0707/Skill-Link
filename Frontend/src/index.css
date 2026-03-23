@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
 
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
 
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
 
-  --color-accent: hsl(var(--secondary));
-  --color-accent-foreground: hsl(var(--secondary-foreground));
+  --color-accent: var(--secondary);
+  --color-accent-foreground: var(--secondary-foreground);
 
-  --color-success: hsl(var(--success));
-  --color-warning: hsl(var(--warning));
+  --color-success: var(--success);
+  --color-warning: var(--warning);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -45,42 +45,49 @@
 @layer base {
   :root {
     /* Background & Main Surface */
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
+    --background: #f8fafc;
+    --foreground: #0f172a;
 
-    /* Primary Color (The "Midnight Navy") */
-    --primary: 222 47% 11%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary Color (Midnight Navy) */
+    --primary: #0f172a;
+    --primary-foreground: #f8fafc;
 
     /* Secondary Surface (Inputs, Card backgrounds) */
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: #f1f5f9;
+    --secondary-foreground: #0f172a;
 
     /* Muted Text and Backgrounds */
-    --muted: 210 40% 94%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: #eef2f6;
+    --muted-foreground: #64748b;
 
-    /* Success, Alert, Error (Standardized) */
-    --success: 142 76% 36%;
-    --warning: 38 92% 50%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Success, Alert, Error */
+    --success: #16a34a;
+    --warning: #eab308;
+    --destructive: #ef4444;
+    --destructive-foreground: #f8fafc;
 
     /* UI Details */
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222 47% 11%;
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: #0f172a;
 
-    /* Modern Rounded Corners from your image */
+    /* Modern Rounded Corners */
     --radius: 0.75rem;
   }
 
-  /* Dark Mode Placeholder (Can be customized later) */
+  /* Dark Mode */
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222 47% 11%;
+    --background: #0f172a;
+    --foreground: #f8fafc;
+    --primary: #f8fafc;
+    --primary-foreground: #0f172a;
+    --secondary: #1e293b;
+    --secondary-foreground: #f8fafc;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+    --border: #1e293b;
+    --input: #1e293b;
+    --ring: #cbd5e1;
   }
   
   body {
