@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, User, Phone, Building2, Briefcase, ChevronRight } from 'lucide-react';
 import { authApi } from '../api/auth';
+import { GoogleAuthButton } from './GoogleAuthButton';
 import { Role } from '../types';
 import { resolveApiErrorMessage } from '../utils/errorMessage';
 import { cn } from '../../../shared/utils/cn';
@@ -76,6 +77,16 @@ export const RegisterForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <GoogleAuthButton mode="register" role={formData.role} />
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground">
+          Or
+        </span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
       {/* Step Indicator */}
       <div className="flex justify-between items-center mt-4 px-4 pb-4">
         {[1, 2, 3].map((s) => (

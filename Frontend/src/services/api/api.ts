@@ -17,7 +17,7 @@ function normalizeApiUrl(rawUrl?: string) {
   return `${baseUrl}/api/v1`;
 }
 
-const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL);
+export const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL);
 
 export const api = axios.create({
   baseURL: API_URL,

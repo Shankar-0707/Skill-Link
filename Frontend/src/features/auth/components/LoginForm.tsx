@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { GoogleAuthButton } from './GoogleAuthButton';
 import { useAuth } from '../context/useAuth';
 import { getHomeRouteForRole } from '../utils/authHelpers';
 import { resolveApiErrorMessage } from '../utils/errorMessage';
@@ -40,6 +41,16 @@ export const LoginForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <GoogleAuthButton mode="login" />
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-xs font-bold uppercase tracking-[0.24em] text-on-surface-variant">
+          Or
+        </span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
       <div className="space-y-2">
         <label className="text-sm font-bold text-on-surface-variant ml-1">
           Email Address

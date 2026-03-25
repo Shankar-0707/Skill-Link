@@ -13,6 +13,7 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   isBootstrapping: boolean;
   login: (email: string, password: string) => Promise<AuthResponse>;
+  completeAuthSession: (authResponse: AuthResponse) => Promise<void>;
   logout: () => Promise<void>;
   deleteAccount: () => Promise<void>;
   refreshProfile: () => Promise<User | null>;
@@ -84,6 +85,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAuthTokens(response.accessToken, response.refreshToken);
         setUser(response.user);
         return response;
+      },
+      completeAuthSession: async (authResponse: AuthResponse) => {
+        setAuthTokens(authResponse.accessToken, authResponse.refreshToken);
+        setUser(authResponse.user);
       },
       logout: async () => {
         const refreshToken = getRefreshToken();
