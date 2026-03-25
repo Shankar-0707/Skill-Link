@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "../../features/auth/components/AuthLayout";
-import { useAuth } from "../../features/auth/context/useAuth";
+import { useAuth } from "../../app/context/useAuth";
 import type { AuthResponse, User } from "../../features/auth/types";
 import { getHomeRouteForRole } from "../../features/auth/utils/authHelpers";
 

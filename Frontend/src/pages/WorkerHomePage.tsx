@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "../features/auth/context/useAuth";
+import { useAuth } from "../app/context/useAuth";
 import { HomePageLayout } from "./HomePageLayout";
 
 export const WorkerHomePage: React.FC = () => {

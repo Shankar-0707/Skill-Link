@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../../features/auth/context/useAuth";
+import { useAuth } from "../context/useAuth";
 
 export const ProtectedRoute: React.FC = () => {
   const { isAuthenticated, isBootstrapping } = useAuth();

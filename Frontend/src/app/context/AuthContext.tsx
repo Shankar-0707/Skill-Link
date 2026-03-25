@@ -1,12 +1,12 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
-import { authApi } from "../api/auth";
-import type { AuthResponse, User } from "../types";
+import { authApi } from "../../features/auth/api/auth";
+import type { AuthResponse, User } from "../../features/auth/types";
 import {
   clearAuthTokens,
   getAccessToken,
   getRefreshToken,
   setAuthTokens,
-} from "../utils/tokenStorage";
+} from "../../features/auth/utils/tokenStorage";
 
 type AuthContextValue = {
   user: User | null;

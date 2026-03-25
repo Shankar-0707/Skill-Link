@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { GoogleAuthButton } from './GoogleAuthButton';
-import { useAuth } from '../context/useAuth';
+import { useAuth } from '../../../app/context/useAuth';
 import { getHomeRouteForRole } from '../utils/authHelpers';
 import { resolveApiErrorMessage } from '../utils/errorMessage';
 import { cn } from '../../../shared/utils/cn';

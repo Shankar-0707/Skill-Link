@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../features/auth/context/useAuth";
+import { useAuth } from "../app/context/useAuth";
 import type { User } from "../features/auth/types";
 import { getRoleLabel } from "../features/auth/utils/authHelpers";
 import { resolveApiErrorMessage } from "../features/auth/utils/errorMessage";
