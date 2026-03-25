@@ -23,9 +23,8 @@ export const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
-    // "x-mock-role": "WOKRER",
-    // "x-mock-userid": "xhuigdwdjkwedhuwdh"
   },
+  withCredentials: true
 });
 
 type RetriableRequestConfig = Parameters<typeof api.request>[0] & {
@@ -83,3 +82,4 @@ api.interceptors.response.use(
     }
   },
 );
+

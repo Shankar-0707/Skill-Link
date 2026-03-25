@@ -20,89 +20,114 @@ const config: Config = {
     },
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "#f8f9fb",
-        foreground: "hsl(var(--foreground))",
-        primary: "#000613",
-        "on-primary": "#ffffff",
-        "primary-container": "#001f3f",
-        "on-primary-container": "#6f88ad",
-        secondary: "#4f6073",
-        "on-secondary": "#ffffff",
-        "secondary-container": "#d2e4fb",
-        "on-secondary-container": "#556679",
-        tertiary: "#110200",
-        "on-tertiary": "#ffffff",
-        "tertiary-container": "#391303",
-        "on-tertiary-container": "#b5785f",
-        error: "#ba1a1a",
-        "on-error": "#ffffff",
-        "error-container": "#ffdad6",
-        "on-error-container": "#93000a",
-        "outline": "#74777f",
-        "outline-variant": "#c4c6cf",
-        "surface": "#f8f9fb",
-        "on-surface": "#191c1e",
-        "surface-variant": "#e0e3e5",
-        "on-surface-variant": "#43474e",
-        "inverse-surface": "#2d3133",
-        "inverse-on-surface": "#eff1f3",
-        "inverse-primary": "#afc8f0",
-        "surface-tint": "#476083",
-        "surface-bright": "#f8f9fb",
-        "surface-dim": "#d8dadc",
-        "surface-container-lowest": "#ffffff",
-        "surface-container-low": "#f2f4f6",
-        "surface-container": "#eceef0",
-        "surface-container-high": "#e6e8ea",
-        "surface-container-highest": "#e0e3e5",
-        "on-background": "#191c1e",
-        "primary-fixed": "#d4e3ff",
-        "on-primary-fixed": "#001c3a",
-        "primary-fixed-dim": "#afc8f0",
-        "on-primary-fixed-variant": "#2f486a",
-        "secondary-fixed": "#d2e4fb",
-        "on-secondary-fixed": "#0b1d2d",
-        "secondary-fixed-dim": "#b7c8de",
-        "on-secondary-fixed-variant": "#38485a",
-        "tertiary-fixed": "#ffdbce",
-        "on-tertiary-fixed": "#351002",
-        "tertiary-fixed-dim": "#fdb69a",
-        "on-tertiary-fixed-variant": "#6b3a25",
+        // ── Core Semantic Tokens ──────────────────────────────
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+
+        // ── Primary — Nocturnal Navy (#000613 / #001F3F) ──────
+        primary: {
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
+          container: "var(--primary-container)",
+          fixed: "var(--primary-fixed)",
+          "fixed-dim": "var(--primary-fixed-dim)",
+        },
+
+        // ── Secondary — Muted Slate Blue ──────────────────────
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
+          container: "var(--secondary-container)",
+          fixed: "var(--secondary-fixed)",
+          "fixed-dim": "var(--secondary-fixed-dim)",
+        },
+
+        // ── Tertiary — Deep Terracotta ────────────────────────
+        tertiary: {
+          DEFAULT: "var(--tertiary)",
+          foreground: "var(--tertiary-foreground)",
+          container: "var(--tertiary-container)",
+          fixed: "var(--tertiary-fixed)",
+          "fixed-dim": "var(--tertiary-fixed-dim)",
+        },
+
+        // ── Destructive / Error ───────────────────────────────
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
         },
+        error: {
+          DEFAULT: "var(--error)",
+          container: "var(--error-container)",
+        },
+
+        // ── Muted ─────────────────────────────────────────────
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
         },
+
+        // ── Accent ────────────────────────────────────────────
         accent: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
         },
+
+        // ── Semantic Status ───────────────────────────────────
         success: {
-          DEFAULT: "hsl(var(--success))",
+          DEFAULT: "var(--success)",
         },
         warning: {
-          DEFAULT: "hsl(var(--warning))",
+          DEFAULT: "var(--warning)",
+        },
+
+        // ── Surface Hierarchy (Tonal Layers) ──────────────────
+        surface: {
+          DEFAULT: "var(--surface)",
+          bright: "var(--surface-bright)",
+          dim: "var(--surface-dim)",
+          variant: "var(--surface-variant)",
+          tint: "var(--surface-tint)",
+          container: "var(--surface-container)",
+          "container-low": "var(--surface-container-low)",
+          "container-lowest": "var(--surface-container-lowest)",
+          "container-high": "var(--surface-container-high)",
+          "container-highest": "var(--surface-container-highest)",
+        },
+
+        // ── Outline ───────────────────────────────────────────
+        outline: {
+          DEFAULT: "var(--outline)",
+          variant: "var(--outline-variant)",
+        },
+
+        // ── Inverse ───────────────────────────────────────────
+        inverse: {
+          primary: "var(--inverse-primary)",
+          surface: "var(--inverse-surface)",
+          "on-surface": "var(--inverse-on-surface)",
         },
       },
+
+      // ── Typography ─────────────────────────────────────────
       fontFamily: {
         headline: ["Manrope", "sans-serif"],
         body: ["Inter", "sans-serif"],
         label: ["Inter", "sans-serif"],
+        sans: ["Inter", "sans-serif"],
       },
+
+      // ── Border Radius — ROUND_FOUR (base: 6px / 0.375rem) ──
       borderRadius: {
-        DEFAULT: "0.125rem",
-        lg: "0.25rem",
-        xl: "0.5rem",
-        full: "0.75rem",
+        lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+
+      // ── Keyframes ─────────────────────────────────────────
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
