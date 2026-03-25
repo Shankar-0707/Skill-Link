@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, User, Phone, Building2, Briefcase, ChevronRight } from 'lucide-react';
+import { authApi } from '../api/auth';
 import { Role } from '../types';
+import { resolveApiErrorMessage } from '../utils/errorMessage';
 import { cn } from '../../../shared/utils/cn';
 import { Button } from '@/shared/components/ui/button';
 
@@ -17,15 +19,59 @@ export const RegisterForm: React.FC = () => {
     businessName: '',
     businessType: '',
   });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (step < 3) return nextStep();
+
+    setErrorMessage(null);
+    setSuccessMessage(null);
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1500);
+
+    try {
+      const response = await authApi.register({
+        role: formData.role,
+        email: formData.email.trim(),
+        password: formData.password,
+        name: formData.name.trim(),
+        phone:
+          formData.role === Role.ORGANISATION ? undefined : formData.phone.trim(),
+        businessName:
+          formData.role === Role.ORGANISATION
+            ? formData.businessName.trim()
+            : undefined,
+        businessType:
+          formData.role === Role.ORGANISATION
+            ? formData.businessType.trim()
+            : undefined,
+      });
+
+      setSuccessMessage(
+        response.message ||
+          'Registration successful. Please verify your email from the inbox link.',
+      );
+      setStep(1);
+      setFormData({
+        role: Role.CUSTOMER,
+        email: '',
+        password: '',
+        name: '',
+        phone: '',
+        businessName: '',
+        businessType: '',
+      });
+    } catch (error) {
+      setErrorMessage(
+        resolveApiErrorMessage(error, 'Registration failed. Please try again.'),
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -91,6 +137,7 @@ export const RegisterForm: React.FC = () => {
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text" required placeholder="Enter your name"
+                value={formData.name}
                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary focus:bg-white border-transparent focus:border-primary transition-all outline-none font-medium"
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
               />
@@ -102,6 +149,7 @@ export const RegisterForm: React.FC = () => {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="email" required placeholder="Enter your email"
+                value={formData.email}
                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary focus:bg-white border-transparent focus:border-primary transition-all outline-none font-medium"
                 onChange={e => setFormData({ ...formData, email: e.target.value })}
               />
@@ -113,6 +161,8 @@ export const RegisterForm: React.FC = () => {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="password" required placeholder="Create a password"
+                minLength={8}
+                value={formData.password}
                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary focus:bg-white border-transparent focus:border-primary transition-all outline-none font-medium"
                 onChange={e => setFormData({ ...formData, password: e.target.value })}
               />
@@ -130,12 +180,13 @@ export const RegisterForm: React.FC = () => {
                 <label className="text-sm font-bold text-foreground/70 ml-1">Business Name</label>
                 <div className="relative">
                   <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input type="text" required placeholder="Enter your business name" className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary outline-none" onChange={e => setFormData({ ...formData, businessName: e.target.value })} />
+                  <input type="text" required value={formData.businessName} placeholder="Enter your business name" className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary outline-none" onChange={e => setFormData({ ...formData, businessName: e.target.value })} />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-foreground/70 ml-1">Business Type</label>
-                <select className="w-full px-4 py-4 rounded-2xl bg-secondary outline-none font-medium appearance-none" onChange={e => setFormData({ ...formData, businessType: e.target.value })}>
+                <select value={formData.businessType} className="w-full px-4 py-4 rounded-2xl bg-secondary outline-none font-medium appearance-none" onChange={e => setFormData({ ...formData, businessType: e.target.value })}>
+                  <option value="">Select business type</option>
                   <option value="AGENCY">Agency</option>
                   <option value="RETAIL">Retail</option>
                   <option value="SERVICES">Services</option>
@@ -147,11 +198,23 @@ export const RegisterForm: React.FC = () => {
               <label className="text-sm font-bold text-foreground/70 ml-1">Phone Number</label>
               <div className="relative">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input type="tel" required placeholder="+91 XXXXX XXXXX" className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary outline-none" onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                <input type="tel" required value={formData.phone} placeholder="+91 XXXXX XXXXX" className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary outline-none" onChange={e => setFormData({ ...formData, phone: e.target.value })} />
               </div>
             </div>
           )}
         </div>
+      )}
+
+      {errorMessage && (
+        <p className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+          {errorMessage}
+        </p>
+      )}
+
+      {successMessage && (
+        <p className="rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+          {successMessage}
+        </p>
       )}
 
       {step > 1 && (
