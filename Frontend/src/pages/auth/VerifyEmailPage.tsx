@@ -13,7 +13,7 @@ function resolveErrorMessage(error: unknown) {
       | undefined;
     if (Array.isArray(data?.message)) {
       return (
-        data.message[0] ?? "Verification failed. Please request a new email."
+        data?.message[0] ?? "Verification failed. Please request a new email."
       );
     }
     if (typeof data?.message === "string") {
