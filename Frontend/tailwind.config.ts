@@ -51,6 +51,10 @@ const config: Config = {
         warning: {
           DEFAULT: "var(--warning)",
         },
+        tertiary: {
+          DEFAULT: "var(--tertiary)",
+          foreground: "var(--tertiary-foreground)",
+        },
       },
       fontFamily: {
         headline: ["Manrope", "sans-serif"],

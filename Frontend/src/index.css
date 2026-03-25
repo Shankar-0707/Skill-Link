@@ -45,49 +45,53 @@
 @layer base {
   :root {
     /* Background & Main Surface */
-    --background: #f8fafc;
-    --foreground: #0f172a;
+    --background: #f8f9fb;
+    --foreground: #191c1e;
 
-    /* Primary Color (Midnight Navy) */
-    --primary: #0f172a;
-    --primary-foreground: #f8fafc;
+    /* Primary Color (Nocturnal Navy) */
+    --primary: #001f3f;
+    --primary-foreground: #ffffff;
 
-    /* Secondary Surface (Inputs, Card backgrounds) */
-    --secondary: #f1f5f9;
-    --secondary-foreground: #0f172a;
+    /* Secondary Surface (Inputs, Card backgrounds) - Surface Container Low */
+    --secondary: #f2f4f6;
+    --secondary-foreground: #191c1e;
 
-    /* Muted Text and Backgrounds */
-    --muted: #eef2f6;
-    --muted-foreground: #64748b;
+    /* Muted Text and Backgrounds - Surface Container */
+    --muted: #eceef0;
+    --muted-foreground: #43474e;
 
     /* Success, Alert, Error */
     --success: #16a34a;
     --warning: #eab308;
-    --destructive: #ef4444;
-    --destructive-foreground: #f8fafc;
+    --tertiary: #110200;
+    --tertiary-foreground: #ffffff;
+    --destructive: #ba1a1a;
+    --destructive-foreground: #ffffff;
 
-    /* UI Details */
-    --border: #e2e8f0;
-    --input: #e2e8f0;
-    --ring: #0f172a;
+    /* UI Details - Outline Variant for Borders */
+    --border: #c4c6cf;
+    --input: #c4c6cf;
+    --ring: #001f3f;
 
-    /* Modern Rounded Corners */
-    --radius: 0.75rem;
+    /* Modern Rounded Corners - ROUND_FOUR / 6px */
+    --radius: 0.375rem;
   }
 
-  /* Dark Mode */
+  /* Dark Mode - Inferred from Material 3 Inverse tokens */
   .dark {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-    --primary: #f8fafc;
-    --primary-foreground: #0f172a;
-    --secondary: #1e293b;
-    --secondary-foreground: #f8fafc;
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
-    --border: #1e293b;
-    --input: #1e293b;
-    --ring: #cbd5e1;
+    --background: #191c1e;
+    --foreground: #f8f9fb;
+    --primary: #afc8f0;
+    --primary-foreground: #001f3f;
+    --secondary: #2d3133;
+    --secondary-foreground: #eff1f3;
+    --tertiary: #ffdbce;
+    --tertiary-foreground: #391303;
+    --muted: #43474e;
+    --muted-foreground: #c4c6cf;
+    --border: #43474e;
+    --input: #43474e;
+    --ring: #afc8f0;
   }
   
   body {

@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from '../../pages/auth/LoginPage';
 import { RegisterPage } from '../../pages/auth/RegisterPage';
+import { OrganisationDashboard } from '../../pages/organisation/OrganisationDashboard';
 import ThemePreview from '../../ThemePreview';
 
 export const AppRoutes: React.FC = () => {
@@ -9,6 +10,7 @@ export const AppRoutes: React.FC = () => {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/organisation" element={<OrganisationDashboard />} />
       <Route path="/preview" element={<ThemePreview />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
