@@ -1,30 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "../../features/auth/components/AuthLayout";
 import { authApi } from "../../features/auth/api/auth";
+import { resolveApiErrorMessage } from "../../features/auth/utils/errorMessage";
 
 type VerifyState = "loading" | "success" | "error";
 
-function resolveErrorMessage(error: unknown) {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data as
-      | { message?: string | string[] }
-      | undefined;
-    if (Array.isArray(data?.message)) {
-      return (
-        data.message[0] ?? "Verification failed. Please request a new email."
-      );
-    }
-    if (typeof data?.message === "string") {
-      return data.message;
-    }
-  }
-
-  return "Verification failed. Please request a new email.";
-}
-
 export const VerifyEmailPage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = useMemo(
     () => searchParams.get("token")?.trim() ?? "",
@@ -57,12 +40,20 @@ export const VerifyEmailPage: React.FC = () => {
           response.message ??
             "Email verified successfully. You can sign in now.",
         );
+        window.setTimeout(() => {
+          navigate("/login", { replace: true });
+        }, 1800);
       } catch (error) {
         if (!isMounted) {
           return;
         }
         setState("error");
-        setMessage(resolveErrorMessage(error));
+        setMessage(
+          resolveApiErrorMessage(
+            error,
+            "Verification failed. Please request a new email.",
+          ),
+        );
       }
     };
 
@@ -71,7 +62,7 @@ export const VerifyEmailPage: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [token]);
+  }, [navigate, token]);
 
   return (
     <AuthLayout

@@ -14,15 +14,41 @@ export interface User {
   name?: string;
   phone?: string;
   profileImage?: string;
-  isEmailVerified: boolean;
+  emailVerified: boolean;
+  authProvider?: 'LOCAL' | 'GOOGLE';
+  isActive?: boolean;
   businessName?: string;
   businessType?: string;
+  customer?: unknown;
+  worker?: {
+    skills?: string[];
+    bio?: string | null;
+    experience?: number | null;
+    serviceRadius?: number | null;
+    isAvailable?: boolean;
+  } | null;
+  organisation?: {
+    businessName?: string;
+    businessType?: string;
+    description?: string | null;
+  } | null;
 }
 
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   user: User;
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  user: User;
+}
+
+export interface BasicApiResponse {
+  success?: boolean;
+  message?: string;
 }
 
 export interface ApiError {

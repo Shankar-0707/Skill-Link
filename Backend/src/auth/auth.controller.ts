@@ -7,9 +7,11 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import type { Request } from 'express';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { EmailDto } from './dto/email.dto';
@@ -77,11 +79,39 @@ export class AuthController {
 
   @UseGuards(GoogleOauthGuard)
   @Get('google/callback')
-  googleCallback(
+  async googleCallback(
     @Req() req: Request & { user: GoogleOauthUser },
+    @Res() res: Response,
     @Query('state') state?: string,
   ) {
-    return this.authService.authenticateWithGoogle(req.user, state);
+    const frontendCallbackUrl =
+      process.env.FRONTEND_AUTH_CALLBACK_URL ||
+      'http://localhost:5173/auth/google/callback';
+
+    try {
+      const authResponse = await this.authService.authenticateWithGoogle(
+        req.user,
+        state,
+      );
+      const redirectUrl = new URL(frontendCallbackUrl);
+
+      redirectUrl.searchParams.set('accessToken', authResponse.accessToken);
+      redirectUrl.searchParams.set('refreshToken', authResponse.refreshToken);
+      redirectUrl.searchParams.set('role', authResponse.user.role);
+      redirectUrl.searchParams.set('email', authResponse.user.email);
+      redirectUrl.searchParams.set('user', encodeURIComponent(JSON.stringify(authResponse.user)));
+
+      return res.redirect(redirectUrl.toString());
+    } catch (error) {
+      const redirectUrl = new URL(frontendCallbackUrl);
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Google sign-in failed. Please try again.';
+
+      redirectUrl.searchParams.set('error', message);
+      return res.redirect(redirectUrl.toString());
+    }
   }
 
   @UseGuards(JwtAuthGuard)

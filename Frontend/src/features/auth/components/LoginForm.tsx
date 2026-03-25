@@ -1,21 +1,56 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { GoogleAuthButton } from './GoogleAuthButton';
+import { useAuth } from '../../../app/context/useAuth';
+import { getHomeRouteForRole } from '../utils/authHelpers';
+import { resolveApiErrorMessage } from '../utils/errorMessage';
 import { cn } from '../../../shared/utils/cn';
 
 export const LoginForm: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
     setIsLoading(true);
-    // Logic will be added when we integrate state management
-    setTimeout(() => setIsLoading(false), 1500);
+
+    try {
+      const response = await login(email.trim(), password);
+      const fallbackRoute = getHomeRouteForRole(response.user.role);
+      const destination =
+        (location.state as { from?: { pathname?: string } } | null)?.from
+          ?.pathname ?? fallbackRoute;
+
+      navigate(destination, { replace: true });
+    } catch (error) {
+      setErrorMessage(
+        resolveApiErrorMessage(error, 'Sign in failed. Please try again.'),
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <GoogleAuthButton mode="login" />
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-xs font-bold uppercase tracking-[0.24em] text-on-surface-variant">
+          Or
+        </span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
       <div className="space-y-2">
         <label className="text-sm font-bold text-on-surface-variant ml-1">
           Email Address
@@ -25,6 +60,8 @@ export const LoginForm: React.FC = () => {
           <input 
             type="email"
             required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
             placeholder="Enter your email"
             className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary-container border-transparent focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium text-on-surface"
           />
@@ -48,6 +85,9 @@ export const LoginForm: React.FC = () => {
           <input 
             type={showPassword ? "text" : "password"}
             required
+            minLength={8}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
             placeholder="Enter your password"
             className="w-full pl-12 pr-12 py-4 rounded-2xl bg-secondary-container border-transparent focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium text-on-surface"
           />
@@ -60,6 +100,12 @@ export const LoginForm: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {errorMessage && (
+        <p className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+          {errorMessage}
+        </p>
+      )}
 
       <button
         type="submit"
