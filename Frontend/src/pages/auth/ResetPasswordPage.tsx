@@ -10,7 +10,7 @@ function resolveErrorMessage(error: unknown) {
       | { message?: string | string[] }
       | undefined;
     if (Array.isArray(data?.message)) {
-      return data.message[0] ?? "Request failed. Please try again.";
+      return data?.message[0] ?? "Request failed. Please try again.";
     }
     if (typeof data?.message === "string") {
       return data.message;
