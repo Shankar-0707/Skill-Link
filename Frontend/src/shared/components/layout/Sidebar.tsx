@@ -7,8 +7,7 @@ import {
   Users, 
   BarChart3, 
   Settings, 
-  CircleHelp,
-  Plus
+  CircleHelp
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/shared/utils/cn';

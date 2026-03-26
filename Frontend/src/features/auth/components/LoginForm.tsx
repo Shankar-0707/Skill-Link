@@ -40,48 +40,38 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <GoogleAuthButton mode="login" />
-
-      <div className="flex items-center gap-3">
-        <div className="h-px flex-1 bg-border" />
-        <span className="text-xs font-bold uppercase tracking-[0.24em] text-on-surface-variant">
-          Or
-        </span>
-        <div className="h-px flex-1 bg-border" />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-bold text-on-surface-variant ml-1">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="space-y-2.5">
+        <label className="ml-1 text-sm font-semibold text-slate-700">
           Email Address
         </label>
         <div className="relative group">
-          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant group-focus-within:text-primary transition-colors" />
+          <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
           <input 
             type="email"
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="Enter your email"
-            className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary-container border-transparent focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium text-on-surface"
+            className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-4 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
           />
         </div>
       </div>
 
-      <div className="space-y-2">
-        <div className="flex justify-between items-center ml-1">
-          <label className="text-sm font-bold text-on-surface-variant">
+      <div className="space-y-2.5">
+        <div className="ml-1 flex items-center justify-between">
+          <label className="text-sm font-semibold text-slate-700">
             Password
           </label>
           <Link 
             to="/forgot-password"
-            className="text-xs font-bold text-primary hover:underline"
+            className="text-xs font-semibold text-primary/80 transition hover:text-primary hover:underline"
           >
             Forgot Password?
           </Link>
         </div>
         <div className="relative group">
-          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant group-focus-within:text-primary transition-colors" />
+          <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
           <input 
             type={showPassword ? "text" : "password"}
             required
@@ -89,12 +79,12 @@ export const LoginForm: React.FC = () => {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Enter your password"
-            className="w-full pl-12 pr-12 py-4 rounded-2xl bg-secondary-container border-transparent focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium text-on-surface"
+            className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-4 pl-12 pr-12 font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
           />
           <button 
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-on-surface-variant hover:text-primary transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 transition-colors hover:text-primary"
           >
             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
           </button>
@@ -111,17 +101,27 @@ export const LoginForm: React.FC = () => {
         type="submit"
         disabled={isLoading}
         className={cn(
-          "w-full py-4 rounded-2xl bg-primary text-on-primary font-bold text-lg shadow-xl shadow-primary/20 transition-all active:scale-[0.98]",
-          isLoading ? "opacity-70 cursor-not-allowed" : "hover:opacity-90"
+          "w-full rounded-[1.35rem] bg-[linear-gradient(135deg,#000613_0%,#0b1b33_100%)] py-4 text-lg font-bold text-white shadow-[0_18px_35px_rgba(2,6,23,0.22)] transition-all active:scale-[0.98]",
+          isLoading ? "cursor-not-allowed opacity-70" : "hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(2,6,23,0.25)]"
         )}
       >
         {isLoading ? "Signing In..." : "Sign In"}
       </button>
 
-      <div className="text-center pt-4">
-        <p className="text-sm text-on-surface-variant font-medium">
+      <div className="flex items-center gap-4 py-1">
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-400">
+          Or continue with
+        </span>
+        <div className="h-px flex-1 bg-slate-200" />
+      </div>
+
+      <GoogleAuthButton mode="login" />
+
+      <div className="border-t border-slate-200/80 pt-4 text-center">
+        <p className="text-sm font-medium text-slate-500">
           Don't have an account?{' '}
-          <Link to="/register" className="text-primary font-bold hover:underline">
+          <Link to="/register" className="font-bold text-primary transition hover:underline">
             Sign Up
           </Link>
         </p>

@@ -55,11 +55,11 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
       type="button"
       onClick={handleGoogleAuth}
       className={cn(
-        "flex w-full items-center justify-center gap-3 rounded-2xl border border-border bg-white px-5 py-4 text-sm font-bold text-primary transition-all hover:border-primary hover:bg-secondary",
+        "flex w-full items-center justify-center gap-3 rounded-[1.35rem] border border-slate-200 bg-white px-5 py-4 text-base font-bold text-slate-900 shadow-[0_12px_30px_rgba(15,23,42,0.05)] transition-all hover:-translate-y-0.5 hover:border-slate-300",
         className,
       )}
     >
-      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+      <span className="flex h-6 w-6 items-center justify-center">
         <GoogleIcon />
       </span>
       <span>

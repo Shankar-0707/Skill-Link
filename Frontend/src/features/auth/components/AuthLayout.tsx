@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Sparkles, Workflow } from "lucide-react";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -8,6 +8,24 @@ interface AuthLayoutProps {
   subtitle?: string;
   showBackButton?: boolean;
 }
+
+const heroPoints = [
+  {
+    icon: ShieldCheck,
+    title: "Trusted onboarding",
+    description: "A cleaner entry point for workers, customers, and businesses.",
+  },
+  {
+    icon: Workflow,
+    title: "Smoother flow",
+    description: "Clearer hierarchy, tighter spacing, and less visual noise.",
+  },
+  {
+    icon: Sparkles,
+    title: "Sharper first impression",
+    description: "A premium auth experience that finally matches the product.",
+  },
+];
 
 export const AuthLayout: React.FC<AuthLayoutProps> = ({
   children,
@@ -18,105 +36,142 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row overflow-hidden">
-      {/* Left Side: Branding (Desktop Only) */}
-      <div className="hidden md:flex md:w-1/2 bg-primary relative items-center justify-center p-12 overflow-hidden">
-        {/* Decorative SVG Pattern */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern
-                id="grid"
-                width="40"
-                height="40"
-                patternUnits="userSpaceOnUse"
-              >
-                <path
-                  d="M 40 0 L 0 0 0 40"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="1"
-                />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg>
-        </div>
-
-        <div className="relative z-10 text-center">
-          <div className="p-4 bg-white/10 rounded-3xl inline-block mb-8 backdrop-blur-sm border border-white/20">
-            <span className="text-on-primary font-black tracking-widest text-3xl">
-              SKILL-LINK
-            </span>
+    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.08),_transparent_28%),linear-gradient(135deg,_#f7f8fb_0%,_#edf3ff_52%,_#f8f3ec_100%)] md:h-screen">
+      <div className="flex min-h-screen flex-col md:h-screen md:flex-row">
+        <div className="relative hidden md:flex md:h-screen md:w-[47%] md:overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(160deg,#07111f_0%,#0c1d35_55%,#0c2233_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(56,189,248,0.15),transparent_20%),radial-gradient(circle_at_78%_16%,rgba(249,115,22,0.11),transparent_22%),radial-gradient(circle_at_52%_78%,rgba(45,212,191,0.08),transparent_24%)]" />
+          <div className="pointer-events-none absolute inset-0 opacity-[0.12]">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="hero-grid" width="60" height="60" patternUnits="userSpaceOnUse">
+                  <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="1" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#hero-grid)" />
+            </svg>
           </div>
-          <h1 className="text-5xl font-black text-white mb-6 leading-tight">
-            Connect with
-            <br />
-            Excellence.
-          </h1>
-          <p className="text-on-primary/70 text-xl font-medium max-w-sm mx-auto">
-            The premium marketplace for skilled workers and growing businesses.
-          </p>
+
+          <div className="relative z-10 flex h-full w-full flex-col px-12 py-8 lg:px-16 lg:py-10">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl border border-white/12 bg-white/10 px-5 py-3 backdrop-blur-xl">
+                <span className="text-sm font-black uppercase tracking-[0.38em] text-white">
+                  Skill-Link
+                </span>
+              </div>
+              <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-slate-300 backdrop-blur-xl">
+                Premium skilled marketplace
+              </div>
+            </div>
+
+            <div className="flex flex-1 items-center">
+              <div className="max-w-[34rem]">
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-100 backdrop-blur-xl">
+                  <Sparkles className="h-4 w-4" />
+                  Better first impressions for every role
+                </div>
+
+                <h1 className="font-headline text-4xl font-extrabold leading-[0.96] tracking-[-0.05em] text-white lg:text-5xl">
+                  Connect talent
+                  <br />
+                  with confidence.
+                </h1>
+
+                <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
+                  Skill-Link now starts with a calmer, more structured auth
+                  experience that feels modern instead of crowded.
+                </p>
+
+                <div className="mt-6 space-y-4">
+                  {heroPoints.map((point) => (
+                    <div
+                      key={point.title}
+                      className="flex items-start gap-4 rounded-[1.75rem] border border-white/10 bg-white/8 px-4 py-3 backdrop-blur-xl"
+                    >
+                      <div className="rounded-2xl bg-white/10 p-2 text-cyan-100">
+                        <point.icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-base font-bold text-white">{point.title}</p>
+                        <p className="mt-1 text-sm leading-6 text-slate-300">
+                          {point.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Bottom Curve for Mobile Transition */}
-        <div className="absolute bottom-0 left-0 w-full md:hidden">
-          <svg
-            viewBox="0 0 500 150"
-            preserveAspectRatio="none"
-            className="h-20 w-full"
-            fill="#f8f9fb"
-          >
-            <path d="M0,150 L500,150 L500,0 C250,150 0,0 0,0 Z"></path>
-          </svg>
-        </div>
-      </div>
+        <div className="relative md:hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(160deg,#07111f_0%,#0c1d35_55%,#0c2233_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(45,212,191,0.12),transparent_26%)]" />
+          <div className="relative px-5 pb-8 pt-6 text-white">
+            <div className="mb-8 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {showBackButton && (
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="rounded-2xl border border-white/10 bg-white/10 p-2.5 backdrop-blur"
+                    aria-label="Go back"
+                    title="Go back"
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </button>
+                )}
+                <span className="text-xs font-black uppercase tracking-[0.36em] text-white/90">
+                  Skill-Link
+                </span>
+              </div>
+              <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold text-cyan-100">
+                Trusted access
+              </div>
+            </div>
 
-      {/* Mobile Top Bar (Only visible on mobile) */}
-      <div className="md:hidden flex items-center justify-between p-6 bg-primary text-white">
-        <div className="flex items-center gap-4">
+            <h1 className="font-headline text-4xl font-extrabold leading-tight tracking-[-0.04em]">
+              Connect talent with confidence.
+            </h1>
+            <p className="mt-3 max-w-sm text-sm leading-6 text-slate-300">
+              Cleaner forms, better spacing, and a more premium first screen.
+            </p>
+          </div>
+        </div>
+
+        <div className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 md:h-screen md:w-[53%] md:px-8 lg:px-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.72),rgba(255,255,255,0)_52%)]" />
+
           {showBackButton && (
             <button
               onClick={() => navigate(-1)}
-              className="p-2 bg-white/10 rounded-full"
-              aria-label="Go back"
-              title="Go back"
+              className="absolute left-6 top-6 hidden items-center gap-2 rounded-full border border-white/75 bg-white/80 px-4 py-2 text-sm font-semibold text-primary shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl transition hover:bg-white md:flex"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="h-4 w-4" />
+              Back
             </button>
           )}
-          <span className="font-bold tracking-widest text-sm">SKILL-LINK</span>
-        </div>
-        <div className="w-8"></div>
-      </div>
 
-      {/* Right Side: Form Content */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-background relative overflow-y-auto">
-        {/* Back Button (Desktop Only) */}
-        {showBackButton && (
-          <button
-            onClick={() => navigate(-1)}
-            className="hidden md:flex absolute top-8 left-8 p-3 bg-secondary-container rounded-2xl hover:bg-surface-container-high transition-colors text-primary items-center gap-2 font-bold"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back
-          </button>
-        )}
+          <div className="relative z-10 w-full max-w-[48rem] md:px-6">
+            <div className="rounded-[2.2rem] border border-white/70 bg-white/70 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-2xl sm:p-4 md:mx-4 md:my-6 md:p-5">
+              <div className="rounded-[1.8rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-6 py-7 sm:px-8 sm:py-8 md:px-10 md:py-10">
+                <div className="mb-8">
+                  <div className="mb-4 inline-flex items-center rounded-full bg-primary/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] text-primary/70">
+                    Welcome to Skill-Link
+                  </div>
+                  <h2 className="font-headline text-4xl font-extrabold tracking-[-0.05em] text-primary sm:text-5xl">
+                    {title}
+                  </h2>
+                  {subtitle && (
+                    <p className="mt-3 max-w-lg text-base leading-7 text-slate-600 sm:text-lg">
+                      {subtitle}
+                    </p>
+                  )}
+                </div>
 
-        <div className="w-full max-w-md p-8 md:p-12">
-          <div className="mb-10 text-center md:text-left">
-            <h2 className="text-4xl font-black text-primary tracking-tight mb-2">
-              {title}
-            </h2>
-            {subtitle && (
-              <p className="text-on-surface-variant font-semibold text-lg">
-                {subtitle}
-              </p>
-            )}
-          </div>
-
-          <div className="bg-white/50 backdrop-blur-sm border border-border/50 rounded-[2.5rem] p-0 shadow-none">
-            {children}
+                {children}
+              </div>
+            </div>
           </div>
         </div>
       </div>
