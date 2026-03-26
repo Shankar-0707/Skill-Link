@@ -8,9 +8,18 @@ import { ForgotPasswordPage } from "../../pages/auth/ForgotPasswordPage";
 import { GoogleAuthCallbackPage } from "../../pages/auth/GoogleAuthCallbackPage";
 import { ResetPasswordPage } from "../../pages/auth/ResetPasswordPage";
 import { VerifyEmailPage } from "../../pages/auth/VerifyEmailPage";
-import { OrganisationHomePage } from "../../pages/OrganisationHomePage";
-import { UserHomePage } from "../../pages/UserHomePage";
-import { WorkerHomePage } from "../../pages/WorkerHomePage";
+// import { OrganisationHomePage } from "../../pages/OrganisationHomePage";
+import OrganisationPage from "@/pages/organisation/OrganisationPage";
+import SettingsPage from "@/pages/organisation/SettingsPage";
+import SeeAllProductsPage from "@/pages/organisation/SeeAllProductsPage";
+import CreateProductPage from "@/pages/organisation/CreateProductPage";
+import EditProductPage from "@/pages/organisation/EditProductPage";
+import ProductExplorePage from "@/pages/organisation/ProductExplorePage";
+import OrganisationLayout from "@/pages/organisation/OrganisationLayout";
+// import { UserHomePage } from "../../pages/UserHomePage";
+// import { WorkerHomePage } from "../../pages/WorkerHomePage";
+import CustomerPage from "@/pages/customer/CustomerPage";
+import WorkerPage from "@/pages/worker/WorkerPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicOnlyRoute } from "./PublicOnlyRoute";
 import { RoleHomeRedirect } from "./RoleHomeRedirect";
@@ -37,15 +46,22 @@ export const AppRoutes: React.FC = () => {
         <Route path="/home" element={<RoleHomeRedirect />} />
 
         <Route element={<RoleRoute allowedRole="CUSTOMER" />}>
-          <Route path="/user/home" element={<UserHomePage />} />
+          <Route path="/customer" element={<CustomerPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRole="WORKER" />}>
-          <Route path="/worker/home" element={<WorkerHomePage />} />
+          <Route path="/worker" element={<WorkerPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRole="ORGANISATION" />}>
-          <Route path="/organisation/home" element={<OrganisationHomePage />} />
+          <Route element={<OrganisationLayout />}>
+            <Route path="/organisation" index element={<OrganisationPage />} />
+            <Route path="/organisation/settings" element={<SettingsPage />} />
+            <Route path="/organisation/products/see_all" element={<SeeAllProductsPage />} />
+            <Route path="/organisation/products/create" element={<CreateProductPage />} />
+            <Route path="/organisation/products/edit/:id" element={<EditProductPage />} />
+            <Route path="/organisation/products/:id/explore" element={<ProductExplorePage />} />
+          </Route>
         </Route>
       </Route>
 

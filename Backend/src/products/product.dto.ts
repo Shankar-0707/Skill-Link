@@ -106,30 +106,5 @@ export class ListProductsDto {
   @ApiPropertyOptional({ description: 'Search by product name (partial match)' })
   @IsOptional()
   @IsString()
-  @MinLength(2)
   search?: string
-
-  @ApiPropertyOptional({ description: 'Minimum price filter' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  minPrice?: number
-
-  @ApiPropertyOptional({ description: 'Maximum price filter' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @IsPositive()
-  maxPrice?: number
-
-  @ApiPropertyOptional({ description: 'Sort field', enum: ['price', 'createdAt', 'name'] })
-  @IsOptional()
-  @IsString()
-  sortBy?: 'price' | 'createdAt' | 'name'
-
-  @ApiPropertyOptional({ description: 'Sort direction', enum: ['asc', 'desc'] })
-  @IsOptional()
-  @IsString()
-  sortOrder?: 'asc' | 'desc'
 }
