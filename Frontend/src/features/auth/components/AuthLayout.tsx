@@ -12,18 +12,18 @@ interface AuthLayoutProps {
 const heroPoints = [
   {
     icon: ShieldCheck,
-    title: "Trusted onboarding",
-    description: "A cleaner entry point for workers, customers, and businesses.",
+    title: "Verified skilled workers",
+    description: "Connect with trusted professionals who are background-checked and ready to work.",
   },
   {
     icon: Workflow,
-    title: "Smoother flow",
-    description: "Clearer hierarchy, tighter spacing, and less visual noise.",
+    title: "Seamless hiring process",
+    description: "Post jobs, review bids, and hire the right talent in minutes, not days.",
   },
   {
     icon: Sparkles,
-    title: "Sharper first impression",
-    description: "A premium auth experience that finally matches the product.",
+    title: "Quality you can trust",
+    description: "Secure payments, real-time tracking, and guaranteed satisfaction on every project.",
   },
 ];
 
@@ -68,7 +68,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
               <div className="max-w-[34rem]">
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-100 backdrop-blur-xl">
                   <Sparkles className="h-4 w-4" />
-                  Better first impressions for every role
+                  Trusted by thousands of businesses
                 </div>
 
                 <h1 className="font-headline text-4xl font-extrabold leading-[0.96] tracking-[-0.05em] text-white lg:text-5xl">
@@ -78,8 +78,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
                 </h1>
 
                 <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-                  Skill-Link now starts with a calmer, more structured auth
-                  experience that feels modern instead of crowded.
+                  Find skilled workers for any job, manage projects effortlessly, and grow your business with India's most trusted marketplace.
                 </p>
 
                 <div className="mt-6 space-y-4">
@@ -114,7 +113,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
                 {showBackButton && (
                   <button
                     onClick={() => navigate(-1)}
-                    className="rounded-2xl border border-white/10 bg-white/10 p-2.5 backdrop-blur"
+                    className="cursor-pointer rounded-2xl border border-white/10 bg-white/10 p-2.5 backdrop-blur"
                     aria-label="Go back"
                     title="Go back"
                   >
@@ -134,7 +133,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
               Connect talent with confidence.
             </h1>
             <p className="mt-3 max-w-sm text-xs leading-6 text-slate-300">
-              Cleaner forms, better spacing, and a more premium first screen.
+              Find skilled workers, manage projects, and grow your business with India's trusted marketplace.
             </p>
           </div>
         </div>
@@ -145,7 +144,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
           {showBackButton && (
             <button
               onClick={() => navigate(-1)}
-              className="absolute left-6 top-6 z-20 hidden items-center gap-2 rounded-full border border-white/75 bg-white/80 px-4 py-2 text-sm font-semibold text-primary shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl transition hover:bg-white md:flex"
+              className="absolute left-6 top-6 z-20 hidden cursor-pointer items-center gap-2 rounded-full border border-white/75 bg-white/80 px-4 py-2 text-sm font-semibold text-primary shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl transition hover:bg-white md:flex"
             >
               <ArrowLeft className="h-4 w-4" />
               Back

@@ -140,7 +140,7 @@ export const RegisterForm: React.FC = () => {
                   nextStep();
                 }}
                 className={cn(
-                  'group flex items-center rounded-xl border px-4 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[0_12px_28px_rgba(15,23,42,0.06)]',
+                  'group flex cursor-pointer items-center rounded-xl border px-4 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[0_12px_28px_rgba(15,23,42,0.06)]',
                   formData.role === option.id
                     ? 'border-primary/20 bg-primary/5'
                     : 'border-slate-200 bg-white',
@@ -217,14 +217,14 @@ export const RegisterForm: React.FC = () => {
             <button
               type="button"
               onClick={prevStep}
-              className="flex-1 rounded-[1.35rem] border-2 border-slate-200 bg-white py-3 text-base font-bold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+              className="flex-1 cursor-pointer rounded-[1.35rem] border-2 border-slate-200 bg-white py-3 text-base font-bold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
             >
               Back
             </button>
             <button
               type="button"
               onClick={nextStep}
-              className="flex-[1.8] rounded-[1.35rem] bg-[linear-gradient(135deg,#000613_0%,#0b1b33_100%)] py-3 text-lg font-bold text-white shadow-[0_18px_35px_rgba(2,6,23,0.22)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(2,6,23,0.25)] active:scale-[0.98]"
+              className="flex-[1.8] cursor-pointer rounded-[1.35rem] bg-[linear-gradient(135deg,#000613_0%,#0b1b33_100%)] py-3 text-lg font-bold text-white shadow-[0_18px_35px_rgba(2,6,23,0.22)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(2,6,23,0.25)] active:scale-[0.98]"
             >
               Continue
             </button>
@@ -324,7 +324,7 @@ export const RegisterForm: React.FC = () => {
             <button
               type="button"
               onClick={prevStep}
-              className="flex-1 rounded-[1.35rem] border-2 border-slate-200 bg-white py-3 text-base font-bold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+              className="flex-1 cursor-pointer rounded-[1.35rem] border-2 border-slate-200 bg-white py-3 text-base font-bold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
             >
               Back
             </button>
@@ -332,7 +332,7 @@ export const RegisterForm: React.FC = () => {
               type="submit"
               disabled={isLoading}
               className={cn(
-                "flex-[1.8] rounded-[1.35rem] bg-[linear-gradient(135deg,#000613_0%,#0b1b33_100%)] py-3 text-lg font-bold text-white shadow-[0_18px_35px_rgba(2,6,23,0.22)] transition-all active:scale-[0.98]",
+                "flex-[1.8] cursor-pointer rounded-[1.35rem] bg-[linear-gradient(135deg,#000613_0%,#0b1b33_100%)] py-3 text-lg font-bold text-white shadow-[0_18px_35px_rgba(2,6,23,0.22)] transition-all active:scale-[0.98]",
                 isLoading ? "cursor-not-allowed opacity-70" : "hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(2,6,23,0.25)]"
               )}
             >
