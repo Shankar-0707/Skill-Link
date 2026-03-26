@@ -108,8 +108,8 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
         <div className="relative md:hidden">
           <div className="absolute inset-0 bg-[linear-gradient(160deg,#07111f_0%,#0c1d35_55%,#0c2233_100%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(45,212,191,0.12),transparent_26%)]" />
-          <div className="relative px-5 pb-8 pt-6 text-white">
-            <div className="mb-8 flex items-center justify-between">
+          <div className="relative px-5 pb-6 pt-5 text-white">
+            <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {showBackButton && (
                   <button
@@ -130,10 +130,10 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
               </div>
             </div>
 
-            <h1 className="font-headline text-4xl font-extrabold leading-tight tracking-[-0.04em]">
+            <h1 className="font-headline text-3xl font-extrabold leading-tight tracking-[-0.04em]">
               Connect talent with confidence.
             </h1>
-            <p className="mt-3 max-w-sm text-sm leading-6 text-slate-300">
+            <p className="mt-3 max-w-sm text-xs leading-6 text-slate-300">
               Cleaner forms, better spacing, and a more premium first screen.
             </p>
           </div>
@@ -154,7 +154,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
 
           <div className="relative z-10 w-full max-w-[48rem] md:px-6">
             <div className="rounded-[2.2rem] border border-white/70 bg-white/70 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-2xl sm:p-4 md:mx-4 md:my-6 md:p-5">
-              <div className="rounded-[1.8rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-6 py-7 sm:px-8 sm:py-8 md:px-10 md:py-10">
+              <div className="rounded-[1.8rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-8 py-7 sm:py-8 md:px-10 md:py-10 lg:px-12">
                 <div className="mb-8">
                   <div className="mb-4 inline-flex items-center rounded-full bg-primary/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] text-primary/70">
                     Welcome to Skill-Link
