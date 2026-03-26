@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Mail,
   Lock,
@@ -14,7 +14,6 @@ import { GoogleAuthButton } from './GoogleAuthButton';
 import { Role } from '../types';
 import { resolveApiErrorMessage } from '../utils/errorMessage';
 import { cn } from '../../../shared/utils/cn';
-import { Button } from '@/shared/components/ui/button';
 
 const roleOptions = [
   {
@@ -38,6 +37,7 @@ const roleOptions = [
 ];
 
 export const RegisterForm: React.FC = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -50,7 +50,6 @@ export const RegisterForm: React.FC = () => {
     businessType: '',
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const nextStep = () => setStep((s) => s + 1);
   const prevStep = () => setStep((s) => s - 1);
@@ -60,11 +59,10 @@ export const RegisterForm: React.FC = () => {
     if (step < 3) return nextStep();
 
     setErrorMessage(null);
-    setSuccessMessage(null);
     setIsLoading(true);
 
     try {
-      const response = await authApi.register({
+      await authApi.register({
         role: formData.role,
         email: formData.email.trim(),
         password: formData.password,
@@ -81,19 +79,9 @@ export const RegisterForm: React.FC = () => {
             : undefined,
       });
 
-      setSuccessMessage(
-        response.message ||
-          'Registration successful. Please verify your email from the inbox link.',
-      );
-      setStep(1);
-      setFormData({
-        role: Role.CUSTOMER,
-        email: '',
-        password: '',
-        name: '',
-        phone: '',
-        businessName: '',
-        businessType: '',
+      navigate('/check-email', { 
+        state: { email: formData.email.trim() },
+        replace: true 
       });
     } catch (error) {
       setErrorMessage(
@@ -366,12 +354,6 @@ export const RegisterForm: React.FC = () => {
       {errorMessage && (
         <p className="rounded-xl border border-red-300 bg-red-50 px-3 py-2.5 text-sm font-semibold text-red-700">
           {errorMessage}
-        </p>
-      )}
-
-      {successMessage && (
-        <p className="rounded-xl border border-green-300 bg-green-50 px-3 py-2.5 text-sm font-semibold text-green-700">
-          {successMessage}
         </p>
       )}
     </form>

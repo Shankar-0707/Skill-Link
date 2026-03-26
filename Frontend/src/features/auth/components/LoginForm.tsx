@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { GoogleAuthButton } from './GoogleAuthButton';
 import { useAuth } from '../../../app/context/useAuth';
 import { getHomeRouteForRole } from '../utils/authHelpers';
@@ -16,6 +16,25 @@ export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showVerifiedToast, setShowVerifiedToast] = useState(false);
+  const [showPasswordResetToast, setShowPasswordResetToast] = useState(false);
+
+  useEffect(() => {
+    const emailVerified = (location.state as { emailVerified?: boolean })?.emailVerified;
+    const passwordReset = (location.state as { passwordReset?: boolean })?.passwordReset;
+    
+    if (emailVerified) {
+      setShowVerifiedToast(true);
+      window.history.replaceState({}, document.title);
+      setTimeout(() => setShowVerifiedToast(false), 5000);
+    }
+    
+    if (passwordReset) {
+      setShowPasswordResetToast(true);
+      window.history.replaceState({}, document.title);
+      setTimeout(() => setShowPasswordResetToast(false), 5000);
+    }
+  }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +60,24 @@ export const LoginForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {showVerifiedToast && (
+        <div className="animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 flex items-center gap-3">
+          <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+          <p className="text-sm font-semibold text-emerald-700">
+            Email verified successfully! You can now sign in.
+          </p>
+        </div>
+      )}
+
+      {showPasswordResetToast && (
+        <div className="animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 flex items-center gap-3">
+          <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+          <p className="text-sm font-semibold text-emerald-700">
+            Password reset successful! You can now sign in.
+          </p>
+        </div>
+      )}
+
       <div className="space-y-2">
         <label className="ml-1 text-xs font-semibold text-slate-700">
           Email Address
