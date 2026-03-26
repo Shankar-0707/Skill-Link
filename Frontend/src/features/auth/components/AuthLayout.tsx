@@ -145,25 +145,25 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
           {showBackButton && (
             <button
               onClick={() => navigate(-1)}
-              className="absolute left-6 top-6 hidden items-center gap-2 rounded-full border border-white/75 bg-white/80 px-4 py-2 text-sm font-semibold text-primary shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl transition hover:bg-white md:flex"
+              className="absolute left-6 top-6 z-20 hidden items-center gap-2 rounded-full border border-white/75 bg-white/80 px-4 py-2 text-sm font-semibold text-primary shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl transition hover:bg-white md:flex"
             >
               <ArrowLeft className="h-4 w-4" />
               Back
             </button>
           )}
 
-          <div className="relative z-10 w-full max-w-[48rem] md:px-6">
-            <div className="rounded-[2.2rem] border border-white/70 bg-white/70 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-2xl sm:p-4 md:mx-4 md:my-6 md:p-5">
-              <div className="rounded-[1.8rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-8 py-7 sm:py-8 md:px-10 md:py-10 lg:px-12">
-                <div className="mb-8">
-                  <div className="mb-4 inline-flex items-center rounded-full bg-primary/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] text-primary/70">
+          <div className="relative z-10 w-full max-w-[48rem]">
+            <div className="rounded-[2.2rem] border border-white/70 bg-white/70 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-2xl sm:p-4 md:p-5">
+              <div className="rounded-[1.8rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-8 py-6 sm:py-7 md:px-10 md:py-8 lg:px-12">
+                <div className="mb-5">
+                  <div className="mb-3 inline-flex items-center rounded-full bg-primary/5 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] text-primary/70">
                     Welcome to Skill-Link
                   </div>
                   <h2 className="font-headline text-3xl font-extrabold tracking-[-0.05em] text-primary sm:text-4xl">
                     {title}
                   </h2>
                   {subtitle && (
-                    <p className="mt-3 max-w-lg text-sm leading-7 text-slate-600 sm:text-base">
+                    <p className="mt-2 max-w-lg text-sm leading-6 text-slate-600 sm:text-base">
                       {subtitle}
                     </p>
                   )}

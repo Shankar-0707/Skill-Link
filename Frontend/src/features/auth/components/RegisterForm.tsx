@@ -107,17 +107,17 @@ export const RegisterForm: React.FC = () => {
   const progressValue = ((step - 1) / 2) * 100;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50/80 px-5 py-5">
-        <div className="mb-4 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50/80 px-4 py-3">
+        <div className="mb-2.5 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
           <span>Setup progress</span>
           <span>Step {step} of 3</span>
         </div>
 
         <div className="relative">
-          <div className="absolute left-0 right-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-slate-200" />
+          <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-slate-200" />
           <div
-            className="absolute left-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-emerald-500 transition-all duration-300"
+            className="absolute left-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-emerald-500 transition-all duration-300"
             style={{ width: `${progressValue}%` }}
           />
           <div className="relative flex items-center justify-between">
@@ -125,9 +125,9 @@ export const RegisterForm: React.FC = () => {
               <div
                 key={s}
                 className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-full border-2 text-lg font-bold transition-all duration-300',
+                  'flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-bold transition-all duration-300',
                   step === s
-                    ? 'border-primary bg-primary text-white shadow-[0_14px_28px_rgba(2,6,23,0.18)]'
+                    ? 'border-primary bg-primary text-white shadow-[0_12px_24px_rgba(2,6,23,0.16)]'
                     : step > s
                       ? 'border-emerald-500 bg-emerald-500 text-white'
                       : 'border-slate-200 bg-white text-slate-400',
@@ -141,17 +141,8 @@ export const RegisterForm: React.FC = () => {
       </div>
 
       {step === 1 && (
-        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-          <div className="space-y-1 text-center">
-            <h2 className="text-3xl font-bold tracking-[-0.03em] text-slate-900">
-              Who are you?
-            </h2>
-            <p className="text-base text-slate-500">
-              Choose how you want to use Skill-Link.
-            </p>
-          </div>
-
-          <div className="grid gap-4">
+        <div className="space-y-3.5 animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="grid gap-3">
             {roleOptions.map((option) => (
               <button
                 key={option.id}
@@ -161,7 +152,7 @@ export const RegisterForm: React.FC = () => {
                   nextStep();
                 }}
                 className={cn(
-                  'group flex items-center rounded-[1.5rem] border px-5 py-5 text-left transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[0_18px_40px_rgba(15,23,42,0.06)]',
+                  'group flex items-center rounded-xl border px-4 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[0_12px_28px_rgba(15,23,42,0.06)]',
                   formData.role === option.id
                     ? 'border-primary/20 bg-primary/5'
                     : 'border-slate-200 bg-white',
@@ -169,84 +160,101 @@ export const RegisterForm: React.FC = () => {
               >
                 <div
                   className={cn(
-                    'mr-4 flex h-16 w-16 items-center justify-center rounded-[1.35rem] border transition-colors',
+                    'mr-3.5 flex h-11 w-11 items-center justify-center rounded-lg border transition-colors',
                     formData.role === option.id
                       ? 'border-primary bg-primary text-white'
                       : 'border-slate-200 bg-slate-50 text-slate-500',
                   )}
                 >
-                  <option.icon className="h-7 w-7" />
+                  <option.icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-2xl font-bold tracking-[-0.03em] text-slate-900">
+                  <p className="text-[15px] font-bold tracking-[-0.02em] text-slate-900">
                     {option.label}
                   </p>
-                  <p className="mt-1 text-lg leading-7 text-slate-500">
+                  <p className="mt-0.5 text-xs leading-[1.4] text-slate-500">
                     {option.description}
                   </p>
                 </div>
-                <ChevronRight className="h-6 w-6 text-slate-400" />
+                <ChevronRight className="h-4 w-4 text-slate-400" />
               </button>
             ))}
+          </div>
+
+          <div className="border-t border-slate-200/80 pt-3.5 text-center">
+            <p className="text-sm font-medium text-slate-500">
+              Already using Skill-Link?{' '}
+              <Link to="/login" className="font-bold text-primary transition hover:underline">
+                Sign In
+              </Link>
+            </p>
           </div>
         </div>
       )}
 
       {step === 2 && (
-        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-          <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Selected role
-            </p>
-            <p className="mt-1 text-lg font-bold text-slate-900">
-              {roleOptions.find((option) => option.id === formData.role)?.label}
-            </p>
-          </div>
-
-          <div className="space-y-2.5">
-            <label className="ml-1 text-sm font-semibold text-slate-700">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+        <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="space-y-2">
+            <label className="ml-1 text-xs font-semibold text-slate-700">Full Name</label>
+            <div className="relative group">
+              <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
               <input
                 type="text"
                 required
                 placeholder="Enter your name"
                 value={formData.name}
-                className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-4 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
+                className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
             </div>
           </div>
 
-          <div className="space-y-2.5">
-            <label className="ml-1 text-sm font-semibold text-slate-700">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+          <div className="space-y-2">
+            <label className="ml-1 text-xs font-semibold text-slate-700">Email Address</label>
+            <div className="relative group">
+              <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
               <input
                 type="email"
                 required
                 placeholder="Enter your email"
                 value={formData.email}
-                className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-4 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
+                className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
           </div>
 
-          <div className="space-y-2.5">
-            <label className="ml-1 text-sm font-semibold text-slate-700">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+          <div className="space-y-2">
+            <label className="ml-1 text-xs font-semibold text-slate-700">Password</label>
+            <div className="relative group">
+              <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
               <input
                 type="password"
                 required
                 minLength={8}
                 placeholder="Create a password"
                 value={formData.password}
-                className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-4 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
+                className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
             </div>
+          </div>
+
+          <div className="flex gap-4 pt-2">
+            <button
+              type="button"
+              onClick={prevStep}
+              className="flex-1 rounded-[1.35rem] border-2 border-slate-200 bg-white py-3 text-base font-bold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={nextStep}
+              className="flex-[1.8] rounded-[1.35rem] bg-[linear-gradient(135deg,#000613_0%,#0b1b33_100%)] py-3 text-lg font-bold text-white shadow-[0_18px_35px_rgba(2,6,23,0.22)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(2,6,23,0.25)] active:scale-[0.98]"
+            >
+              Continue
+            </button>
           </div>
 
           <div className="flex items-center gap-4 py-1">
@@ -258,32 +266,32 @@ export const RegisterForm: React.FC = () => {
           </div>
 
           <GoogleAuthButton mode="register" role={formData.role} />
+
+          <div className="border-t border-slate-200/80 pt-4 text-center">
+            <p className="text-sm font-medium text-slate-500">
+              Already using Skill-Link?{' '}
+              <Link to="/login" className="font-bold text-primary transition hover:underline">
+                Sign In
+              </Link>
+            </p>
+          </div>
         </div>
       )}
 
       {step === 3 && (
-        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-          <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Final step
-            </p>
-            <p className="mt-1 text-lg font-bold text-slate-900">
-              Add the last details for your account.
-            </p>
-          </div>
-
+        <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
           {formData.role === Role.ORGANISATION ? (
             <>
-              <div className="space-y-2.5">
-                <label className="ml-1 text-sm font-semibold text-slate-700">Business Name</label>
-                <div className="relative">
-                  <Building2 className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+              <div className="space-y-2">
+                <label className="ml-1 text-xs font-semibold text-slate-700">Business Name</label>
+                <div className="relative group">
+                  <Building2 className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
                   <input
                     type="text"
                     required
                     value={formData.businessName}
                     placeholder="Enter your business name"
-                    className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-4 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
+                    className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
                     onChange={(e) =>
                       setFormData({ ...formData, businessName: e.target.value })
                     }
@@ -291,11 +299,11 @@ export const RegisterForm: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-2.5">
-                <label className="ml-1 text-sm font-semibold text-slate-700">Business Type</label>
+              <div className="space-y-2">
+                <label className="ml-1 text-xs font-semibold text-slate-700">Business Type</label>
                 <select
                   value={formData.businessType}
-                  className="w-full appearance-none rounded-[1.35rem] border border-slate-200 bg-slate-50/80 px-4 py-4 font-medium text-slate-900 outline-none transition-all focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
+                  className="w-full appearance-none rounded-[1.35rem] border border-slate-200 bg-slate-50/80 px-4 py-3 text-base text-slate-900 outline-none transition-all focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
                   onChange={(e) =>
                     setFormData({ ...formData, businessType: e.target.value })
                   }
@@ -308,63 +316,64 @@ export const RegisterForm: React.FC = () => {
               </div>
             </>
           ) : (
-            <div className="space-y-2.5">
-              <label className="ml-1 text-sm font-semibold text-slate-700">Phone Number</label>
-              <div className="relative">
-                <Phone className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <div className="space-y-2">
+              <label className="ml-1 text-xs font-semibold text-slate-700">Phone Number</label>
+              <div className="relative group">
+                <Phone className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
                 <input
                   type="tel"
                   required
                   value={formData.phone}
                   placeholder="+91 XXXXX XXXXX"
-                  className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-4 pl-12 pr-4 font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
+                  className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
             </div>
           )}
+
+          <div className="flex gap-4 pt-2">
+            <button
+              type="button"
+              onClick={prevStep}
+              className="flex-1 rounded-[1.35rem] border-2 border-slate-200 bg-white py-3 text-base font-bold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={cn(
+                "flex-[1.8] rounded-[1.35rem] bg-[linear-gradient(135deg,#000613_0%,#0b1b33_100%)] py-3 text-lg font-bold text-white shadow-[0_18px_35px_rgba(2,6,23,0.22)] transition-all active:scale-[0.98]",
+                isLoading ? "cursor-not-allowed opacity-70" : "hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(2,6,23,0.25)]"
+              )}
+            >
+              {isLoading ? 'Creating...' : 'Create Account'}
+            </button>
+          </div>
+
+          <div className="border-t border-slate-200/80 pt-4 text-center">
+            <p className="text-sm font-medium text-slate-500">
+              Already using Skill-Link?{' '}
+              <Link to="/login" className="font-bold text-primary transition hover:underline">
+                Sign In
+              </Link>
+            </p>
+          </div>
         </div>
       )}
 
       {errorMessage && (
-        <p className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+        <p className="rounded-xl border border-red-300 bg-red-50 px-3 py-2.5 text-sm font-semibold text-red-700">
           {errorMessage}
         </p>
       )}
 
       {successMessage && (
-        <p className="rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+        <p className="rounded-xl border border-green-300 bg-green-50 px-3 py-2.5 text-sm font-semibold text-green-700">
           {successMessage}
         </p>
       )}
-
-      {step > 1 && (
-        <div className="flex gap-4 pt-2">
-          <Button
-            type="button"
-            onClick={prevStep}
-            className="h-14 flex-1 rounded-[1.35rem] border border-slate-200 bg-white text-primary shadow-none transition-all hover:bg-slate-50"
-          >
-            Back
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="h-14 flex-[1.8] rounded-[1.35rem] bg-[linear-gradient(135deg,#000613_0%,#0b1b33_100%)] text-white shadow-[0_18px_35px_rgba(2,6,23,0.22)] transition-all hover:-translate-y-0.5 hover:opacity-100"
-          >
-            {step === 3 ? (isLoading ? 'Creating...' : 'Create account') : 'Continue'}
-          </Button>
-        </div>
-      )}
-
-      <div className="border-t border-slate-200/80 pt-4 text-center">
-        <p className="text-sm font-medium text-slate-500">
-          Already using Skill-Link?{' '}
-          <Link to="/login" className="font-bold text-primary hover:underline">
-            Sign In
-          </Link>
-        </p>
-      </div>
     </form>
   );
 };

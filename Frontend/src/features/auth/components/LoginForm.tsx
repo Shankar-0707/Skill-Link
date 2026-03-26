@@ -40,8 +40,8 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="space-y-2.5">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
         <label className="ml-1 text-xs font-semibold text-slate-700">
           Email Address
         </label>
@@ -58,7 +58,7 @@ export const LoginForm: React.FC = () => {
         </div>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         <div className="ml-1 flex items-center justify-between">
           <label className="text-xs font-semibold text-slate-700">
             Password
@@ -92,7 +92,7 @@ export const LoginForm: React.FC = () => {
       </div>
 
       {errorMessage && (
-        <p className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+        <p className="rounded-xl border border-red-300 bg-red-50 px-3 py-2.5 text-sm font-semibold text-red-700">
           {errorMessage}
         </p>
       )}
