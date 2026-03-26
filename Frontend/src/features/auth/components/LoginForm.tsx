@@ -42,7 +42,7 @@ export const LoginForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2.5">
-        <label className="ml-1 text-sm font-semibold text-slate-700">
+        <label className="ml-1 text-xs font-semibold text-slate-700">
           Email Address
         </label>
         <div className="relative group">
@@ -60,7 +60,7 @@ export const LoginForm: React.FC = () => {
 
       <div className="space-y-2.5">
         <div className="ml-1 flex items-center justify-between">
-          <label className="text-sm font-semibold text-slate-700">
+          <label className="text-xs font-semibold text-slate-700">
             Password
           </label>
           <Link 

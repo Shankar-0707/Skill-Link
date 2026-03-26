@@ -159,11 +159,11 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
                   <div className="mb-4 inline-flex items-center rounded-full bg-primary/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] text-primary/70">
                     Welcome to Skill-Link
                   </div>
-                  <h2 className="font-headline text-4xl font-extrabold tracking-[-0.05em] text-primary sm:text-5xl">
+                  <h2 className="font-headline text-3xl font-extrabold tracking-[-0.05em] text-primary sm:text-4xl">
                     {title}
                   </h2>
                   {subtitle && (
-                    <p className="mt-3 max-w-lg text-base leading-7 text-slate-600 sm:text-lg">
+                    <p className="mt-3 max-w-lg text-sm leading-7 text-slate-600 sm:text-base">
                       {subtitle}
                     </p>
                   )}
