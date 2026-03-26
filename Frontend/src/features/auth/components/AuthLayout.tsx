@@ -139,7 +139,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
           </div>
         </div>
 
-        <div className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 md:h-screen md:w-[53%] md:px-8 lg:px-10">
+        <div className="relative flex flex-1 items-center justify-center px-6 py-8 sm:px-8 md:h-screen md:w-[53%] md:px-10 lg:px-12">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.72),rgba(255,255,255,0)_52%)]" />
 
           {showBackButton && (
@@ -152,25 +152,23 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
             </button>
           )}
 
-          <div className="relative z-10 w-full max-w-[48rem]">
-            <div className="rounded-[2.2rem] border border-white/70 bg-white/70 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-2xl sm:p-4 md:p-5">
-              <div className="rounded-[1.8rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-8 py-6 sm:py-7 md:px-10 md:py-8 lg:px-12">
-                <div className="mb-5">
-                  <div className="mb-3 inline-flex items-center rounded-full bg-primary/5 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] text-primary/70">
-                    Welcome to Skill-Link
-                  </div>
-                  <h2 className="font-headline text-3xl font-extrabold tracking-[-0.05em] text-primary sm:text-4xl">
-                    {title}
-                  </h2>
-                  {subtitle && (
-                    <p className="mt-2 max-w-lg text-sm leading-6 text-slate-600 sm:text-base">
-                      {subtitle}
-                    </p>
-                  )}
+          <div className="relative z-10 w-full max-w-[48rem] px-4 sm:px-6">
+            <div className="rounded-[1.8rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-8 py-6 shadow-[0_28px_80px_rgba(15,23,42,0.14)] sm:py-7 md:px-10 md:py-8 lg:px-12">
+              <div className="mb-5">
+                <div className="mb-3 inline-flex items-center rounded-full bg-primary/5 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] text-primary/70">
+                  Welcome to Skill-Link
                 </div>
-
-                {children}
+                <h2 className="font-headline text-3xl font-extrabold tracking-[-0.05em] text-primary sm:text-4xl">
+                  {title}
+                </h2>
+                {subtitle && (
+                  <p className="mt-2 max-w-lg text-sm leading-6 text-slate-600 sm:text-base">
+                    {subtitle}
+                  </p>
+                )}
               </div>
+
+              {children}
             </div>
           </div>
         </div>

@@ -183,21 +183,6 @@ export const RegisterForm: React.FC = () => {
       {step === 2 && (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
           <div className="space-y-2">
-            <label className="ml-1 text-xs font-semibold text-slate-700">Full Name</label>
-            <div className="relative group">
-              <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
-              <input
-                type="text"
-                required
-                placeholder="Enter your name"
-                value={formData.name}
-                className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
             <label className="ml-1 text-xs font-semibold text-slate-700">Email Address</label>
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
@@ -268,6 +253,21 @@ export const RegisterForm: React.FC = () => {
 
       {step === 3 && (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="space-y-2">
+            <label className="ml-1 text-xs font-semibold text-slate-700">Full Name</label>
+            <div className="relative group">
+              <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary" />
+              <input
+                type="text"
+                required
+                placeholder="Enter your name"
+                value={formData.name}
+                className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+          </div>
+
           {formData.role === Role.ORGANISATION ? (
             <>
               <div className="space-y-2">
