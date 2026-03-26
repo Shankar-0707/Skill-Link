@@ -1,7 +1,7 @@
-import { IsString, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class VerifyEmailDto {
   @IsString()
-  @MinLength(20)
+  @IsNotEmpty()
   token: string;
 }
