@@ -7,6 +7,7 @@ export const RegisterPage: React.FC = () => {
     <AuthLayout 
       title="Sign Up" 
       subtitle="Join the future of skilled work"
+      showBackButton={false}
     >
       <RegisterForm />
     </AuthLayout>

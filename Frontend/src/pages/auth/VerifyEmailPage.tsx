@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "../../features/auth/components/AuthLayout";
 import { authApi } from "../../features/auth/api/auth";
 import { resolveApiErrorMessage } from "../../features/auth/utils/errorMessage";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 type VerifyState = "loading" | "success" | "error";
 
@@ -38,11 +39,14 @@ export const VerifyEmailPage: React.FC = () => {
         setState("success");
         setMessage(
           response.message ??
-            "Email verified successfully. You can sign in now.",
+            "Email verified successfully!",
         );
         window.setTimeout(() => {
-          navigate("/login", { replace: true });
-        }, 1800);
+          navigate("/login", { 
+            replace: true,
+            state: { emailVerified: true }
+          });
+        }, 2500);
       } catch (error) {
         if (!isMounted) {
           return;
@@ -66,35 +70,40 @@ export const VerifyEmailPage: React.FC = () => {
 
   return (
     <AuthLayout
-      title="Verify Email"
-      subtitle="Securing your Skill-Link account"
+      title={state === "success" ? "Email Verified" : state === "loading" ? "Verifying..." : "Verification Failed"}
+      subtitle={state === "success" ? "Welcome to Skill-Link" : "Securing your account"}
+      showBackButton={false}
     >
-      <div className="p-8 md:p-10 space-y-5">
-        <p
-          className={`rounded-xl px-4 py-4 text-sm font-semibold ${
-            state === "success"
-              ? "border border-green-300 bg-green-50 text-green-700"
-              : state === "error"
-                ? "border border-red-300 bg-red-50 text-red-700"
-                : "border border-blue-300 bg-blue-50 text-blue-700"
-          }`}
-        >
+      <div className="space-y-5 text-center">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+          {state === "loading" && <Loader2 className="h-10 w-10 animate-spin text-primary" />}
+          {state === "success" && <CheckCircle2 className="h-10 w-10 text-emerald-500" />}
+          {state === "error" && <XCircle className="h-10 w-10 text-red-500" />}
+        </div>
+
+        <p className="text-base font-semibold text-slate-700">
           {message}
         </p>
 
-        {state === "error" && (
-          <p className="text-sm font-medium text-on-surface-variant">
-            Need a fresh link? Go to forgot password or request a new
-            verification from your account flow.
+        {state === "success" && (
+          <p className="text-sm text-slate-500">
+            Redirecting you to sign in...
           </p>
         )}
 
-        <Link
-          to="/login"
-          className="block w-full rounded-2xl bg-primary py-4 text-center text-lg font-bold text-on-primary shadow-xl shadow-primary/20 transition-all hover:opacity-90"
-        >
-          Go To Sign In
-        </Link>
+        {state === "error" && (
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-slate-600">
+              The verification link may have expired or is invalid. Please try registering again or contact support.
+            </p>
+            <button
+              onClick={() => navigate('/login', { replace: true })}
+              className="w-full cursor-pointer rounded-[1.35rem] bg-[linear-gradient(135deg,#000613_0%,#0b1b33_100%)] py-3 text-lg font-bold text-white shadow-[0_18px_35px_rgba(2,6,23,0.22)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(2,6,23,0.25)] active:scale-[0.98]"
+            >
+              Go to Sign In
+            </button>
+          </div>
+        )}
       </div>
     </AuthLayout>
   );
