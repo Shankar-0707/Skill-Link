@@ -41,7 +41,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
 
   // ─── Public endpoints ─────────────────────────────────────────────────────
-
+  // Admin ke liye h ye bhi 
   @Get()
   @ApiOperation({ summary: 'List all active products with filters (public)' })
   @ApiOkResponse({ description: 'Paginated product list' })
@@ -65,7 +65,7 @@ export class ProductsController {
   @common.Roles(Role.ORGANISATION)
   @ApiBearerAuth()
   @ApiOperation({ summary: "List the authenticated org's own products (all states)" })
-  getMyProducts(@common.CurrentUser() user: common.JwtPayload, @Query() query: common.PaginationDto) {
+  getMyProducts(@common.CurrentUser() user: common.JwtPayload, @Query() query: ListProductsDto & common.PaginationDto) {
     return this.productsService.findMyProducts(user.sub, query)
   }
 

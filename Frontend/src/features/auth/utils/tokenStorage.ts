@@ -1,6 +1,11 @@
-const ACCESS_TOKEN_KEY = "skill_link_access_token";
-const REFRESH_TOKEN_KEY = "skill_link_refresh_token";
-const COOKIE_MAX_AGE_DAYS = 7;
+
+// This file has to be changes dynamically 
+// console.log(import.meta.env.VITE_ACCESS_TOKEN_KEY)
+const ACCESS_TOKEN_KEY = import.meta.env.VITE_ACCESS_TOKEN_KEY || "skill_link_access_token";
+const REFRESH_TOKEN_KEY = import.meta.env.VITE_REFRESH_TOKEN_KEY || "skill_link_refresh_token";
+const ACCESS_TOKEN_EXPIRY_MINUTES = Number(import.meta.env.VITE_ACCESS_TOKEN_EXPIRY_MINUTES) || 15;
+const REFRESH_TOKEN_EXPIRY_DAYS = Number(import.meta.env.VITE_REFRESH_TOKEN_EXPIRY_DAYS) || 7;
+
 
 function readCookie(name: string) {
   if (typeof document === "undefined") {
@@ -39,8 +44,12 @@ function deleteCookie(name: string) {
 
 function getCookieExpiry() {
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + COOKIE_MAX_AGE_DAYS);
-  return expiresAt;
+  const expiresAt2 = new Date();
+  // Access token expires in minutes
+  expiresAt.setMinutes(expiresAt.getMinutes() + ACCESS_TOKEN_EXPIRY_MINUTES);
+  // Refresh token expires in days
+  expiresAt2.setDate(expiresAt2.getDate() + REFRESH_TOKEN_EXPIRY_DAYS);
+  return {expiresAt, expiresAt2};
 }
 
 export function getAccessToken() {
@@ -52,9 +61,9 @@ export function getRefreshToken() {
 }
 
 export function setAuthTokens(accessToken: string, refreshToken: string) {
-  const expiresAt = getCookieExpiry();
+  const {expiresAt, expiresAt2} = getCookieExpiry();
   writeCookie(ACCESS_TOKEN_KEY, accessToken, expiresAt);
-  writeCookie(REFRESH_TOKEN_KEY, refreshToken, expiresAt);
+  writeCookie(REFRESH_TOKEN_KEY, refreshToken, expiresAt2);
 }
 
 export function clearAuthTokens() {

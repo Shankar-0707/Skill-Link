@@ -3,27 +3,28 @@ export interface ProductImage {
   productId: string;
   imageUrl: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface Product {
   id: string;
-  organisationId: string;
   name: string;
-  description: string | null;
+  description?: string | null;
   price: number;
   stockQuantity: number;
   isActive: boolean;
-  deletedAt: string | null;
+  organisationId: string;
+  ratingAvg?: number;
+  ratingCount?: number;
   createdAt: string;
   updatedAt: string;
   images?: ProductImage[];
-  _count?: {
-    reservations: number;
+  organisation?: {
+    businessName: string;
+    businessType: string;
   };
 }
 
-export interface CreateProductDto {
+export interface CreateProductPayload {
   name: string;
   description?: string;
   price: number;
@@ -31,7 +32,7 @@ export interface CreateProductDto {
   imageUrls?: string[];
 }
 
-export interface UpdateProductDto {
+export interface UpdateProductPayload {
   name?: string;
   description?: string;
   price?: number;
@@ -39,17 +40,21 @@ export interface UpdateProductDto {
   isActive?: boolean;
 }
 
-export interface AddProductImageDto {
-  imageUrl: string;
+export interface ListProductsParams {
+  organisationId?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
+export interface PaginatedProducts {
+  items: Product[];
   meta: {
-    totalItems: number;
-    itemCount: number;
-    itemsPerPage: number;
+    total: number;
+    page: number;
+    limit: number;
     totalPages: number;
-    currentPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
   };
 }

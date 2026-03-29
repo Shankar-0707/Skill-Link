@@ -1,61 +1,94 @@
 import { api } from '../../../services/api/api';
-import type {
-  Product,
-  CreateProductDto,
-  UpdateProductDto,
-  AddProductImageDto,
-  PaginatedResponse
+import type { 
+  Product, 
+  CreateProductPayload, 
+  UpdateProductPayload, 
+  ListProductsParams, 
+  PaginatedProducts,
+  ProductImage
 } from '../types';
+
+type ApiEnvelope<T> = {
+  success: boolean;
+  statusCode: number;
+  data: T;
+};
+
+function unwrapResponse<T>(response: ApiEnvelope<T> | T): T {
+  if (
+    typeof response === 'object' &&
+    response !== null &&
+    'data' in response &&
+    'success' in response
+  ) {
+    return (response as ApiEnvelope<T>).data;
+  }
+
+  return response as T;
+}
 
 export const productsApi = {
   /**
-   * List the authenticated organisation's own products
+   * List all active products with filters (public)
    */
-  getMyProducts: async (params?: { page?: number; limit?: number; search?: string }) => {
-    // Note: If the backend `/products/me/all` doesn't natively support `search`, 
-    // it will be ignored by backend, so we will also handle client-side filtering.
-    // However, attaching params for pagination.
-    const response = await api.get<PaginatedResponse<Product>>('/products/me/all', { params });
-    return response.data;
+  findAll: async (params?: ListProductsParams): Promise<PaginatedProducts> => {
+    const response = await api.get('/products', { params });
+    return unwrapResponse<PaginatedProducts>(response.data);
+  },
+
+  /**
+   * Get a single product by ID (public)
+   */
+  findOne: async (id: string): Promise<Product> => {
+    const response = await api.get(`/products/${id}`);
+    return unwrapResponse<Product>(response.data);
+  },
+
+  /**
+   * List the authenticated org's own products (all states)
+   */
+  getMyProducts: async (params?: ListProductsParams): Promise<PaginatedProducts> => {
+    const response = await api.get('/products/me/all', { params });
+    return unwrapResponse<PaginatedProducts>(response.data);
   },
 
   /**
    * Create a new product
    */
-  createProduct: async (data: CreateProductDto) => {
-    const response = await api.post<Product>('/products', data);
-    return response.data;
+  create: async (data: CreateProductPayload): Promise<Product> => {
+    const response = await api.post('/products', data);
+    return unwrapResponse<Product>(response.data);
   },
 
   /**
-   * Update an existing product
+   * Update a product
    */
-  updateProduct: async (id: string, data: UpdateProductDto) => {
-    const response = await api.patch<Product>(`/products/${id}`, data);
-    return response.data;
+  update: async (id: string, data: UpdateProductPayload): Promise<Product> => {
+    const response = await api.patch(`/products/${id}`, data);
+    return unwrapResponse<Product>(response.data);
   },
 
   /**
    * Soft-delete a product
    */
-  deleteProduct: async (id: string) => {
-    const response = await api.delete<{ message: string }>(`/products/${id}`);
-    return response.data;
+  remove: async (id: string): Promise<{ message: string }> => {
+    const response = await api.delete(`/products/${id}`);
+    return unwrapResponse<{ message: string }>(response.data);
   },
 
   /**
    * Add an image URL to a product
    */
-  addImage: async (productId: string, data: AddProductImageDto) => {
-    const response = await api.post(`/products/${productId}/images`, data);
-    return response.data;
+  addImage: async (id: string, imageUrl: string): Promise<ProductImage> => {
+    const response = await api.post(`/products/${id}/images`, { imageUrl });
+    return unwrapResponse<ProductImage>(response.data);
   },
 
   /**
    * Remove an image from a product
    */
-  removeImage: async (productId: string, imageId: string) => {
-    const response = await api.delete<{ message: string }>(`/products/${productId}/images/${imageId}`);
-    return response.data;
-  }
+  removeImage: async (id: string, imageId: string): Promise<{ message: string }> => {
+    const response = await api.delete(`/products/${id}/images/${imageId}`);
+    return unwrapResponse<{ message: string }>(response.data);
+  },
 };
