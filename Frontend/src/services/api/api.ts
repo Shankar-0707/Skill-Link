@@ -65,11 +65,13 @@ api.interceptors.response.use(
       const refreshResponse = await axios.post(`${API_URL}/auth/refresh`, {
         refreshToken,
       });
-      const { accessToken, refreshToken: nextRefreshToken } =
-        refreshResponse.data as {
-          accessToken: string;
-          refreshToken: string;
-        };
+      
+      // Backend wraps response in { success, statusCode, data }
+      const responseData = refreshResponse.data.data || refreshResponse.data;
+      const { accessToken, refreshToken: nextRefreshToken } = responseData as {
+        accessToken: string;
+        refreshToken: string;
+      };
 
       setAuthTokens(accessToken, nextRefreshToken);
       originalRequest.headers = originalRequest.headers ?? {};
