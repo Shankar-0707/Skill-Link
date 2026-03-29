@@ -1,7 +1,7 @@
-import { IsString, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class RefreshTokenDto {
   @IsString()
-  @MinLength(20)
+  @IsNotEmpty()
   refreshToken: string;
 }

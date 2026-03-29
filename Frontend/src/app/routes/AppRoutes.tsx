@@ -8,6 +8,11 @@ import { ForgotPasswordPage } from "../../pages/auth/ForgotPasswordPage";
 import { GoogleAuthCallbackPage } from "../../pages/auth/GoogleAuthCallbackPage";
 import { ResetPasswordPage } from "../../pages/auth/ResetPasswordPage";
 import { VerifyEmailPage } from "../../pages/auth/VerifyEmailPage";
+import { CheckEmailPage } from "../../pages/auth/CheckEmailPage";
+import { CheckResetEmailPage } from "../../pages/auth/CheckResetEmailPage";
+import { OrganisationHomePage } from "../../pages/OrganisationHomePage";
+import { UserHomePage } from "../../pages/UserHomePage";
+import { WorkerHomePage } from "../../pages/WorkerHomePage";
 // import { OrganisationHomePage } from "../../pages/OrganisationHomePage";
 import OrganisationPage from "@/pages/organisation/OrganisationPage";
 import SettingsPage from "@/pages/organisation/SettingsPage";
@@ -42,6 +47,8 @@ export const AppRoutes: React.FC = () => {
         />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/check-email" element={<CheckEmailPage />} />
+        <Route path="/check-reset-email" element={<CheckResetEmailPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
