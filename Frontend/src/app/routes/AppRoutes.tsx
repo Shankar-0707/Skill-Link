@@ -11,27 +11,28 @@ import { VerifyEmailPage } from "../../pages/auth/VerifyEmailPage";
 import { CheckEmailPage } from "../../pages/auth/CheckEmailPage";
 import { CheckResetEmailPage } from "../../pages/auth/CheckResetEmailPage";
 // import { OrganisationHomePage } from "../../pages/OrganisationHomePage";
-// import { UserHomePage } from "../../pages/UserHomePage";
+import { UserHomePage } from "../../pages/customer/UserHomePage";
+import { CreateJobPage } from "../../pages/customer/Createjobpage";
+import { MyJobsPage } from "../../pages/customer/MyJobsPage";
+import { JobDetailPage } from "../../pages/customer/JobDetailPage";
+import { WorkerProfilePage } from "../../pages/customer/WorkerProfilePage";
+import { ComingSoonPage } from "../../pages/customer/ComingSoonPage";
+import { SettingsPage } from "../../pages/customer/SettingsPage";
 // import { WorkerHomePage } from "../../pages/WorkerHomePage";
-// import { OrganisationHomePage } from "../../pages/OrganisationHomePage";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { PublicOnlyRoute } from "./PublicOnlyRoute";
+import { RoleHomeRedirect } from "./RoleHomeRedirect";
+import { RoleRoute } from "./RoleRoute";
+import ThemePreview from "../../ThemePreview";
+import WorkerPage from "@/pages/worker/WorkerPage";
+import OrganisationLayout from "@/pages/organisation/OrganisationLayout";
 import OrganisationPage from "@/pages/organisation/OrganisationPage";
-import SettingsPage from "@/pages/organisation/SettingsPage";
 import SeeAllProductsPage from "@/pages/organisation/SeeAllProductsPage";
 import CreateProductPage from "@/pages/organisation/CreateProductPage";
 import EditProductPage from "@/pages/organisation/EditProductPage";
 import ProductExplorePage from "@/pages/organisation/ProductExplorePage";
 import AllReservationsPage from "@/pages/organisation/AllReservationsPage";
 import PendingReservationsPage from "@/pages/organisation/PendingReservationsPage";
-import OrganisationLayout from "@/pages/organisation/OrganisationLayout";
-// import { UserHomePage } from "../../pages/UserHomePage";
-// import { WorkerHomePage } from "../../pages/WorkerHomePage";
-import CustomerPage from "@/pages/customer/CustomerPage";
-import WorkerPage from "@/pages/worker/WorkerPage";
-import { ProtectedRoute } from "./ProtectedRoute";
-import { PublicOnlyRoute } from "./PublicOnlyRoute";
-import { RoleHomeRedirect } from "./RoleHomeRedirect";
-import { RoleRoute } from "./RoleRoute";
-import ThemePreview from "../../ThemePreview";
 
 
 export const AppRoutes: React.FC = () => {
@@ -55,7 +56,14 @@ export const AppRoutes: React.FC = () => {
         <Route path="/home" element={<RoleHomeRedirect />} />
 
         <Route element={<RoleRoute allowedRole="CUSTOMER" />}>
-          <Route path="/customer" element={<CustomerPage />} />
+          <Route path="/user/home" element={<UserHomePage />} />
+          <Route path="/user/create-job" element={<CreateJobPage />} />
+          <Route path="/user/my-jobs" element={<MyJobsPage />} />
+          <Route path="/user/job-detail/:id" element={<JobDetailPage />} />
+          <Route path="/user/worker/:id" element={<WorkerProfilePage />} />
+          <Route path="/user/inventory" element={<ComingSoonPage />} />
+          <Route path="/user/schedule" element={<ComingSoonPage />} />
+          <Route path="/user/settings" element={<SettingsPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRole="WORKER" />}>
