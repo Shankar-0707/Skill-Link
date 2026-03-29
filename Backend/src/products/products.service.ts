@@ -28,32 +28,25 @@ export class ProductsService {
   // ─── Public: List products ────────────────────────────────────────────────
 
   async findAll(query: ListProductsDto & PaginationDto) {
-    const { organisationId, search, minPrice, maxPrice, sortBy, sortOrder, skip, limit, page } =
-      query
+    const { organisationId, search, skip, limit, page } = query
 
     const where: Prisma.ProductWhereInput = {
       isActive: true,
       deletedAt: null,
       ...(organisationId && { organisationId }),
       ...(search && { name: { contains: search, mode: 'insensitive' } }),
-      ...((minPrice !== undefined || maxPrice !== undefined) && {
-        price: {
-          ...(minPrice !== undefined && { gte: minPrice }),
-          ...(maxPrice !== undefined && { lte: maxPrice }),
-        },
-      }),
     }
 
     // Default: newest first
     const orderBy: Prisma.ProductOrderByWithRelationInput = {
-      [sortBy ?? 'createdAt']: sortOrder ?? 'desc',
+      createdAt: 'desc',
     }
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
         where,
-        skip,
-        take: limit,
+        skip: Number(skip) || 0,
+        take: Number(limit) || 20,
         orderBy,
         include: {
           images: { take: 1, orderBy: { createdAt: 'asc' } },
@@ -207,17 +200,26 @@ export class ProductsService {
 
   // ─── Internal: Get org's own products ────────────────────────────────────
 
-  async findMyProducts(userId: string, query: PaginationDto) {
+  async findMyProducts(userId: string, query: ListProductsDto & PaginationDto) {
     const orgId = await this.organisationsService.resolveOrgId(userId)
+    const { search } = query
 
-    const where = { organisationId: orgId, deletedAt: null }
+    const where: Prisma.ProductWhereInput = {
+      organisationId: orgId,
+      deletedAt: null,
+      ...(search && { name: { contains: search, mode: 'insensitive' } }),
+    }
+
+    const orderBy: Prisma.ProductOrderByWithRelationInput = {
+      createdAt: 'desc',
+    }
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
         where,
-        skip: query.skip,
-        take: query.limit,
-        orderBy: { createdAt: 'desc' },
+        skip: Number(query.skip) || 0,
+        take: Number(query.limit) || 20,
+        orderBy,
         include: {
           images: true,
           _count: { select: { reservations: true } },
@@ -226,7 +228,7 @@ export class ProductsService {
       this.prisma.product.count({ where }),
     ])
 
-    return paginate(items, total, query)
+    return paginate(items, total, query as PaginationDto)
   }
 
   // ─── Private: Ownership guard ─────────────────────────────────────────────

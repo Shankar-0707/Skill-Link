@@ -24,8 +24,11 @@ async function bootstrap(): Promise<void> {
   app.use(helmet());
   app.use(compression());
 
+  const corsOrigin = configService.get<string>('CORS_ORIGIN');
   app.enableCors({
-    origin: configService.get<string>('CORS_ORIGIN', 'http://localhost:5173'),
+    origin: corsOrigin
+      ? corsOrigin.split(',').map((o) => o.trim())
+      : ['http://localhost:5173', 'http://localhost:5174'],
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
