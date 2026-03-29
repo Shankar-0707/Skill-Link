@@ -8,7 +8,7 @@ export function getHomeRouteForRole(role: Role) {
       return "/organisation";
     case "CUSTOMER":
     default:
-      return "/customer";
+      return "/user/home";
   }
 }
 
