@@ -10,7 +10,7 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
-} from '@nestjs/common'
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -21,19 +21,18 @@ import {
   ApiForbiddenResponse,
   ApiBadRequestResponse,
   ApiConflictResponse,
-} from '@nestjs/swagger'
-import { Role } from '@prisma/client'
-import { MockAuthGuard } from '../common/guards/mock-auth.guard'
-import { JwtAuthGuard } from ".././auth/guards/jwt-auth.guard"
-import { ReservationsService } from './reservations.service'
+} from '@nestjs/swagger';
+import { Role } from '@prisma/client';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ReservationsService } from './reservations.service';
 import {
   CreateReservationDto,
   CancelReservationDto,
   ListReservationsDto,
   ListIncomingReservationsDto,
-} from './dto/reservation.dto'
-import * as common from '../common'
-import { RolesGuard, Roles, CurrentUser, JwtPayload } from '../common'
+} from './dto/reservation.dto';
+import * as common from '../common';
+import { RolesGuard, Roles } from '../common';
 
 @ApiTags('Reservations')
 @ApiBearerAuth()
@@ -57,20 +56,25 @@ export class ReservationsController {
   @ApiCreatedResponse({ description: 'Reservation created, escrow held' })
   @ApiConflictResponse({ description: 'Insufficient stock' })
   @ApiBadRequestResponse({ description: 'Product unavailable' })
-  create(@common.CurrentUser() user: common.JwtPayload, @Body() dto: CreateReservationDto) {
-    return this.reservationsService.create(user.sub, dto)
+  create(
+    @common.CurrentUser() user: common.JwtPayload,
+    @Body() dto: CreateReservationDto,
+  ) {
+    return this.reservationsService.create(user.sub, dto);
   }
 
   @Get('my')
   @UseGuards(RolesGuard)
   @Roles(Role.CUSTOMER)
-  @ApiOperation({ summary: "List the authenticated customer's own reservations" })
+  @ApiOperation({
+    summary: "List the authenticated customer's own reservations",
+  })
   @ApiOkResponse({ description: 'Paginated reservation list' })
   findMy(
     @common.CurrentUser() user: common.JwtPayload,
     @Query() query: ListReservationsDto & common.PaginationDto,
   ) {
-    return this.reservationsService.findMyReservations(user.sub, query)
+    return this.reservationsService.findMyReservations(user.sub, query);
   }
 
   @Patch(':id/pickup')
@@ -79,16 +83,21 @@ export class ReservationsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Mark a reservation as picked up',
-    description: 'Transitions CONFIRMED → PICKED_UP and releases escrow to the organisation.',
+    description:
+      'Transitions CONFIRMED → PICKED_UP and releases escrow to the organisation.',
   })
-  @ApiOkResponse({ description: 'Reservation marked as picked up, escrow released' })
-  @ApiBadRequestResponse({ description: 'Reservation is not in CONFIRMED state' })
+  @ApiOkResponse({
+    description: 'Reservation marked as picked up, escrow released',
+  })
+  @ApiBadRequestResponse({
+    description: 'Reservation is not in CONFIRMED state',
+  })
   @ApiForbiddenResponse({ description: 'Reservation does not belong to you' })
   markPickedUp(
     @Param('id', ParseUUIDPipe) id: string,
     @common.CurrentUser() user: common.JwtPayload,
   ) {
-    return this.reservationsService.markPickedUp(id, user.sub)
+    return this.reservationsService.markPickedUp(id, user.sub);
   }
 
   // ─── Organisation endpoints ───────────────────────────────────────────────
@@ -102,7 +111,7 @@ export class ReservationsController {
     @common.CurrentUser() user: common.JwtPayload,
     @Query() query: ListIncomingReservationsDto & common.PaginationDto,
   ) {
-    return this.reservationsService.findIncomingReservations(user.sub, query)
+    return this.reservationsService.findIncomingReservations(user.sub, query);
   }
 
   @Patch(':id/confirm')
@@ -111,16 +120,19 @@ export class ReservationsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Confirm a pending reservation',
-    description: 'Transitions PENDING → CONFIRMED. Only the owning org can do this.',
+    description:
+      'Transitions PENDING → CONFIRMED. Only the owning org can do this.',
   })
   @ApiOkResponse({ description: 'Reservation confirmed' })
   @ApiBadRequestResponse({ description: 'Reservation is not in PENDING state' })
-  @ApiForbiddenResponse({ description: 'You do not own the product for this reservation' })
+  @ApiForbiddenResponse({
+    description: 'You do not own the product for this reservation',
+  })
   confirm(
     @Param('id', ParseUUIDPipe) id: string,
     @common.CurrentUser() user: common.JwtPayload,
   ) {
-    return this.reservationsService.confirm(id, user.sub)
+    return this.reservationsService.confirm(id, user.sub);
   }
 
   // ─── Shared: cancel (customer or org) ────────────────────────────────────
@@ -132,27 +144,31 @@ export class ReservationsController {
     description:
       'Either customer or org can cancel. Restores stock and refunds escrow to customer.',
   })
-  @ApiOkResponse({ description: 'Reservation cancelled, stock restored, escrow refunded' })
+  @ApiOkResponse({
+    description: 'Reservation cancelled, stock restored, escrow refunded',
+  })
   @ApiBadRequestResponse({ description: 'Cannot cancel from current state' })
   cancel(
     @Param('id', ParseUUIDPipe) id: string,
     @common.CurrentUser() user: common.JwtPayload,
     @Body() dto: CancelReservationDto,
   ) {
-    return this.reservationsService.cancel(id, user, dto)
+    return this.reservationsService.cancel(id, user, dto);
   }
 
   // ─── Shared: get one (customer sees own, org sees their products') ────────
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a single reservation by ID' })
-  @ApiOkResponse({ description: 'Reservation detail with product, customer, and escrow info' })
+  @ApiOkResponse({
+    description: 'Reservation detail with product, customer, and escrow info',
+  })
   @ApiNotFoundResponse({ description: 'Reservation not found' })
   @ApiForbiddenResponse({ description: 'Access denied to this reservation' })
   findOne(
     @Param('id', ParseUUIDPipe) id: string,
     @common.CurrentUser() user: common.JwtPayload,
   ) {
-    return this.reservationsService.findOne(id, user)
+    return this.reservationsService.findOne(id, user);
   }
 }

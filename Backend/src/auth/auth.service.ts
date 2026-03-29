@@ -38,7 +38,9 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email or phone already exists.');
+      throw new ConflictException(
+        'User with this email or phone already exists.',
+      );
     }
 
     const passwordHash = this.hashPassword(registerDto.password);
@@ -57,7 +59,12 @@ export class AuthService {
         },
       });
 
-      await this.createRoleProfile(tx, createdUser.id, registerDto.role, registerDto);
+      await this.createRoleProfile(
+        tx,
+        createdUser.id,
+        registerDto.role,
+        registerDto,
+      );
 
       return tx.user.findUniqueOrThrow({
         where: { id: createdUser.id },
@@ -69,7 +76,8 @@ export class AuthService {
 
     return {
       success: true,
-      message: 'Registration successful. Please verify your email before logging in.',
+      message:
+        'Registration successful. Please verify your email before logging in.',
       user: this.toPublicUser(user),
     };
   }
@@ -86,7 +94,9 @@ export class AuthService {
     }
 
     if (!user.passwordHash) {
-      throw new UnauthorizedException('This account uses Google sign-in. Please continue with Google.');
+      throw new UnauthorizedException(
+        'This account uses Google sign-in. Please continue with Google.',
+      );
     }
 
     if (!this.verifyPassword(loginDto.password, user.passwordHash)) {
@@ -94,7 +104,9 @@ export class AuthService {
     }
 
     if (!user.emailVerified && user.role !== Role.ADMIN) {
-      throw new UnauthorizedException('Email not verified. Please verify your email first.');
+      throw new UnauthorizedException(
+        'Email not verified. Please verify your email first.',
+      );
     }
 
     return this.buildAuthResponse(user);
@@ -254,7 +266,10 @@ export class AuthService {
     return { success: true, message: 'Password reset successfully.' };
   }
 
-  async authenticateWithGoogle(googleUser: GoogleOauthUser, requestedRole?: string) {
+  async authenticateWithGoogle(
+    googleUser: GoogleOauthUser,
+    requestedRole?: string,
+  ) {
     const role = this.resolvePublicRole(requestedRole);
 
     const user = await this.prisma.$transaction(async (tx) => {
@@ -310,7 +325,10 @@ export class AuthService {
 
       await this.createRoleProfile(tx, createdUser.id, role, {
         skills: [],
-        businessName: role === Role.ORGANISATION ? `${googleUser.name ?? 'Google'} Organisation` : undefined,
+        businessName:
+          role === Role.ORGANISATION
+            ? `${googleUser.name ?? 'Google'} Organisation`
+            : undefined,
         businessType: role === Role.ORGANISATION ? 'General' : undefined,
       });
 
@@ -332,15 +350,18 @@ export class AuthService {
     const user = await this.findActiveUserById(userId);
 
     if (updateProfileDto.email && user.authProvider === AuthProvider.GOOGLE) {
-      throw new BadRequestException('Email changes are not supported for Google-authenticated accounts.');
+      throw new BadRequestException(
+        'Email changes are not supported for Google-authenticated accounts.',
+      );
     }
 
     const nextEmail = updateProfileDto.email
       ? this.normalizeEmail(updateProfileDto.email)
       : undefined;
-    const nextPhone = updateProfileDto.phone !== undefined
-      ? this.normalizeOptionalString(updateProfileDto.phone)
-      : undefined;
+    const nextPhone =
+      updateProfileDto.phone !== undefined
+        ? this.normalizeOptionalString(updateProfileDto.phone)
+        : undefined;
 
     if (nextEmail || nextPhone) {
       const conflictUser = await this.prisma.user.findFirst({
@@ -387,8 +408,12 @@ export class AuthService {
         await tx.organisation.update({
           where: { userId },
           data: {
-            businessName: this.normalizedRequiredField(updateProfileDto.businessName),
-            businessType: this.normalizedRequiredField(updateProfileDto.businessType),
+            businessName: this.normalizedRequiredField(
+              updateProfileDto.businessName,
+            ),
+            businessType: this.normalizedRequiredField(
+              updateProfileDto.businessType,
+            ),
             description: this.normalizedField(updateProfileDto.description),
           },
         });
@@ -401,7 +426,11 @@ export class AuthService {
     });
 
     if (nextEmail) {
-      await this.issueEmailVerification(updatedUser.id, updatedUser.email, updatedUser.name);
+      await this.issueEmailVerification(
+        updatedUser.id,
+        updatedUser.email,
+        updatedUser.name,
+      );
     }
 
     return this.toPublicUser(updatedUser);
@@ -538,7 +567,11 @@ export class AuthService {
     }
   }
 
-  private async issueEmailVerification(userId: string, email: string, name?: string | null) {
+  private async issueEmailVerification(
+    userId: string,
+    email: string,
+    name?: string | null,
+  ) {
     const token = this.generateRawToken();
     const tokenHash = this.hashToken(token);
     const expiresAt = this.getFutureDateInMinutes(
@@ -562,11 +595,17 @@ export class AuthService {
       name: name ?? undefined,
       token,
       verificationUrl: this.buildActionUrl(process.env.VERIFY_EMAIL_URL, token),
-      expiresInMinutes: Number(process.env.EMAIL_VERIFICATION_EXPIRES_MINUTES ?? '60'),
+      expiresInMinutes: Number(
+        process.env.EMAIL_VERIFICATION_EXPIRES_MINUTES ?? '60',
+      ),
     });
   }
 
-  private async issuePasswordReset(userId: string, email: string, name?: string | null) {
+  private async issuePasswordReset(
+    userId: string,
+    email: string,
+    name?: string | null,
+  ) {
     const token = this.generateRawToken();
     const tokenHash = this.hashToken(token);
     const expiresAt = this.getFutureDateInMinutes(
@@ -590,13 +629,17 @@ export class AuthService {
       name: name ?? undefined,
       token,
       resetUrl: this.buildActionUrl(process.env.RESET_PASSWORD_URL, token),
-      expiresInMinutes: Number(process.env.PASSWORD_RESET_EXPIRES_MINUTES ?? '30'),
+      expiresInMinutes: Number(
+        process.env.PASSWORD_RESET_EXPIRES_MINUTES ?? '30',
+      ),
     });
   }
 
   private ensurePublicRole(role: Role) {
     if (role === Role.ADMIN) {
-      throw new BadRequestException('Admin accounts cannot be created via public registration.');
+      throw new BadRequestException(
+        'Admin accounts cannot be created via public registration.',
+      );
     }
   }
 
@@ -618,7 +661,9 @@ export class AuthService {
 
     const normalizedRole = role.toUpperCase();
     if (normalizedRole === Role.ADMIN) {
-      throw new BadRequestException('Admin accounts cannot be created via Google sign-in.');
+      throw new BadRequestException(
+        'Admin accounts cannot be created via Google sign-in.',
+      );
     }
 
     if (
@@ -713,7 +758,9 @@ export class AuthService {
   }
 
   private getRefreshTokenExpiry() {
-    const refreshExpiryDays = Number(process.env.JWT_REFRESH_EXPIRES_DAYS ?? '7');
+    const refreshExpiryDays = Number(
+      process.env.JWT_REFRESH_EXPIRES_DAYS ?? '7',
+    );
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + refreshExpiryDays);
     return expiresAt;

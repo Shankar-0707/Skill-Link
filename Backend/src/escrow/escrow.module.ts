@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
-import { EscrowService } from './escrow.service'
-
-
+import { EscrowService } from './escrow.service';
 
 /**
  * EscrowModule is imported by ReservationsModule and JobsModule.
@@ -9,7 +7,7 @@ import { EscrowService } from './escrow.service'
  */
 
 @Module({
-    providers: [EscrowService],
-    exports: [EscrowService],
+  providers: [EscrowService],
+  exports: [EscrowService],
 })
 export class EscrowModule {}

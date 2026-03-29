@@ -1,6 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { ReservationStatus } from '@prisma/client'
-import { Type } from 'class-transformer'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ReservationStatus } from '@prisma/client';
 import {
   IsUUID,
   IsInt,
@@ -9,19 +8,19 @@ import {
   IsString,
   IsEnum,
   MaxLength,
-} from 'class-validator'
+} from 'class-validator';
 
 // ─── Create ──────────────────────────────────────────────────────────────────
 
 export class CreateReservationDto {
   @ApiProperty({ example: 'uuid-of-product' })
   @IsUUID()
-  productId: string
+  productId: string;
 
   @ApiProperty({ example: 2, minimum: 1 })
   @IsInt()
   @Min(1)
-  quantity: number
+  quantity: number;
 }
 
 // ─── Cancel ──────────────────────────────────────────────────────────────────
@@ -31,7 +30,7 @@ export class CancelReservationDto {
   @IsOptional()
   @IsString()
   @MaxLength(500)
-  reason?: string
+  reason?: string;
 }
 
 // ─── Query ────────────────────────────────────────────────────────────────────
@@ -43,7 +42,7 @@ export class ListReservationsDto {
   })
   @IsOptional()
   @IsEnum(ReservationStatus)
-  status?: ReservationStatus
+  status?: ReservationStatus;
 }
 
 // ─── Org query (incoming reservations for their products) ────────────────────
@@ -52,10 +51,10 @@ export class ListIncomingReservationsDto {
   @ApiPropertyOptional({ enum: ReservationStatus })
   @IsOptional()
   @IsEnum(ReservationStatus)
-  status?: ReservationStatus
+  status?: ReservationStatus;
 
   @ApiPropertyOptional({ description: 'Filter by a specific productId' })
   @IsOptional()
   @IsUUID()
-  productId?: string
+  productId?: string;
 }

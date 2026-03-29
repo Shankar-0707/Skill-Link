@@ -61,7 +61,9 @@ export class MailService {
     const mode = process.env.MAIL_MODE ?? 'smtp';
 
     if (mode === 'log') {
-      this.logger.log(`MAIL_MODE=log | To: ${options.to} | Subject: ${options.subject}`);
+      this.logger.log(
+        `MAIL_MODE=log | To: ${options.to} | Subject: ${options.subject}`,
+      );
       this.logger.log(options.text);
       return;
     }

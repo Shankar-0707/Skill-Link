@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { Cron, CronExpression } from '@nestjs/schedule'
-import { ReservationsService } from './reservations.service'
+import { Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { ReservationsService } from './reservations.service';
 
 /**
  * Runs every 15 minutes and expires PENDING reservations
@@ -12,21 +12,21 @@ import { ReservationsService } from './reservations.service'
  */
 @Injectable()
 export class ReservationExpiryTask {
-  private readonly logger = new Logger(ReservationExpiryTask.name)
+  private readonly logger = new Logger(ReservationExpiryTask.name);
 
   constructor(private readonly reservationsService: ReservationsService) {}
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async handleExpiry(): Promise<void> {
-    this.logger.debug('Running reservation expiry check...')
+    this.logger.debug('Running reservation expiry check...');
 
     try {
-      const count = await this.reservationsService.expireOverdueReservations()
+      const count = await this.reservationsService.expireOverdueReservations();
       if (count > 0) {
-        this.logger.log(`Expired ${count} overdue reservation(s)`)
+        this.logger.log(`Expired ${count} overdue reservation(s)`);
       }
     } catch (err) {
-      this.logger.error(`Expiry cron failed: ${(err as Error).message}`)
+      this.logger.error(`Expiry cron failed: ${(err as Error).message}`);
     }
   }
 }

@@ -10,19 +10,26 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { RolesGuard } from '../common/guards/roles.guards';
 
-
 @Module({
   imports: [
     PassportModule.register({ session: false }),
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET ?? 'replace-this-access-secret',
       signOptions: {
-        expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN ?? '15m') as SignOptions['expiresIn'],
+        expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN ??
+          '15m') as SignOptions['expiresIn'],
       },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, MailService, JwtAuthGuard, GoogleOauthGuard, GoogleStrategy, RolesGuard],
+  providers: [
+    AuthService,
+    MailService,
+    JwtAuthGuard,
+    GoogleOauthGuard,
+    GoogleStrategy,
+    RolesGuard,
+  ],
   exports: [AuthService, JwtAuthGuard, JwtModule, RolesGuard],
 })
-export class AuthModule { }
+export class AuthModule {}

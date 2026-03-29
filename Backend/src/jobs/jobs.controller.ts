@@ -71,10 +71,7 @@ export class JobsController {
   @Post()
   @Roles('CUSTOMER')
   @HttpCode(HttpStatus.CREATED)
-  createJob(
-    @CurrentUser('sub') userId: string,
-    @Body() dto: CreateJobDto,
-  ) {
+  createJob(@CurrentUser('sub') userId: string, @Body() dto: CreateJobDto) {
     console.log(userId);
     return this.jobsService.createJob(userId, dto);
   }
@@ -131,8 +128,6 @@ export class JobsController {
   ) {
     return this.jobsService.cancelJob(jobId, userId);
   }
-
-
 
   // ─────────────────────────────────────────────
   // JOB LIFECYCLE — Status Transitions
