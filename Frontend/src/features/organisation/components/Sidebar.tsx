@@ -7,7 +7,8 @@ import {
   Building2,
   ChevronRight,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  ClipboardList
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../../app/context/useAuth";
@@ -57,6 +58,7 @@ export const Sidebar: React.FC = () => {
     return saved === "true";
   });
   const [isProductsOpen, setIsProductsOpen] = useState(true);
+  const [isReservationsOpen, setIsReservationsOpen] = useState(true);
 
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", String(isCollapsed));
@@ -115,6 +117,66 @@ export const Sidebar: React.FC = () => {
           isActive={location.pathname === "/organisation"}
           isCollapsed={isCollapsed}
         />
+
+        {/* Reservations Section with Dropdown */}
+        <div className="space-y-1">
+          <button
+            onClick={() => !isCollapsed && setIsReservationsOpen(!isReservationsOpen)}
+            className={cn(
+              "w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative",
+              location.pathname.startsWith("/organisation/reservations") 
+                ? "bg-primary/5 text-primary font-medium" 
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+              isCollapsed ? "justify-center px-0 w-12 mx-auto" : "justify-between"
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <ClipboardList size={20} className={cn("shrink-0 transition-colors", location.pathname.startsWith("/organisation/reservations") ? "text-primary" : "group-hover:text-foreground")} />
+              {!isCollapsed && <span className="text-sm truncate">Reservations</span>}
+            </div>
+            {!isCollapsed && (
+              <ChevronRight 
+                size={14} 
+                className={cn(
+                  "transition-transform duration-200",
+                  isReservationsOpen ? "rotate-90 text-primary" : "text-muted-foreground"
+                )} 
+              />
+            )}
+            {isCollapsed && (
+              <div className="absolute left-full ml-4 px-2 py-1 bg-foreground text-background text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+                Reservations
+              </div>
+            )}
+          </button>
+
+          {!isCollapsed && isReservationsOpen && (
+            <div className="pl-11 pr-2 space-y-1 animate-in slide-in-from-top-1 duration-200">
+              <Link
+                to="/organisation/reservations/all"
+                className={cn(
+                  "block px-4 py-2 text-xs rounded-lg transition-all",
+                  location.pathname === "/organisation/reservations/all"
+                    ? "text-primary font-bold bg-primary/5"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                All Reservations
+              </Link>
+              <Link
+                to="/organisation/reservations/pending"
+                className={cn(
+                  "block px-4 py-2 text-xs rounded-lg transition-all",
+                  location.pathname === "/organisation/reservations/pending"
+                    ? "text-primary font-bold bg-primary/5"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                Pending Reservations
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Products Section with Dropdown */}
         <div className="space-y-1">

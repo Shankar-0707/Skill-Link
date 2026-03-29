@@ -14,7 +14,7 @@ export class OrganisationsController {
     constructor(private readonly organisationsService: OrganisationsService) { }
 
     // Public endpoints
-
+    // Admin kke liye h ye route
     @Get()
     @ApiOperation({ summary: 'List All Active organisations (public)' })
     @ApiOkResponse({ description: 'Paginated List of organisations' })

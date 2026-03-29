@@ -15,6 +15,8 @@ import SeeAllProductsPage from "@/pages/organisation/SeeAllProductsPage";
 import CreateProductPage from "@/pages/organisation/CreateProductPage";
 import EditProductPage from "@/pages/organisation/EditProductPage";
 import ProductExplorePage from "@/pages/organisation/ProductExplorePage";
+import AllReservationsPage from "@/pages/organisation/AllReservationsPage";
+import PendingReservationsPage from "@/pages/organisation/PendingReservationsPage";
 import OrganisationLayout from "@/pages/organisation/OrganisationLayout";
 // import { UserHomePage } from "../../pages/UserHomePage";
 // import { WorkerHomePage } from "../../pages/WorkerHomePage";
@@ -61,6 +63,10 @@ export const AppRoutes: React.FC = () => {
             <Route path="/organisation/products/create" element={<CreateProductPage />} />
             <Route path="/organisation/products/edit/:id" element={<EditProductPage />} />
             <Route path="/organisation/products/:id/explore" element={<ProductExplorePage />} />
+            
+            {/* Reservations */}
+            <Route path="/organisation/reservations/all" element={<AllReservationsPage />} />
+            <Route path="/organisation/reservations/pending" element={<PendingReservationsPage />} />
           </Route>
         </Route>
       </Route>

@@ -41,7 +41,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
 
   // ─── Public endpoints ─────────────────────────────────────────────────────
-
+  // Admin ke liye h ye bhi 
   @Get()
   @ApiOperation({ summary: 'List all active products with filters (public)' })
   @ApiOkResponse({ description: 'Paginated product list' })
