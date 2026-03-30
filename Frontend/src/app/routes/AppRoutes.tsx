@@ -17,14 +17,19 @@ import { MyJobsPage } from "../../pages/customer/MyJobsPage";
 import { JobDetailPage } from "../../pages/customer/JobDetailPage";
 import { WorkerProfilePage } from "../../pages/customer/WorkerProfilePage";
 import { ComingSoonPage } from "../../pages/customer/ComingSoonPage";
-import { SettingsPage } from "../../pages/customer/SettingsPage";
+import { SettingsPage as CustomerSettingsPage } from "../../pages/customer/SettingsPage";
 // import { WorkerHomePage } from "../../pages/WorkerHomePage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicOnlyRoute } from "./PublicOnlyRoute";
 import { RoleHomeRedirect } from "./RoleHomeRedirect";
 import { RoleRoute } from "./RoleRoute";
 import ThemePreview from "../../ThemePreview";
-import WorkerPage from "@/pages/worker/WorkerPage";
+import { WorkerDashboardPage as WorkerDashboard } from "@/pages/worker/WorkerDashboard";
+import { AvailableJobsPage as AvailableJobs } from "@/pages/worker/AvailableJobs";
+import { MyAssignmentsPage as MyWork } from "@/pages/worker/MyAssignments";
+import { WorkerJobDetailPage as WorkerJobDetail } from "@/pages/worker/JobDetail";
+import { WorkerSettingsPage as WorkerSettings } from "@/pages/worker/Settings";
+import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
 import OrganisationLayout from "@/pages/organisation/OrganisationLayout";
 import OrganisationPage from "@/pages/organisation/OrganisationPage";
 import SeeAllProductsPage from "@/pages/organisation/SeeAllProductsPage";
@@ -63,17 +68,24 @@ export const AppRoutes: React.FC = () => {
           <Route path="/user/worker/:id" element={<WorkerProfilePage />} />
           <Route path="/user/inventory" element={<ComingSoonPage />} />
           <Route path="/user/schedule" element={<ComingSoonPage />} />
-          <Route path="/user/settings" element={<SettingsPage />} />
+          <Route path="/user/settings" element={<CustomerSettingsPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRole="WORKER" />}>
-          <Route path="/worker" element={<WorkerPage />} />
+          <Route path="/worker/dashboard" element={<WorkerDashboard />} />
+          <Route path="/worker/available-jobs" element={<AvailableJobs />} />
+          <Route path="/worker/my-assignments" element={<MyWork />} />
+          <Route path="/worker/job/:id" element={<WorkerJobDetail />} />
+          <Route path="/worker/earnings" element={<ComingSoonPage />} />
+          <Route path="/worker/schedule" element={<ComingSoonPage />} />
+          <Route path="/worker/settings" element={<WorkerSettings />} />
+          <Route path="/worker" element={<Navigate to="/worker/dashboard" replace />} />
         </Route>
 
         <Route element={<RoleRoute allowedRole="ORGANISATION" />}>
           <Route element={<OrganisationLayout />}>
             <Route path="/organisation" index element={<OrganisationPage />} />
-            <Route path="/organisation/settings" element={<SettingsPage />} />
+            <Route path="/organisation/settings" element={<OrganisationSettingsPage />} />
             <Route path="/organisation/products/see_all" element={<SeeAllProductsPage />} />
             <Route path="/organisation/products/create" element={<CreateProductPage />} />
             <Route path="/organisation/products/edit/:id" element={<EditProductPage />} />

@@ -88,7 +88,10 @@ interface WorkerRowProps {
 
 export const WorkerRow: React.FC<WorkerRowProps> = ({ worker, onViewProfile }) => (
   <div
-    className="flex items-center gap-4 p-4 bg-background border border-border rounded-xl hover:border-outline hover:shadow-sm transition-all cursor-pointer"
+    className={`flex items-center gap-4 p-4 bg-background border border-border rounded-xl transition-all cursor-pointer
+      ${worker.kycStatus === 'VERIFIED'
+        ? 'hover:border-outline hover:shadow-sm' 
+        : 'opacity-75 grayscale-[0.5] bg-gray-50/50'}`}
     onClick={() => onViewProfile(worker)}
   >
     <div className="relative flex-shrink-0">
@@ -110,13 +113,31 @@ export const WorkerRow: React.FC<WorkerRowProps> = ({ worker, onViewProfile }) =
           <span className="text-xs font-label text-foreground">{worker.ratingAvg.toFixed(1)}</span>
         </div>
       </div>
-      <p className="text-xs font-body text-muted-foreground truncate">{worker.skills.join(', ')}</p>
+      <p className="text-[10px] font-body text-muted-foreground truncate uppercase font-bold tracking-wider mb-1">
+        {worker.skills.join(' • ')}
+      </p>
+      <div className="flex items-center gap-2">
+        <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-tight
+          ${worker.kycStatus === 'VERIFIED' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+          {worker.kycStatus === 'VERIFIED' ? 'Verified Expert' : 'Verification Pending'}
+        </span>
+        {!worker.isAvailable && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-600 font-bold uppercase tracking-tight">
+            Busy
+          </span>
+        )}
+      </div>
     </div>
     <div className="text-right flex-shrink-0">
-      <p className="text-xs text-muted-foreground">{worker.experience ?? 0}+ yrs</p>
-      <span className={`text-xs font-label font-medium ${worker.isAvailable ? 'text-green-600' : 'text-muted-foreground'}`}>
-        {worker.isAvailable ? 'Available' : 'Busy'}
-      </span>
+      <p className="text-xs text-muted-foreground font-bold">{worker.experience ?? 0}+ yrs</p>
+      <button 
+        className={`mt-1 text-[10px] font-bold py-1 px-3 rounded-lg transition-colors
+          ${worker.kycStatus === 'VERIFIED'
+            ? 'bg-foreground text-background hover:opacity-90'
+            : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
+      >
+        {worker.kycStatus === 'VERIFIED' ? 'Assign' : 'Incomplete KYC'}
+      </button>
     </div>
   </div>
 );
