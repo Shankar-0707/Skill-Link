@@ -1,11 +1,7 @@
-import { EditProduct } from "@/features/products/components/EditProduct";
+import { EditProductView } from "@/features/organisation/components/pages/EditProductView";
 
 const EditProductPage = () => {
-  return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <EditProduct />
-    </div>
-  );
+  return <EditProductView />;
 };
 
 export default EditProductPage;

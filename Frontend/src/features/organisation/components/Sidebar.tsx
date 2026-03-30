@@ -11,9 +11,8 @@ import {
   ClipboardList
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "../../../app/context/useAuth";
-import { Button } from "../../../shared/components/ui/button";
-import { cn } from "../../../shared/utils/cn";
+import { useAuth } from "@/app/context/useAuth";
+import { cn } from "@/shared/utils/cn";
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -28,18 +27,15 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon: Icon, label, href, isAc
     to={href}
     title={isCollapsed ? label : undefined}
     className={cn(
-      "flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative",
+      "flex items-center px-4 py-3 transition-colors duration-200 group relative",
       isActive 
-        ? "bg-primary/10 text-primary font-medium" 
-        : "text-muted-foreground hover:bg-secondary hover:text-foreground",
-      isCollapsed ? "justify-center px-0 w-12 mx-auto" : "justify-between"
+        ? "text-primary font-bold border-r-4 border-primary translate-x-1" 
+        : "text-muted-foreground hover:text-primary hover:bg-secondary/50",
+      isCollapsed ? "justify-center px-0 w-12 mx-auto border-r-0" : "gap-3"
     )}
   >
-    <div className="flex items-center gap-3">
-      <Icon size={20} className={cn("shrink-0 transition-colors", isActive ? "text-primary" : "group-hover:text-foreground")} />
-      {!isCollapsed && <span className="text-sm truncate">{label}</span>}
-    </div>
-    {!isCollapsed && isActive && <ChevronRight size={14} className="text-primary shrink-0" />}
+    <Icon size={20} className={cn("shrink-0 transition-colors", isActive ? "text-primary" : "text-muted-foreground group-hover:text-primary")} />
+    {!isCollapsed && <span className="text-xs font-semibold tracking-wider uppercase">{label}</span>}
     
     {/* Tooltip for collapsed state */}
     {isCollapsed && (
@@ -64,14 +60,11 @@ export const Sidebar: React.FC = () => {
     localStorage.setItem("sidebar-collapsed", String(isCollapsed));
   }, [isCollapsed]);
 
-  const organisationName = user?.organisation?.businessName || "Organisation";
-  const organisationType = user?.organisation?.businessType || "Business Dashboard";
-
   return (
     <aside 
       className={cn(
-        "h-screen sticky top-0 bg-white border-r border-border flex flex-col p-4 shadow-sm transition-all duration-300 ease-in-out z-40",
-        isCollapsed ? "w-20" : "w-72"
+        "h-screen sticky top-0 bg-white border-r border-border flex flex-col pt-8 pb-4 transition-all duration-300 ease-in-out z-40 shrink-0",
+        isCollapsed ? "w-20" : "w-64"
       )}
     >
       {/* Toggle Button */}
@@ -84,31 +77,34 @@ export const Sidebar: React.FC = () => {
 
       {/* Logo & Header */}
       <div className={cn(
-        "flex items-center gap-3 mb-10 px-2 transition-all duration-300",
-        isCollapsed ? "justify-center" : ""
+        "flex flex-col mb-10 transition-all duration-300 px-6",
+        isCollapsed ? "items-center px-2" : ""
       )}>
-        <div className="w-10 h-10 bg-primary rounded-xl shrink-0 flex items-center justify-center text-white shadow-lg shadow-primary/20">
-          <Building2 size={22} />
+        <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-xl shrink-0 flex items-center justify-center text-white shadow-md shadow-primary/20">
+            <Building2 size={22} />
+            </div>
+            {!isCollapsed && (
+            <div className="flex flex-col">
+                <h1 className="text-xl font-bold tracking-tighter text-foreground leading-none">
+                Skill-Link
+                </h1>
+                <span className="text-[10px] font-semibold tracking-wider uppercase text-primary mt-1">
+                Hyperlocal Portal
+                </span>
+            </div>
+            )}
         </div>
-        {!isCollapsed && (
-          <div className="flex flex-col overflow-hidden transition-all duration-300 opacity-100 scale-100 origin-left">
-            <h1 className="font-bold text-lg leading-tight tracking-tight text-foreground truncate max-w-[160px]">
-              {organisationName}
-            </h1>
-            <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground truncate">
-              {organisationType}
-            </span>
-          </div>
+        {!isCollapsed && user?.organisation && (
+             <div className="mt-4 pt-4 border-t border-border/50">
+                 <p className="text-xs font-bold text-foreground truncate">{user.organisation.businessName}</p>
+                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest truncate">{user.organisation.businessType}</p>
+             </div>
         )}
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
-        {!isCollapsed && (
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-4 mb-3 transition-opacity duration-300">
-            Main Menu
-          </p>
-        )}
+      <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar">
         
         <SidebarItem 
           icon={LayoutDashboard} 
@@ -123,23 +119,23 @@ export const Sidebar: React.FC = () => {
           <button
             onClick={() => !isCollapsed && setIsReservationsOpen(!isReservationsOpen)}
             className={cn(
-              "w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative",
+              "w-full flex items-center px-4 py-3 transition-colors duration-200 group relative",
               location.pathname.startsWith("/organisation/reservations") 
-                ? "bg-primary/5 text-primary font-medium" 
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground",
-              isCollapsed ? "justify-center px-0 w-12 mx-auto" : "justify-between"
+                ? "text-primary font-bold border-r-4 border-primary translate-x-1" 
+                : "text-muted-foreground hover:bg-secondary/50",
+              isCollapsed ? "justify-center px-0 w-12 mx-auto border-r-0" : "justify-between"
             )}
           >
             <div className="flex items-center gap-3">
-              <ClipboardList size={20} className={cn("shrink-0 transition-colors", location.pathname.startsWith("/organisation/reservations") ? "text-primary" : "group-hover:text-foreground")} />
-              {!isCollapsed && <span className="text-sm truncate">Reservations</span>}
+              <ClipboardList size={20} className={cn("shrink-0 transition-colors", location.pathname.startsWith("/organisation/reservations") ? "text-primary" : "text-muted-foreground group-hover:text-primary")} />
+              {!isCollapsed && <span className="text-xs font-semibold tracking-wider uppercase group-hover:text-primary transition-colors">Reservations</span>}
             </div>
             {!isCollapsed && (
               <ChevronRight 
                 size={14} 
                 className={cn(
                   "transition-transform duration-200",
-                  isReservationsOpen ? "rotate-90 text-primary" : "text-muted-foreground"
+                  isReservationsOpen ? "rotate-90 text-primary" : "text-muted-foreground group-hover:text-primary"
                 )} 
               />
             )}
@@ -151,28 +147,28 @@ export const Sidebar: React.FC = () => {
           </button>
 
           {!isCollapsed && isReservationsOpen && (
-            <div className="pl-11 pr-2 space-y-1 animate-in slide-in-from-top-1 duration-200">
+            <div className="pl-11 pr-4 space-y-1 py-1 animate-in slide-in-from-top-1 duration-200">
               <Link
                 to="/organisation/reservations/all"
                 className={cn(
-                  "block px-4 py-2 text-xs rounded-lg transition-all",
+                  "block px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
                   location.pathname === "/organisation/reservations/all"
-                    ? "text-primary font-bold bg-primary/5"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    ? "text-primary bg-primary/5 border-l-2 border-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-l-2 border-transparent"
                 )}
               >
-                All Reservations
+                All
               </Link>
               <Link
                 to="/organisation/reservations/pending"
                 className={cn(
-                  "block px-4 py-2 text-xs rounded-lg transition-all",
+                  "block px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
                   location.pathname === "/organisation/reservations/pending"
-                    ? "text-primary font-bold bg-primary/5"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    ? "text-primary bg-primary/5 border-l-2 border-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-l-2 border-transparent"
                 )}
               >
-                Pending Reservations
+                Pending
               </Link>
             </div>
           )}
@@ -183,67 +179,73 @@ export const Sidebar: React.FC = () => {
           <button
             onClick={() => !isCollapsed && setIsProductsOpen(!isProductsOpen)}
             className={cn(
-              "w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative",
+              "w-full flex items-center px-4 py-3 transition-colors duration-200 group relative",
               location.pathname.startsWith("/organisation/products") 
-                ? "bg-primary/5 text-primary font-medium" 
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground",
-              isCollapsed ? "justify-center px-0 w-12 mx-auto" : "justify-between"
+                ? "text-primary font-bold border-r-4 border-primary translate-x-1" 
+                : "text-muted-foreground hover:bg-secondary/50",
+              isCollapsed ? "justify-center px-0 w-12 mx-auto border-r-0" : "justify-between"
             )}
           >
             <div className="flex items-center gap-3">
-              <Package size={20} className={cn("shrink-0 transition-colors", location.pathname.startsWith("/organisation/products") ? "text-primary" : "group-hover:text-foreground")} />
-              {!isCollapsed && <span className="text-sm truncate">Products</span>}
+              <Package size={20} className={cn("shrink-0 transition-colors", location.pathname.startsWith("/organisation/products") ? "text-primary" : "text-muted-foreground group-hover:text-primary")} />
+              {!isCollapsed && <span className="text-xs font-semibold tracking-wider uppercase group-hover:text-primary transition-colors">Inventory</span>}
             </div>
             {!isCollapsed && (
               <ChevronRight 
                 size={14} 
                 className={cn(
                   "transition-transform duration-200",
-                  isProductsOpen ? "rotate-90 text-primary" : "text-muted-foreground"
+                  isProductsOpen ? "rotate-90 text-primary" : "text-muted-foreground group-hover:text-primary"
                 )} 
               />
             )}
             {isCollapsed && (
               <div className="absolute left-full ml-4 px-2 py-1 bg-foreground text-background text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
-                Products
+                Inventory
               </div>
             )}
           </button>
 
           {!isCollapsed && isProductsOpen && (
-            <div className="pl-11 pr-2 space-y-1 animate-in slide-in-from-top-1 duration-200">
+            <div className="pl-11 pr-4 space-y-1 py-1 animate-in slide-in-from-top-1 duration-200">
               <Link
                 to="/organisation/products/see_all"
                 className={cn(
-                  "block px-4 py-2 text-xs rounded-lg transition-all",
+                  "block px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
                   location.pathname === "/organisation/products/see_all"
-                    ? "text-primary font-bold bg-primary/5"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    ? "text-primary bg-primary/5 border-l-2 border-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-l-2 border-transparent"
                 )}
               >
-                See all products
+                See all
               </Link>
               <Link
                 to="/organisation/products/create"
                 className={cn(
-                  "block px-4 py-2 text-xs rounded-lg transition-all",
+                  "block px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
                   location.pathname === "/organisation/products/create"
-                    ? "text-primary font-bold bg-primary/5"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    ? "text-primary bg-primary/5 border-l-2 border-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-l-2 border-transparent"
                 )}
               >
-                Create a product
+                Create
               </Link>
             </div>
           )}
         </div>
       </nav>
 
-      {/* Bottom Actions */}
       <div className={cn(
-        "mt-auto space-y-2 pt-6 border-t border-border transition-all duration-300",
-        isCollapsed ? "items-center" : ""
+        "mt-auto pt-6 border-t border-border/50 transition-all duration-300 space-y-1",
+        isCollapsed ? "px-0" : "px-0"
       )}>
+        {!isCollapsed && (
+            <div className="px-6 mb-4">
+               <button onClick={() => window.location.href='/organisation/products/create'} className="w-full bg-primary text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                   Post New Listing
+               </button>
+            </div>
+        )}
         <SidebarItem 
           icon={Settings} 
           label="Settings" 
@@ -251,22 +253,21 @@ export const Sidebar: React.FC = () => {
           isActive={location.pathname === "/organisation/settings"}
           isCollapsed={isCollapsed}
         />
-        <Button
-          variant="ghost"
+        <button
           onClick={() => logout()}
           className={cn(
-            "w-full justify-start gap-3 px-4 py-6 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50 transition-all group relative",
-            isCollapsed ? "px-0 justify-center w-12 mx-auto" : ""
+            "w-full flex items-center px-4 py-3 transition-colors duration-200 group relative text-muted-foreground hover:text-red-500 hover:bg-red-50",
+            isCollapsed ? "justify-center px-0 w-12 mx-auto" : "gap-3"
           )}
         >
-          <LogOut size={20} className="shrink-0" />
-          {!isCollapsed && <span className="text-sm font-medium">Logout</span>}
+          <LogOut size={20} className="shrink-0 transition-colors" />
+          {!isCollapsed && <span className="text-xs font-semibold tracking-wider uppercase">Logout</span>}
           {isCollapsed && (
             <div className="absolute left-full ml-4 px-2 py-1 bg-red-500 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
               Logout
             </div>
           )}
-        </Button>
+        </button>
       </div>
     </aside>
   );

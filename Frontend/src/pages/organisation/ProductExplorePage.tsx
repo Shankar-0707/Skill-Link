@@ -1,11 +1,7 @@
-import { ProductExplore } from "@/features/products/components/ProductExplore";
+import { ProductExploreView } from "@/features/organisation/components/pages/ProductExploreView";
 
 const ProductExplorePage = () => {
-  return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <ProductExplore />
-    </div>
-  );
+  return <ProductExploreView />;
 };
 
 export default ProductExplorePage;

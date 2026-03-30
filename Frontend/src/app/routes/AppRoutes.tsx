@@ -17,7 +17,7 @@ import { MyJobsPage } from "../../pages/customer/MyJobsPage";
 import { JobDetailPage } from "../../pages/customer/JobDetailPage";
 import { WorkerProfilePage } from "../../pages/customer/WorkerProfilePage";
 import { ComingSoonPage } from "../../pages/customer/ComingSoonPage";
-import { SettingsPage } from "../../pages/customer/SettingsPage";
+import { SettingsPage as CustomerSettingsPage } from "../../pages/customer/SettingsPage";
 // import { WorkerHomePage } from "../../pages/WorkerHomePage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicOnlyRoute } from "./PublicOnlyRoute";
@@ -33,6 +33,8 @@ import EditProductPage from "@/pages/organisation/EditProductPage";
 import ProductExplorePage from "@/pages/organisation/ProductExplorePage";
 import AllReservationsPage from "@/pages/organisation/AllReservationsPage";
 import PendingReservationsPage from "@/pages/organisation/PendingReservationsPage";
+import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
+
 
 
 export const AppRoutes: React.FC = () => {
@@ -63,7 +65,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/user/worker/:id" element={<WorkerProfilePage />} />
           <Route path="/user/inventory" element={<ComingSoonPage />} />
           <Route path="/user/schedule" element={<ComingSoonPage />} />
-          <Route path="/user/settings" element={<SettingsPage />} />
+          <Route path="/user/settings" element={<CustomerSettingsPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRole="WORKER" />}>
@@ -73,7 +75,7 @@ export const AppRoutes: React.FC = () => {
         <Route element={<RoleRoute allowedRole="ORGANISATION" />}>
           <Route element={<OrganisationLayout />}>
             <Route path="/organisation" index element={<OrganisationPage />} />
-            <Route path="/organisation/settings" element={<SettingsPage />} />
+            <Route path="/organisation/settings" element={<OrganisationSettingsPage />} />
             <Route path="/organisation/products/see_all" element={<SeeAllProductsPage />} />
             <Route path="/organisation/products/create" element={<CreateProductPage />} />
             <Route path="/organisation/products/edit/:id" element={<EditProductPage />} />
