@@ -302,10 +302,10 @@ export const OrganisationDashboardView = () => {
                 return (
                   <div key={p.id} className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-border group transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 hover:translate-y-[-4px] cursor-pointer" onClick={() => navigate(`/organisation/products/edit/${p.id}`)}>
                     <div className="h-44 overflow-hidden relative bg-secondary/20">
-                      {p.imageUrl? (
+                      {p.images?.[0]?.imageUrl ? (
                         <img 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                          src={p?.imageUrl} 
+                          src={p.images[0].imageUrl} 
                           alt={p.name}
                         />
                       ) : (
