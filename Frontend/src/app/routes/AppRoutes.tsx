@@ -24,7 +24,12 @@ import { PublicOnlyRoute } from "./PublicOnlyRoute";
 import { RoleHomeRedirect } from "./RoleHomeRedirect";
 import { RoleRoute } from "./RoleRoute";
 import ThemePreview from "../../ThemePreview";
-import WorkerPage from "@/pages/worker/WorkerPage";
+import { WorkerDashboardPage as WorkerDashboard } from "@/pages/worker/WorkerDashboard";
+import { AvailableJobsPage as AvailableJobs } from "@/pages/worker/AvailableJobs";
+import { MyAssignmentsPage as MyWork } from "@/pages/worker/MyAssignments";
+import { WorkerJobDetailPage as WorkerJobDetail } from "@/pages/worker/JobDetail";
+import { WorkerSettingsPage as WorkerSettings } from "@/pages/worker/Settings";
+import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
 import OrganisationLayout from "@/pages/organisation/OrganisationLayout";
 import OrganisationPage from "@/pages/organisation/OrganisationPage";
 import SeeAllProductsPage from "@/pages/organisation/SeeAllProductsPage";
@@ -69,7 +74,14 @@ export const AppRoutes: React.FC = () => {
         </Route>
 
         <Route element={<RoleRoute allowedRole="WORKER" />}>
-          <Route path="/worker" element={<WorkerPage />} />
+          <Route path="/worker/dashboard" element={<WorkerDashboard />} />
+          <Route path="/worker/available-jobs" element={<AvailableJobs />} />
+          <Route path="/worker/my-assignments" element={<MyWork />} />
+          <Route path="/worker/job/:id" element={<WorkerJobDetail />} />
+          <Route path="/worker/earnings" element={<ComingSoonPage />} />
+          <Route path="/worker/schedule" element={<ComingSoonPage />} />
+          <Route path="/worker/settings" element={<WorkerSettings />} />
+          <Route path="/worker" element={<Navigate to="/worker/dashboard" replace />} />
         </Route>
 
         <Route element={<RoleRoute allowedRole="ORGANISATION" />}>
