@@ -1,5 +1,5 @@
 import React from "react";
-import { Package, Tag, Trash2, Edit, Eye } from "lucide-react";
+import { Package, Trash2, Edit, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { Product } from "../types";
 import { cn } from "@/shared/utils/cn";

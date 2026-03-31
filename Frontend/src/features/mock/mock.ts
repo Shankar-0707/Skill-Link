@@ -1,5 +1,6 @@
-import type { Job, Worker } from '../customer/types/index';
+/* import type { Job, Worker } from '../customer/types/index'; */
 
+/*
 export const MOCK_JOBS: Job[] = [
   {
     id: '1',
@@ -94,3 +95,4 @@ export const CATEGORIES = [
   { label: 'Carpentry',    icon: '🪵' },
   { label: 'Gardening',    icon: '🌿' },
 ];
+*/

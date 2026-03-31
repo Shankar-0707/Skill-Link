@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { LoginPage } from "../../pages/auth/LoginPage";
@@ -10,7 +8,6 @@ import { ResetPasswordPage } from "../../pages/auth/ResetPasswordPage";
 import { VerifyEmailPage } from "../../pages/auth/VerifyEmailPage";
 import { CheckEmailPage } from "../../pages/auth/CheckEmailPage";
 import { CheckResetEmailPage } from "../../pages/auth/CheckResetEmailPage";
-// import { OrganisationHomePage } from "../../pages/OrganisationHomePage";
 import { UserHomePage } from "../../pages/customer/UserHomePage";
 import { CreateJobPage } from "../../pages/customer/Createjobpage";
 import { MyJobsPage } from "../../pages/customer/MyJobsPage";
@@ -38,7 +35,7 @@ import EditProductPage from "@/pages/organisation/EditProductPage";
 import ProductExplorePage from "@/pages/organisation/ProductExplorePage";
 import AllReservationsPage from "@/pages/organisation/AllReservationsPage";
 import PendingReservationsPage from "@/pages/organisation/PendingReservationsPage";
-import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
+// import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
 
 
 

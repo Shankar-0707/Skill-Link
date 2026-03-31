@@ -1,0 +1,6 @@
+src/features/products/components/ConfirmDeleteModal.tsx(24,25): error TS2339: Property 'deleteProduct' does not exist on type '{ findAll: (params?: ListProductsParams | undefined) => Promise<PaginatedProducts>; findOne: (id: string) => Promise<Product>; ... 6 more ...; removeImage: (id: string, imageId: string) => Promise<...>; }'.
+src/features/products/components/ProductCard.tsx(2,19): error TS6133: 'Tag' is declared but its value is never read.
+src/features/products/components/ProductFormModal.tsx(4,24): error TS2305: Module '"../types"' has no exported member 'CreateProductDto'.
+src/features/products/components/ProductFormModal.tsx(4,42): error TS2305: Module '"../types"' has no exported member 'UpdateProductDto'.
+src/features/products/components/ProductImageModal.tsx(25,46): error TS2345: Argument of type '{ imageUrl: string; }' is not assignable to parameter of type 'string'.
+src/features/worker/components/layout/Sidebar.tsx(8,3): error TS6133: 'Calendar' is declared but its value is never read.

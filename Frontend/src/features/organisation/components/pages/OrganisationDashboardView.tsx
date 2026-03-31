@@ -232,6 +232,7 @@ export const OrganisationDashboardView = () => {
             </div>
 
             {/* Staff Overview (Mock) */}
+            {/* 
             <div className="space-y-6">
               <div className="flex justify-between items-center px-1">
                 <h2 className="text-xl font-bold tracking-tight text-foreground">Staff Overview</h2>
@@ -281,6 +282,7 @@ export const OrganisationDashboardView = () => {
                 </table>
               </div>
             </div>
+            */}
 
           </div>
 

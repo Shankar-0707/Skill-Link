@@ -350,13 +350,14 @@ export class JobsService {
 
     const worker = await this.prisma.worker.findUnique({
       where: { id: workerId },
-      select: { id: true, kycStatus: true },
+      select: { id: true, isAvailable: true },
     });
 
-    if (!worker)
-      throw new NotFoundException('Worker not found');
-    if (worker.kycStatus !== 'VERIFIED')
-      throw new BadRequestException('Worker KYC is not verified');
+    if (!worker) throw new NotFoundException('Worker not found');
+    if (!worker.isAvailable)
+      throw new BadRequestException('This worker is currently unavailable');
+
+    await this.kycGate.assertWorkerKycVerified(workerId);
 
     return this.prisma.$transaction(async (tx) => {
       // Assign worker and move job to ASSIGNED
@@ -366,6 +367,19 @@ export class JobsService {
           workerId,
           status: 'ASSIGNED',
         },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          budget: true,
+          workerId: true,
+        },
+      });
+
+      // Mark worker as unavailable
+      await tx.worker.update({
+        where: { id: workerId },
+        data: { isAvailable: false },
       });
 
       // Create escrow — funds held until job confirmed
@@ -483,6 +497,14 @@ export class JobsService {
             status: 'SUCCESS',
             idempotencyKey: `job_payout_${jobId}`,
           },
+        });
+      }
+
+      // Make worker available again
+      if (job.workerId) {
+        await tx.worker.update({
+          where: { id: job.workerId },
+          data: { isAvailable: true },
         });
       }
 

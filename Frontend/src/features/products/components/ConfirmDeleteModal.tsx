@@ -21,7 +21,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ isOpen, 
     setLoading(true);
     setError(null);
     try {
-      await productsApi.deleteProduct(product.id);
+      await productsApi.remove(product.id);
       onDeleted();
       onClose();
     } catch (err: any) {
