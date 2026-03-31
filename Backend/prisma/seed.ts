@@ -71,12 +71,22 @@ async function main() {
     console.log('Starting database seed...')
 
     const adminPass = hashPassword('admin123')
+    const secondAdminPass = hashPassword('linkskill07official') // Change this!
     const testPass = hashPassword('test123')
 
+    // Original Admin
     await upsertUser({
         email: 'admin@skilllink.com',
         phone: '9000000000',
         passwordHash: adminPass,
+        role: Role.ADMIN,
+    })
+
+    // Second Custom Admin
+    await upsertUser({
+        email: 'linkskillofficial@gmail.com', // Change this!
+        phone: '9310433267',            // Change this! (Must be unique)
+        passwordHash: secondAdminPass,
         role: Role.ADMIN,
     })
 
