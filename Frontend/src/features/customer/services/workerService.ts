@@ -17,4 +17,12 @@ export const workerService = {
     const response = await api.get<ApiResponse<Worker>>(`/workers/${id}`);
     return response.data.data;
   },
+  getMe: async (): Promise<Worker> => {
+    const response = await api.get<ApiResponse<Worker>>("/workers/profile/me");
+    return response.data.data;
+  },
+  updateMe: async (data: any): Promise<Worker> => {
+    const response = await api.patch<ApiResponse<Worker>>("/workers/profile/me", data);
+    return response.data.data;
+  },
 };

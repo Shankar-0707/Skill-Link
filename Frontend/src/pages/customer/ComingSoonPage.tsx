@@ -1,12 +1,18 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Layout } from '../../features/customer/components/layout/Layout';
+import { Layout as CustomerLayout } from '../../features/customer/components/layout/Layout';
+import { WorkerLayout } from '../../features/worker/components/layout/Layout';
 import { Zap, ArrowLeft } from 'lucide-react';
 
 export const ComingSoonPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
+  const isWorkerPath = location.pathname.startsWith('/worker');
+  const Layout = isWorkerPath ? WorkerLayout : CustomerLayout;
+  const homePath = isWorkerPath ? '/worker/dashboard' : '/user/home';
+  const homeLabel = isWorkerPath ? 'Back to Dashboard' : 'Back to Marketplace';
+
   // Determine page title based on path
   const getPageTitle = () => {
     const path = location.pathname.split('/').pop();
@@ -39,10 +45,10 @@ export const ComingSoonPage: React.FC = () => {
         {/* Actions */}
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate('/user/home')}
+            onClick={() => navigate(homePath)}
             className="flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-xl font-label font-semibold hover:opacity-90 transition-opacity shadow-lg"
           >
-            Back to Marketplace
+            {homeLabel}
           </button>
           <button
             onClick={() => navigate(-1)}

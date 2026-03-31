@@ -58,4 +58,24 @@ export const jobService = {
     const response = await api.patch<ApiResponse<Job>>(`/jobs/${id}/confirm`);
     return response.data.data;
   },
+
+  getAvailableJobs: async (): Promise<Job[]> => {
+    const response = await api.get<ApiResponse<Job[]>>("/jobs/available");
+    return response.data.data || [];
+  },
+
+  getMyAssignments: async (): Promise<Job[]> => {
+    const response = await api.get<ApiResponse<Job[]>>("/jobs/my-assignments");
+    return response.data.data || [];
+  },
+
+  startJob: async (id: string): Promise<Job> => {
+    const response = await api.patch<ApiResponse<Job>>(`/jobs/${id}/start`);
+    return response.data.data;
+  },
+
+  completeJob: async (id: string): Promise<Job> => {
+    const response = await api.patch<ApiResponse<Job>>(`/jobs/${id}/complete`);
+    return response.data.data;
+  },
 };

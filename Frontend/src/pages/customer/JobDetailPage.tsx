@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, IndianRupee, Calendar, Shield, Star, Loader2 } from 'lucide-react';
+import { ArrowLeft, IndianRupee, Calendar, Shield, Loader2 } from 'lucide-react';
 import type { Job, Worker } from '../../features/customer/types';
 import { StatusBadge, SectionHeader, EmptyState } from '../../features/customer/components/ui';
 import { JobActionButton } from '../../features/customer/worker/JobCard';
@@ -34,10 +34,37 @@ export const JobDetailPage: React.FC = () => {
     }
   };
 
-  const fetchWorkers = async () => {
+  const fetchWorkers = async (category?: string) => {
     try {
       const data = await workerService.getAllWorkers();
-      setAvailableWorkers(data.filter(w => w.isAvailable && w.kycStatus === 'VERIFIED'));
+      
+      // Normalization helper (e.g., "Electrician" matches "Electricians")
+      const normalize = (s: string) => s.toLowerCase().trim().replace(/s$/, '');
+      
+      let filtered = data;
+      
+      // 1. Filter by relevance (if category exists)
+      if (category) {
+        const normCat = normalize(category);
+        filtered = data.filter(w => 
+          w.skills.some(skill => normalize(skill).includes(normCat) || normCat.includes(normalize(skill)))
+        );
+      }
+
+      // 2. Sort by availability and verification status
+      const sorted = [...filtered].sort((a, b) => {
+        // Verified + Available first
+        if (a.kycStatus === 'VERIFIED' && a.isAvailable && (b.kycStatus !== 'VERIFIED' || !b.isAvailable)) return -1;
+        if (b.kycStatus === 'VERIFIED' && b.isAvailable && (a.kycStatus !== 'VERIFIED' || !a.isAvailable)) return 1;
+        
+        // Then just Verified
+        if (a.kycStatus === 'VERIFIED' && b.kycStatus !== 'VERIFIED') return -1;
+        if (b.kycStatus === 'VERIFIED' && a.kycStatus !== 'VERIFIED') return 1;
+        
+        return 0;
+      });
+
+      setAvailableWorkers(sorted);
     } catch (err) {
       console.error('Failed to fetch available workers:', err);
     }
@@ -51,8 +78,15 @@ export const JobDetailPage: React.FC = () => {
       setError('Job ID is missing.');
       setLoading(false);
     }
-    fetchWorkers();
   }, [id]);
+
+  useEffect(() => {
+    if (job?.category) {
+      fetchWorkers(job.category);
+    } else if (!loading) {
+      fetchWorkers();
+    }
+  }, [job?.category, loading]);
 
   const handleConfirm = async () => {
     if (!job) return;
@@ -81,11 +115,15 @@ export const JobDetailPage: React.FC = () => {
     }
   };
 
-  const handleAssign = async (workerId: string) => {
+  const handleAssign = async (worker: Worker) => {
     if (!job) return;
+    if (worker.kycStatus !== 'VERIFIED') {
+      alert('This worker must complete KYC verification before they can be assigned to a job.');
+      return;
+    }
     try {
       setRefreshing(true);
-      await jobService.assignWorker(job.id, workerId);
+      await jobService.assignWorker(job.id, worker.id);
       setShowAssignPanel(false);
       await fetchJob(job.id);
     } catch (err) {
@@ -248,7 +286,7 @@ export const JobDetailPage: React.FC = () => {
                   <WorkerRow
                     key={worker.id}
                     worker={worker}
-                    onViewProfile={(w) => handleAssign(w.id)}
+                    onViewProfile={(w) => handleAssign(w)}
                   />
                 ))
               )}

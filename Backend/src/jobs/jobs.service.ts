@@ -141,11 +141,15 @@ export class JobsService {
 
     if (!job) throw new NotFoundException('Job not found');
 
-    // Ensure only the customer or the assigned worker can view
+    // Ensure access:
+    // 1. The customer who posted it
+    // 2. The assigned worker
+    // 3. Any verified worker if the job is still POSTED (open for discovery)
     const isCustomer = job.customer.user.id === userId;
     const isAssignedWorker = job.worker?.user.id === userId;
+    const isOpenJob = job.status === 'POSTED';
 
-    if (!isCustomer && !isAssignedWorker)
+    if (!isCustomer && !isAssignedWorker && !isOpenJob)
       throw new ForbiddenException('You do not have access to this job');
 
     return job;
@@ -325,7 +329,7 @@ export class JobsService {
    * Validates:
    *   - Job exists and belongs to this customer
    *   - Job is still POSTED
-   *   - Target worker exists and is available
+   *   - Target worker exists and is verified
    * Side effect: creates Escrow record with status HELD.
    */
   async assignWorker(jobId: string, workerId: string, userId: string) {
@@ -344,13 +348,11 @@ export class JobsService {
 
     const worker = await this.prisma.worker.findUnique({
       where: { id: workerId },
-      select: { id: true, isAvailable: true, kycStatus: true },
+      select: { id: true, kycStatus: true },
     });
 
     if (!worker)
       throw new NotFoundException('Worker not found');
-    if (!worker.isAvailable)
-      throw new BadRequestException('This worker is currently unavailable');
     if (worker.kycStatus !== 'VERIFIED')
       throw new BadRequestException('Worker KYC is not verified');
 
@@ -362,19 +364,6 @@ export class JobsService {
           workerId,
           status: 'ASSIGNED',
         },
-        select: {
-          id:       true,
-          title:    true,
-          status:   true,
-          budget:   true,
-          workerId: true,
-        },
-      });
-
-      // Mark worker as unavailable
-      await tx.worker.update({
-        where: { id: workerId },
-        data:  { isAvailable: false },
       });
 
       // Create escrow — funds held until job confirmed
@@ -457,7 +446,6 @@ export class JobsService {
    * Customer confirms job completion.
    * Releases escrow: HELD → RELEASED.
    * Creates a Payment record for the worker payout.
-   * Makes the worker available again.
    */
   async confirmJobCompletion(jobId: string, userId: string) {
     const customerId = await this.getCustomerId(userId);
@@ -496,14 +484,6 @@ export class JobsService {
             status:           'SUCCESS',
             idempotencyKey:   `job_payout_${jobId}`,
           },
-        });
-      }
-
-      // Make worker available again
-      if (job.workerId) {
-        await tx.worker.update({
-          where: { id: job.workerId },
-          data:  { isAvailable: true },
         });
       }
 
