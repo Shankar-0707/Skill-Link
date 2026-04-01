@@ -188,7 +188,7 @@ export const Sidebar: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <Package size={20} className={cn("shrink-0 transition-colors", location.pathname.startsWith("/organisation/products") ? "text-primary" : "text-muted-foreground group-hover:text-primary")} />
-              {!isCollapsed && <span className="text-xs font-semibold tracking-wider uppercase group-hover:text-primary transition-colors">Inventory</span>}
+              {!isCollapsed && <span className="text-xs font-semibold tracking-wider uppercase group-hover:text-primary transition-colors">Products</span>}
             </div>
             {!isCollapsed && (
               <ChevronRight 
@@ -201,7 +201,7 @@ export const Sidebar: React.FC = () => {
             )}
             {isCollapsed && (
               <div className="absolute left-full ml-4 px-2 py-1 bg-foreground text-background text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
-                Inventory
+                Products
               </div>
             )}
           </button>

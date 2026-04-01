@@ -4,6 +4,7 @@ import {
   Briefcase,
   Package,
   Calendar,
+  ShoppingBag,
   // Users,
   // BarChart2,
   Settings,
@@ -15,12 +16,13 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const NAV_ITEMS = [
-  { id: 'marketplace', label: 'Marketplace',  icon: LayoutGrid, path: '/user/home' },
-  { id: 'my-jobs',     label: 'My Jobs',       icon: Briefcase,  path: '/user/my-jobs' },
-  { id: 'inventory',   label: 'Inventory',     icon: Package,    path: '/user/inventory' },
-  { id: 'schedule',    label: 'Schedule',      icon: Calendar,   path: '/user/schedule' },
-  // { id: 'staff',       label: 'Staff',         icon: Users,      path: '/user/staff' },
-  // { id: 'analytics',   label: 'Analytics',     icon: BarChart2,  path: '/user/analytics' },
+  { id: 'marketplace',    label: 'Marketplace',      icon: LayoutGrid,  path: '/user/home' },
+  { id: 'my-jobs',        label: 'My Jobs',           icon: Briefcase,   path: '/user/my-jobs' },
+  { id: 'products',       label: 'Products',          icon: Package,     path: '/user/products' },
+  { id: 'reservations',   label: 'My Reservations',   icon: ShoppingBag, path: '/user/products/reservations' },
+  { id: 'schedule',       label: 'Schedule',          icon: Calendar,    path: '/user/schedule' },
+  // { id: 'staff',       label: 'Staff',             icon: Users,       path: '/user/staff' },
+  // { id: 'analytics',   label: 'Analytics',         icon: BarChart2,   path: '/user/analytics' },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -31,7 +33,8 @@ export const Sidebar: React.FC = () => {
     if (location.pathname === '/user/home') return 'marketplace';
     if (location.pathname === '/user/create-job') return 'create-job';
     if (location.pathname === '/user/my-jobs') return 'my-jobs';
-    if (location.pathname === '/user/inventory') return 'inventory';
+    if (location.pathname === '/user/products/reservations') return 'reservations';
+    if (location.pathname.startsWith('/user/products')) return 'products';
     if (location.pathname === '/user/schedule') return 'schedule';
     if (location.pathname === '/user/settings') return 'settings';
     return '';

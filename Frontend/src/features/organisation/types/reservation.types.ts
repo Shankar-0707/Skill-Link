@@ -12,8 +12,11 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  description?: string;
+  stockQuantity: number;
   organisationId: string;
-  images?: { imageUrl: string }[];
+  images?: { id: string; imageUrl: string }[];
+  category?: { id: string; name: string };
 }
 
 export interface Customer {
