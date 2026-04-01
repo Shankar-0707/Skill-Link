@@ -1,3 +1,6 @@
+import type { Product, ListProductsParams, PaginatedProducts } from "../../products/types";
+import type { Reservation, ReservationStatus, PaginatedReservations, CreateReservationPayload, ListReservationsParams, CancelReservationPayload } from "../../organisation/types/reservation.types";
+
 // ── Job Types ─────────────────────────────────────────────────────────────────
 
 export type JobStatus =
@@ -75,3 +78,17 @@ export interface NavItem {
   href: string;
   active?: boolean;
 }
+
+// ── Re-exported Types ────────────────────────────────────────────────────────
+
+export type {
+  Product,
+  ListProductsParams,
+  PaginatedProducts,
+  Reservation,
+  ReservationStatus,
+  PaginatedReservations,
+  CreateReservationPayload,
+  ListReservationsParams,
+  CancelReservationPayload
+};
