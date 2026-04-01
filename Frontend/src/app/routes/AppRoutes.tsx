@@ -40,6 +40,7 @@ import PendingReservationsPage from "@/pages/organisation/PendingReservationsPag
 // import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
 import { AdminLayout } from "@/features/admin/components/layout/AdminLayout";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
+import { AdminJobsPage } from "@/pages/admin/AdminJobsPage";
 import { KycManagementPage } from "@/pages/admin/KycManagementPage";
 
 
@@ -104,7 +105,7 @@ export const AppRoutes: React.FC = () => {
         <Route element={<RoleRoute allowedRole="ADMIN" />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/jobs" element={<ComingSoonPage />} />
+            <Route path="/admin/jobs" element={<AdminJobsPage />} />
             <Route path="/admin/reservations" element={<ComingSoonPage />} />
             <Route path="/admin/users" element={<ComingSoonPage />} />
             <Route path="/admin/kyc" element={<KycManagementPage />} />

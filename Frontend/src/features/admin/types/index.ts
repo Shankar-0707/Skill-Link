@@ -1,18 +1,25 @@
+export interface MetricSummary {
+  count: number;
+  trend: number;
+}
+
 export interface UserMetrics {
-  total: number;
-  customers: number;
-  workers: number;
-  organisations: number;
+  total: MetricSummary;
+  customers: MetricSummary;
+  workers: MetricSummary;
+  organisations: MetricSummary;
 }
 
 export interface RecentJob {
   id: string;
   title: string;
   status: string;
-  workerName: string;
-  customerName: string;
+  workerName: string | null;
+  customerName: string | null;
   date: string;
   price?: number;
+  category?: string;
+  scheduledAt?: string | null;
 }
 
 export interface RecentReservation {
