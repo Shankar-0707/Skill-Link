@@ -1,10 +1,23 @@
 /* eslint-disable prettier/prettier */
 import 'dotenv/config'
+import { randomBytes, scryptSync } from 'crypto'
 import { PrismaClient, Role, KycStatus, JobStatus, ReservationStatus } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 
+/** Matches AuthService.hashPassword — login works with seeded users. */
+function hashPassword(password: string) {
+    const salt = randomBytes(16).toString('hex')
+    const derivedKey = scryptSync(password, salt, 64).toString('hex')
+    return `${salt}:${derivedKey}`
+}
+
+const connectionString = process.env.DATABASE ?? process.env.DATABASE_URL
+if (!connectionString) {
+    throw new Error('Set DATABASE or DATABASE_URL in .env (same connection string as the app).')
+}
+
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL!
+    connectionString,
 })
 
 const prisma = new PrismaClient({ adapter })
@@ -57,17 +70,30 @@ async function upsertUser(params: {
 async function main() {
     console.log('Starting database seed...')
 
+    const adminPass = hashPassword('admin123')
+    const secondAdminPass = hashPassword('linkskill07official') // Change this!
+    const testPass = hashPassword('test123')
+
+    // Original Admin
     await upsertUser({
         email: 'admin@skilllink.com',
         phone: '9000000000',
-        passwordHash: 'admin123',
+        passwordHash: adminPass,
+        role: Role.ADMIN,
+    })
+
+    // Second Custom Admin
+    await upsertUser({
+        email: 'linkskillofficial@gmail.com', // Change this!
+        phone: '9310433267',            // Change this! (Must be unique)
+        passwordHash: secondAdminPass,
         role: Role.ADMIN,
     })
 
     const customerUser1 = await upsertUser({
         email: 'customer1@test.com',
         phone: '9000000001',
-        passwordHash: 'test123',
+        passwordHash: testPass,
         role: Role.CUSTOMER,
         customer: {},
     })
@@ -75,7 +101,7 @@ async function main() {
     const customerUser2 = await upsertUser({
         email: 'customer2@test.com',
         phone: '9000000002',
-        passwordHash: 'test123',
+        passwordHash: testPass,
         role: Role.CUSTOMER,
         customer: {},
     })
@@ -83,7 +109,7 @@ async function main() {
     const workerUser1 = await upsertUser({
         email: 'worker1@test.com',
         phone: '9000000003',
-        passwordHash: 'test123',
+        passwordHash: testPass,
         role: Role.WORKER,
         worker: {
             bio: 'Electrician with 5 years experience',
@@ -97,7 +123,7 @@ async function main() {
     const workerUser2 = await upsertUser({
         email: 'worker2@test.com',
         phone: '9000000004',
-        passwordHash: 'test123',
+        passwordHash: testPass,
         role: Role.WORKER,
         worker: {
             bio: 'Professional plumber',
@@ -111,7 +137,7 @@ async function main() {
     const orgUser1 = await upsertUser({
         email: 'org1@test.com',
         phone: '9000000005',
-        passwordHash: 'test123',
+        passwordHash: testPass,
         role: Role.ORGANISATION,
         organisation: {
             businessName: 'GreenBuild Materials',
@@ -123,7 +149,7 @@ async function main() {
     const orgUser2 = await upsertUser({
         email: 'org2@test.com',
         phone: '9000000006',
-        passwordHash: 'test123',
+        passwordHash: testPass,
         role: Role.ORGANISATION,
         organisation: {
             businessName: 'Urban Tools Hub',

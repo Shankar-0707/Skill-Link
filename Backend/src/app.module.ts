@@ -6,6 +6,8 @@ import { AuthModule } from './auth/auth.module';
 import { EscrowModule } from './escrow/escrow.module';
 import { JobsModule } from './jobs/jobs.module';
 import { KycModule } from './kyc/kyc.module';
+import { AdminModule } from './admin/admin.module';
+import { StorageModule } from './storage/storage.module';
 import { OrganisationsModule } from './organisations/organisations.module';
 import { PaymentsModule } from './payments/payments.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -27,6 +29,7 @@ import { WorkersModule } from './workers/workers.module';
       },
     ]),
     ScheduleModule.forRoot(),
+    StorageModule,
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -38,6 +41,7 @@ import { WorkersModule } from './workers/workers.module';
     PaymentsModule,
     EscrowModule,
     KycModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [],

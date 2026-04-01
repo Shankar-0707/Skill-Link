@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { LoginPage } from "../../pages/auth/LoginPage";
@@ -10,7 +8,6 @@ import { ResetPasswordPage } from "../../pages/auth/ResetPasswordPage";
 import { VerifyEmailPage } from "../../pages/auth/VerifyEmailPage";
 import { CheckEmailPage } from "../../pages/auth/CheckEmailPage";
 import { CheckResetEmailPage } from "../../pages/auth/CheckResetEmailPage";
-// import { OrganisationHomePage } from "../../pages/OrganisationHomePage";
 import { UserHomePage } from "../../pages/customer/UserHomePage";
 import { CreateJobPage } from "../../pages/customer/Createjobpage";
 import { MyJobsPage } from "../../pages/customer/MyJobsPage";
@@ -38,6 +35,9 @@ import EditProductPage from "@/pages/organisation/EditProductPage";
 import ProductExplorePage from "@/pages/organisation/ProductExplorePage";
 import AllReservationsPage from "@/pages/organisation/AllReservationsPage";
 import PendingReservationsPage from "@/pages/organisation/PendingReservationsPage";
+// import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
+import { AdminLayout } from "@/features/admin/components/layout/AdminLayout";
+import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 
 
 export const AppRoutes: React.FC = () => {
@@ -94,6 +94,18 @@ export const AppRoutes: React.FC = () => {
             {/* Reservations */}
             <Route path="/organisation/reservations/all" element={<AllReservationsPage />} />
             <Route path="/organisation/reservations/pending" element={<PendingReservationsPage />} />
+          </Route>
+        </Route>
+
+        <Route element={<RoleRoute allowedRole="ADMIN" />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/jobs" element={<ComingSoonPage />} />
+            <Route path="/admin/reservations" element={<ComingSoonPage />} />
+            <Route path="/admin/users" element={<ComingSoonPage />} />
+            <Route path="/admin/kyc" element={<ComingSoonPage />} />
+            <Route path="/admin/help" element={<ComingSoonPage />} />
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           </Route>
         </Route>
       </Route>

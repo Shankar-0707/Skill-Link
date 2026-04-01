@@ -85,6 +85,20 @@ export const productsApi = {
   },
 
   /**
+   * Upload a product image file to Cloudinary
+   */
+  uploadImage: async (id: string, file: File): Promise<ProductImage> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post(`/products/${id}/images/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return unwrapResponse<ProductImage>(response.data);
+  },
+
+  /**
    * Remove an image from a product
    */
   removeImage: async (id: string, imageId: string): Promise<{ message: string }> => {

@@ -1,11 +1,7 @@
-import { CreateProduct } from "@/features/products/components/CreateProduct";
+import { CreateProductView } from "@/features/organisation/components/pages/CreateProductView";
 
 const CreateProductPage = () => {
-  return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <CreateProduct />
-    </div>
-  );
+  return <CreateProductView />;
 };
 
 export default CreateProductPage;

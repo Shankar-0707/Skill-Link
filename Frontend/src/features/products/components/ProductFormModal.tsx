@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '../../../shared/components/ui/button';
-import type { Product, CreateProductDto, UpdateProductDto } from '../types';
+import type { Product, CreateProductPayload, UpdateProductPayload } from '../types';
 
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateProductDto | UpdateProductDto) => Promise<void>;
+  onSubmit: (data: CreateProductPayload | UpdateProductPayload) => Promise<void>;
   product?: Product | null; // If provided, we are editing
 }
 
@@ -47,14 +47,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
           price: parseFloat(price), 
           stockQuantity: parseInt(stockQuantity, 10),
           isActive
-        } as UpdateProductDto);
+        } as UpdateProductPayload);
       } else {
         await onSubmit({
           name, 
           description, 
           price: parseFloat(price), 
           stockQuantity: parseInt(stockQuantity, 10)
-        } as CreateProductDto);
+        } as CreateProductPayload);
       }
       onClose();
     } catch (err) {

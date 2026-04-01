@@ -22,7 +22,7 @@ export const ProductImageModal: React.FC<ProductImageModalProps> = ({ isOpen, on
     if (!newUrl.trim()) return;
     setLoading(true);
     try {
-      await productsApi.addImage(product.id, { imageUrl: newUrl });
+      await productsApi.addImage(product.id, newUrl);
       setNewUrl('');
       onImageUpdate();
     } catch (err) {

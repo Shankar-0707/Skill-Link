@@ -99,7 +99,10 @@ export class AuthController {
       redirectUrl.searchParams.set('refreshToken', authResponse.refreshToken);
       redirectUrl.searchParams.set('role', authResponse.user.role);
       redirectUrl.searchParams.set('email', authResponse.user.email);
-      redirectUrl.searchParams.set('user', encodeURIComponent(JSON.stringify(authResponse.user)));
+      redirectUrl.searchParams.set(
+        'user',
+        encodeURIComponent(JSON.stringify(authResponse.user)),
+      );
 
       return res.redirect(redirectUrl.toString());
     } catch (error) {

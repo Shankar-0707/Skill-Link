@@ -1,5 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { Type } from 'class-transformer'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsOptional,
@@ -13,7 +12,7 @@ import {
   IsArray,
   IsUrl,
   MinLength,
-} from 'class-validator'
+} from 'class-validator';
 
 // ─── Create ──────────────────────────────────────────────────────────────────
 
@@ -23,23 +22,26 @@ export class CreateProductDto {
   @IsNotEmpty()
   @MinLength(2)
   @MaxLength(200)
-  name: string
+  name: string;
 
   @ApiPropertyOptional({ example: 'Recycled construction bricks, pack of 50.' })
   @IsOptional()
   @IsString()
   @MaxLength(2000)
-  description?: string
+  description?: string;
 
-  @ApiProperty({ example: 500, description: 'Price in smallest currency unit (paise/cents)' })
+  @ApiProperty({
+    example: 500,
+    description: 'Price in smallest currency unit (paise/cents)',
+  })
   @IsNumber({ maxDecimalPlaces: 2 })
   @IsPositive()
-  price: number
+  price: number;
 
   @ApiProperty({ example: 50 })
   @IsInt()
   @Min(0)
-  stockQuantity: number
+  stockQuantity: number;
 
   @ApiPropertyOptional({
     type: [String],
@@ -49,7 +51,7 @@ export class CreateProductDto {
   @IsOptional()
   @IsArray()
   @IsUrl({}, { each: true })
-  imageUrls?: string[]
+  imageUrls?: string[];
 }
 
 // ─── Update ──────────────────────────────────────────────────────────────────
@@ -61,30 +63,30 @@ export class UpdateProductDto {
   @IsNotEmpty()
   @MinLength(2)
   @MaxLength(200)
-  name?: string
+  name?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   @MaxLength(2000)
-  description?: string
+  description?: string;
 
   @ApiPropertyOptional({ example: 599 })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @IsPositive()
-  price?: number
+  price?: number;
 
   @ApiPropertyOptional({ example: 45 })
   @IsOptional()
   @IsInt()
   @Min(0)
-  stockQuantity?: number
+  stockQuantity?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsBoolean()
-  isActive?: boolean
+  isActive?: boolean;
 }
 
 // ─── Add image ────────────────────────────────────────────────────────────────
@@ -92,7 +94,7 @@ export class UpdateProductDto {
 export class AddProductImageDto {
   @ApiProperty({ example: 'https://cdn.example.com/product/img.jpg' })
   @IsUrl()
-  imageUrl: string
+  imageUrl: string;
 }
 
 // ─── Query ────────────────────────────────────────────────────────────────────
@@ -101,10 +103,12 @@ export class ListProductsDto {
   @ApiPropertyOptional({ description: 'Filter by organisationId' })
   @IsOptional()
   @IsString()
-  organisationId?: string
+  organisationId?: string;
 
-  @ApiPropertyOptional({ description: 'Search by product name (partial match)' })
+  @ApiPropertyOptional({
+    description: 'Search by product name (partial match)',
+  })
   @IsOptional()
   @IsString()
-  search?: string
+  search?: string;
 }

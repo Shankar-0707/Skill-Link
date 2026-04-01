@@ -6,6 +6,8 @@ export interface ProductImage {
 }
 
 export interface Product {
+  imageUrl: any;
+  category: any;
   id: string;
   name: string;
   description?: string | null;

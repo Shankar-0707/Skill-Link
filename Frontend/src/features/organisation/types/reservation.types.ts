@@ -65,3 +65,14 @@ export interface PaginatedReservations {
     hasPrevPage: boolean;
   };
 }
+
+export interface CreateReservationPayload {
+  productId: string;
+  quantity: number;
+}
+
+export interface ListReservationsParams {
+  status?: ReservationStatus;
+  page?: number;
+  limit?: number;
+}

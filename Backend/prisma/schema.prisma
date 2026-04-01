@@ -70,6 +70,13 @@ enum DocumentStatus {
   REJECTED
 }
 
+/// Status of a single KYC submission row (not the same as Worker.kycStatus umbrella).
+enum KycRequestStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
 //// USERS
 
 model User {
@@ -384,6 +391,10 @@ model WorkerDocument {
   workerId String
   worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  /// Set when the document is locked to a submission; null = draft for next submit.
+  kycRequestId String?
+  kycRequest   KycRequest? @relation(fields: [kycRequestId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
   documentType DocumentType
 
   documentUrl String
@@ -398,6 +409,8 @@ model WorkerDocument {
 
   @@index([workerId])
   @@index([status])
+  @@index([kycRequestId])
+  @@index([workerId, kycRequestId])
 }
 
 //// KYC REQUESTS
@@ -408,12 +421,18 @@ model KycRequest {
   workerId String
   worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  provider String
+  provider String @default("INTERNAL")
 
-  status KycStatus @default(PENDING)
+  status KycRequestStatus @default(PENDING)
 
   submittedAt DateTime?
   verifiedAt  DateTime?
+
+  rejectionReason String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+
+  documents WorkerDocument[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

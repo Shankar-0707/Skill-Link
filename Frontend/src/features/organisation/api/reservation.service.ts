@@ -3,7 +3,9 @@ import type {
   Reservation, 
   ListIncomingReservationsParams, 
   CancelReservationPayload,
-  PaginatedReservations 
+  PaginatedReservations,
+  CreateReservationPayload,
+  ListReservationsParams
 } from '../types/reservation.types';
 
 type ApiEnvelope<T> = {
@@ -55,6 +57,30 @@ export const reservationApi = {
    */
   getOne: async (id: string): Promise<Reservation> => {
     const response = await api.get(`/reservations/${id}`);
+    return unwrapResponse<Reservation>(response.data);
+  },
+
+  /**
+   * Create a reservation for a product
+   */
+  create: async (payload: CreateReservationPayload): Promise<Reservation> => {
+    const response = await api.post('/reservations', payload);
+    return unwrapResponse<Reservation>(response.data);
+  },
+
+  /**
+   * List the authenticated customer's own reservations
+   */
+  findMy: async (params?: ListReservationsParams): Promise<PaginatedReservations> => {
+    const response = await api.get('/reservations/my', { params });
+    return unwrapResponse<PaginatedReservations>(response.data);
+  },
+
+  /**
+   * Mark a reservation as picked up
+   */
+  markPickedUp: async (id: string): Promise<Reservation> => {
+    const response = await api.patch(`/reservations/${id}/pickup`);
     return unwrapResponse<Reservation>(response.data);
   },
 };

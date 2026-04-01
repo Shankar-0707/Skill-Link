@@ -15,11 +15,13 @@ export const WorkerProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Mock reviews (requested to keep)
+  /*
   const MOCK_REVIEWS = [
     { id: 1, author: 'Anita S.',   rating: 5, comment: 'Excellent work! Very professional and completed the job ahead of schedule.', date: '2 weeks ago' },
     { id: 2, author: 'Raj P.',     rating: 5, comment: 'Highly recommend. Diagnosed the issue immediately and fixed it cleanly.', date: '1 month ago' },
     { id: 3, author: 'Deepa M.',   rating: 4, comment: 'Good work. Arrived on time and was thorough. Slightly pricey but worth it.', date: '2 months ago' },
   ];
+  */
 
   useEffect(() => {
     const fetchWorker = async () => {
@@ -173,6 +175,7 @@ export const WorkerProfilePage: React.FC = () => {
         </div>
 
         {/* Reviews */}
+        {/* 
         <div className="mb-8">
           <h2 className="font-headline font-bold text-base text-foreground mb-4">Recent Reviews</h2>
           <div className="flex flex-col gap-3">
@@ -197,6 +200,7 @@ export const WorkerProfilePage: React.FC = () => {
             ))}
           </div>
         </div>
+        */}
 
         {/* CTA */}
         <div className="sticky bottom-6">

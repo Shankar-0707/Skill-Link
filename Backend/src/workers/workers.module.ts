@@ -7,6 +7,6 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [PrismaModule, AuthModule],
   controllers: [WorkersController],
-  providers: [WorkersService]
+  providers: [WorkersService],
 })
 export class WorkersModule {}

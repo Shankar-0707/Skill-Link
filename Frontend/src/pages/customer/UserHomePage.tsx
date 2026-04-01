@@ -1,38 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wrench, Loader2 } from 'lucide-react';
-import { CATEGORIES } from '../../features/mock/mock';
+import { CATEGORIES } from '../../shared/constants/categories';
 import type { Worker } from '../../features/customer/types';
 import { WorkerCard } from '../../features/customer/worker/Workercard';
 import { CategoryPill, SectionHeader, PageHeader, EmptyState } from '../../features/customer/components/ui';
 import { Layout } from '../../features/customer/components/layout/Layout';
 import { useAuth } from "../../app/context/useAuth";
 import { workerService } from '../../features/customer/services/workerService';
+import { productsApi } from "@/features/products/api/productsApi";
+import type { Product } from "@/features/products/types";
 
 export const UserHomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [workers, setWorkers] = useState<Worker[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('Electricians');
 
   useEffect(() => {
-    const fetchWorkers = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await workerService.getAllWorkers();
-        setWorkers(data);
+        const [workersData, productsRes] = await Promise.all([
+          workerService.getAllWorkers(),
+          productsApi.findAll({ limit: 4 })
+        ]);
+        
+        setWorkers(workersData);
+        
+        let items: Product[] = [];
+        const res = productsRes as any;
+        if (Array.isArray(res)) {
+          items = res;
+        } else if (res && typeof res === 'object') {
+          if (Array.isArray(res.items)) items = res.items;
+          else if (res.data && Array.isArray(res.data.items)) items = res.data.items;
+          else if (res.data && Array.isArray(res.data)) items = res.data;
+        }
+        setProducts(items);
+
         setError(null);
       } catch (err) {
-        console.error('Failed to fetch workers:', err);
-        setError('Failed to load workers. Please try again later.');
+        console.error('Failed to fetch data:', err);
+        setError('Failed to load data. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchWorkers();
+    fetchData();
   }, []);
 
   if (!user) return null;
@@ -166,25 +185,24 @@ export const UserHomePage: React.FC = () => {
           title="Popular at Local Shops"
         />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {MOCK_PRODUCTS.map(product => (
-            <div key={product.id}
+          {products.map(product => (
+            <div key={product.id} onClick={() => navigate('/products')}
               className="bg-background border border-border rounded-xl overflow-hidden hover:shadow-lg hover:border-outline transition-all cursor-pointer group">
               <div className="relative aspect-video overflow-hidden">
                 <img
-                  src={product.image}
+                  src={product.images?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&h=200&fit=crop'}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                {product.badge && (
-                  <span className={`absolute top-2 left-2 text-[10px] font-label font-bold px-2 py-0.5 rounded shadow-sm
-                    ${product.badge === 'Sale' ? 'bg-red-500 text-white' : 'bg-foreground text-background'}`}>
-                    {product.badge}
+                {product.stockQuantity < 10 && (
+                  <span className={`absolute top-2 left-2 text-[10px] font-label font-bold px-2 py-0.5 rounded shadow-sm bg-red-500 text-white`}>
+                    Low Stock
                   </span>
                 )}
               </div>
               <div className="p-4">
                 <h4 className="font-label font-semibold text-sm text-foreground line-clamp-1">{product.name}</h4>
-                <p className="text-xs font-body text-muted-foreground mb-3">{product.shop}</p>
+                <p className="text-xs font-body text-muted-foreground mb-3">{product.organisation?.businessName || 'Local Shop'}</p>
                 <div className="flex items-center justify-between">
                   <span className="font-headline font-bold text-sm text-foreground">
                     ₹{product.price.toLocaleString()}
@@ -196,12 +214,18 @@ export const UserHomePage: React.FC = () => {
               </div>
             </div>
           ))}
+          {products.length === 0 && !loading && (
+            <div className="col-span-4 py-8 text-center text-muted-foreground text-sm font-body">
+              No products available right now.
+            </div>
+          )}
         </div>
       </div>
     </Layout>
   );
 };
 
+/* 
 // Simulated product data
 const MOCK_PRODUCTS = [
   { id: 'p1', name: 'Heavy-Duty Brushless Drill', shop: "Miller's Hardware",  price: 12999, badge: '2 Left', image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&h=200&fit=crop' },
@@ -209,3 +233,4 @@ const MOCK_PRODUCTS = [
   { id: 'p3', name: '100m Copper Core Wire',       shop: 'PowerLine Pro Shop', price: 8500,  badge: null,   image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop' },
   { id: 'p4', name: 'Smart Cam Ultra HD',           shop: 'SafeFirst Systems',  price: 19900, badge: 'Sale', image: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=300&h=200&fit=crop' },
 ];
+*/

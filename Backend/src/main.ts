@@ -2,13 +2,11 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import compression from 'compression';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const compression = require('compression');
 
 async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
@@ -59,6 +57,8 @@ async function bootstrap(): Promise<void> {
       .addTag('Products', 'Product CRUD and image management')
       .addTag('Jobs', 'Job creation and worker matching')
       .addTag('Reservations', 'Reservation lifecycle and escrow')
+      .addTag('KYC', 'Worker identity verification and document upload')
+      .addTag('Admin — KYC', 'Admin review of worker KYC submissions')
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
@@ -80,4 +80,4 @@ async function bootstrap(): Promise<void> {
   logger.log(`Application running on port ${port} [${nodeEnv}]`);
 }
 
-bootstrap();
+void bootstrap();

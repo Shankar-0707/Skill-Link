@@ -9,7 +9,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor() {
     super({
       clientID: process.env.GOOGLE_CLIENT_ID || 'missing-google-client-id',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'missing-google-client-secret',
+      clientSecret:
+        process.env.GOOGLE_CLIENT_SECRET || 'missing-google-client-secret',
       callbackURL:
         process.env.GOOGLE_CALLBACK_URL ||
         'http://localhost:3000/auth/google/callback',
@@ -18,16 +19,18 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
-  async validate(
+  validate(
     _req: Request,
     _accessToken: string,
     _refreshToken: string,
     profile: Profile,
-  ): Promise<GoogleOauthUser> {
+  ): GoogleOauthUser {
     const email = profile.emails?.[0]?.value?.toLowerCase();
 
     if (!email) {
-      throw new UnauthorizedException('Google account did not provide an email address.');
+      throw new UnauthorizedException(
+        'Google account did not provide an email address.',
+      );
     }
 
     return {

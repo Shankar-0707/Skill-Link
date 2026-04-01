@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, Lock, Shield, Loader2, Camera, 
-  MapPin, Briefcase, CheckCircle2, AlertCircle, LogOut 
+  MapPin, Briefcase, CheckCircle2, AlertCircle, LogOut, X 
 } from 'lucide-react';
 import { useAuth } from "../../app/context/useAuth";
 import { workerService } from '../../features/customer/services/workerService';
@@ -21,14 +21,15 @@ export const WorkerSettingsPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<Section>('profile');
   const [toast, setToast] = useState('');
 
-  // Form states
   const [formData, setFormData] = useState({
     name: '',
     bio: '',
     experience: 0,
     serviceRadius: 10,
     isAvailable: true,
+    skills: [] as string[],
   });
+  const [skillInput, setSkillInput] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -42,6 +43,7 @@ export const WorkerSettingsPage: React.FC = () => {
           experience: data.experience || 0,
           serviceRadius: data.serviceRadius || 10,
           isAvailable: data.isAvailable,
+          skills: data.skills || [],
         });
       } catch (err) {
         console.error('Failed to fetch worker profile:', err);
@@ -55,6 +57,28 @@ export const WorkerSettingsPage: React.FC = () => {
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(''), 3000);
+  };
+
+  const addSkill = () => {
+    const trimmed = skillInput.trim();
+    if (trimmed && !formData.skills.includes(trimmed)) {
+      setFormData({ ...formData, skills: [...formData.skills, trimmed] });
+    }
+    setSkillInput('');
+  };
+
+  const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addSkill();
+    }
+  };
+
+  const removeSkill = (indexToRemove: number) => {
+    setFormData({
+      ...formData,
+      skills: formData.skills.filter((_, index) => index !== indexToRemove)
+    });
   };
 
   const handleLogout = async () => {
@@ -189,6 +213,46 @@ export const WorkerSettingsPage: React.FC = () => {
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email (Read Only)</label>
                     <input type="text" value={user.email} disabled className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm text-gray-400 cursor-not-allowed" />
+                  </div>
+                  
+                  <div className="col-span-2 space-y-1.5">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Skills</label>
+                    <div className="flex border border-gray-200 bg-gray-50 rounded-xl overflow-hidden focus-within:border-gray-400 transition-colors shadow-sm">
+                      <input 
+                        type="text" 
+                        value={skillInput}
+                        onChange={e => setSkillInput(e.target.value)}
+                        onKeyDown={handleSkillKeyDown}
+                        placeholder="e.g. Plumbing, Electrical (Press Enter to add)"
+                        className="flex-1 px-4 py-2.5 bg-transparent text-sm focus:outline-none" 
+                      />
+                      <button 
+                        type="button" 
+                        onClick={(e) => {
+                           e.preventDefault();
+                           addSkill();
+                        }}
+                        className="px-5 bg-gray-900 text-white hover:bg-gray-800 font-semibold text-sm transition-colors border-l border-gray-900"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    {formData.skills.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2.5">
+                        {formData.skills.map((skill, index) => (
+                          <div key={index} className="flex items-center gap-1.5 bg-gray-100 text-gray-900 border border-gray-200 px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm animate-in fade-in zoom-in-95 duration-200">
+                            <span>{skill}</span>
+                            <button 
+                              type="button" 
+                              onClick={() => removeSkill(index)}
+                              className="focus:outline-none hover:text-red-500 hover:bg-red-50 p-0.5 rounded transition-colors"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="col-span-2 space-y-1.5">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Professional Bio</label>

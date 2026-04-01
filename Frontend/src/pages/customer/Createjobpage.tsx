@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, IndianRupee, Calendar, Tag, AlignLeft, Type, Loader2, AlertCircle } from 'lucide-react';
-import { CATEGORIES } from '../../features/mock/mock';
+import { CATEGORIES } from '../../shared/constants/categories';
 import { jobService } from '../../features/customer/services/jobService';
 
 interface CreateJobPageProps {

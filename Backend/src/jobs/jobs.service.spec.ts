@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JobsService } from './jobs.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { KycGateService } from '../kyc/kyc-gate.service';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -12,6 +13,12 @@ describe('JobsService', () => {
         {
           provide: PrismaService,
           useValue: {},
+        },
+        {
+          provide: KycGateService,
+          useValue: {
+            assertWorkerKycVerified: jest.fn().mockResolvedValue(undefined),
+          },
         },
       ],
     }).compile();
