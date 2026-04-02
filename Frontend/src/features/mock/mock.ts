@@ -1,0 +1,98 @@
+/* import type { Job, Worker } from '../customer/types/index'; */
+
+/*
+export const MOCK_JOBS: Job[] = [
+  {
+    id: '1',
+    title: 'Fix electrical wiring in kitchen',
+    description: 'Need a certified electrician to rewire the kitchen outlets and install a new circuit breaker. The main panel also needs inspection.',
+    category: 'Electricians',
+    budget: 4500,
+    status: 'POSTED',
+    scheduledAt: '2026-04-10T10:00:00Z',
+    createdAt: '2026-03-27T08:00:00Z',
+  },
+  {
+    id: '2',
+    title: 'Bathroom plumbing repair',
+    description: 'Leaking pipe under the bathroom sink. Needs immediate attention before it causes water damage to the floor.',
+    category: 'Plumbing',
+    budget: 1800,
+    status: 'ASSIGNED',
+    createdAt: '2026-03-25T09:30:00Z',
+    worker: { id: 'w1', user: { id: 'u1', phone: '+91 98765 43210' } },
+    escrow: { amount: 1800, status: 'HELD' },
+  },
+  {
+    id: '3',
+    title: 'Paint living room walls',
+    description: 'Full interior painting of a 400 sqft living room. Two coats required. Walls need light sanding and primer.',
+    category: 'Renovation',
+    budget: 6000,
+    status: 'IN_PROGRESS',
+    createdAt: '2026-03-20T11:00:00Z',
+    worker: { id: 'w1', user: { id: 'u1', phone: '+91 98765 43210' } },
+    escrow: { amount: 6000, status: 'HELD' },
+  },
+  {
+    id: '4',
+    title: 'Deep clean AC unit',
+    description: 'Annual maintenance and deep cleaning of a 1.5-ton split AC. Filter replacement included.',
+    category: 'Sanitation',
+    budget: 900,
+    status: 'COMPLETED',
+    createdAt: '2026-03-10T14:00:00Z',
+    worker: { id: 'w1', user: { id: 'u1', phone: '+91 98765 43210' } },
+    escrow: { amount: 900, status: 'RELEASED' },
+  },
+  {
+    id: '5',
+    title: 'Replace kitchen ceiling fan',
+    description: 'Old fan needs to be removed and a new 48-inch ceiling fan installed with a dimmer switch.',
+    category: 'Electricians',
+    budget: 1200,
+    status: 'POSTED',
+    scheduledAt: '2026-04-12T14:00:00Z',
+    createdAt: '2026-03-28T07:00:00Z',
+  },
+  {
+    id: '6',
+    title: 'Garden landscaping and trimming',
+    description: 'Trim overgrown hedges, replant flower beds, and lay fresh mulch in a medium-sized garden.',
+    category: 'Gardening',
+    budget: 3200,
+    status: 'POSTED',
+    scheduledAt: '2026-04-08T09:00:00Z',
+    createdAt: '2026-03-26T12:00:00Z',
+  },
+];
+
+export const MOCK_WORKER: Worker = {
+  id: 'w1',
+  skills: ['Wiring', 'Circuit Breakers', 'Solar Installation', 'Panel Upgrades'],
+  experience: 8,
+  bio: 'Certified Master Electrician with 8 years of residential and commercial experience. Available for emergency calls 7 days a week.',
+  isAvailable: true,
+  ratingAvg: 4.9,
+  ratingCount: 124,
+  serviceRadius: 15,
+  kycStatus: 'VERIFIED',
+  user: {
+    id: 'u1',
+    phone: '+91 98765 43210',
+    name: 'David Chen',
+    profileImage: 'https://i.pravatar.cc/150?img=11',
+  },
+};
+
+export const CATEGORIES = [
+  { label: 'Electricians', icon: '⚡' },
+  { label: 'Plumbing',     icon: '🔧' },
+  { label: 'Hardware',     icon: '🔨' },
+  { label: 'Sanitation',   icon: '🧹' },
+  { label: 'Auto Parts',   icon: '🚗' },
+  { label: 'Renovation',   icon: '🏠' },
+  { label: 'Carpentry',    icon: '🪵' },
+  { label: 'Gardening',    icon: '🌿' },
+];
+*/
