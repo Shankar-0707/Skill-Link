@@ -2,6 +2,39 @@ import { Injectable, Logger } from '@nestjs/common';
 import nodemailer, { Transporter } from 'nodemailer';
 import sgMail from '@sendgrid/mail';
 
+// Extend global process.env types with custom environment variables
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      // Email Configuration
+      MAIL_MODE?: 'smtp' | 'sendgrid' | 'log';
+      SENDGRID_API_KEY?: string;
+      SMTP_HOST?: string;
+      SMTP_PORT?: string;
+      SMTP_USER?: string;
+      SMTP_PASS?: string;
+      SMTP_SECURE?: string;
+      MAIL_FROM?: string;
+
+      // Email URLs & Expiration
+      VERIFY_EMAIL_URL?: string;
+      RESET_PASSWORD_URL?: string;
+      EMAIL_VERIFICATION_EXPIRES_MINUTES?: string;
+      PASSWORD_RESET_EXPIRES_MINUTES?: string;
+
+      // JWT Configuration
+      JWT_ACCESS_SECRET?: string;
+      JWT_ACCESS_EXPIRES_IN?: string;
+      JWT_REFRESH_SECRET?: string;
+      JWT_REFRESH_EXPIRES_DAYS?: string;
+
+      // Database & Other
+      NODE_ENV?: string;
+      DATABASE?: string;
+    }
+  }
+}
+
 type VerificationMailInput = {
   to: string;
   name?: string;
