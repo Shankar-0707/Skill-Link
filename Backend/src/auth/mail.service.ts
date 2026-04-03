@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import nodemailer, { Transporter } from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
 type VerificationMailInput = {
   to: string;
@@ -21,6 +22,14 @@ type ResetMailInput = {
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private transporter: Transporter | null = null;
+
+  constructor() {
+    // Initialize SendGrid if API key is available
+    const sendGridApiKey = process.env.SENDGRID_API_KEY;
+    if (sendGridApiKey) {
+      sgMail.setApiKey(sendGridApiKey);
+    }
+  }
 
   async sendEmailVerification(input: VerificationMailInput) {
     const subject = 'Verify your Skill-Link email';
@@ -68,14 +77,77 @@ export class MailService {
       return;
     }
 
-    const transporter = this.getTransporter();
-    await transporter.sendMail({
-      from: process.env.MAIL_FROM,
-      to: options.to,
-      subject: options.subject,
-      text: options.text,
-      html: options.html,
-    });
+    if (mode === 'sendgrid') {
+      return this.sendMailViaSendGrid(options);
+    }
+
+    return this.sendMailViaSMTP(options);
+  }
+
+  private async sendMailViaSendGrid(options: {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+  }) {
+    try {
+      const apiKey = process.env.SENDGRID_API_KEY;
+      if (!apiKey) {
+        throw new Error(
+          'SENDGRID_API_KEY is not set. Set it in environment variables.',
+        );
+      }
+
+      const from = process.env.MAIL_FROM;
+      if (!from) {
+        throw new Error(
+          'MAIL_FROM is not set. Set it in environment variables.',
+        );
+      }
+
+      await sgMail.send({
+        to: options.to,
+        from,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+      });
+
+      this.logger.debug(`Email sent successfully via SendGrid to ${options.to}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send email via SendGrid to ${options.to}. Subject: ${options.subject}`,
+        error instanceof Error ? error.message : String(error),
+      );
+      throw error;
+    }
+  }
+
+  private async sendMailViaSMTP(options: {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+  }) {
+    try {
+      const transporter = this.getTransporter();
+      const result = await transporter.sendMail({
+        from: process.env.MAIL_FROM,
+        to: options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+      });
+      this.logger.debug(
+        `Email sent successfully via SMTP to ${options.to}. Message ID: ${result.messageId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send email via SMTP to ${options.to}. Subject: ${options.subject}`,
+        error instanceof Error ? error.message : String(error),
+      );
+      throw error;
+    }
   }
 
   private getTransporter() {
