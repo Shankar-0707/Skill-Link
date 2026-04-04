@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { X, ShoppingBag, AlertCircle, CheckCircle2, Loader2, Minus, Plus } from "lucide-react";
 import type { Product } from "../../types";
 import { customerReservationService } from "../../services/customerReservationService";
-import { cn } from "@/shared/utils/cn";
 
 interface ReserveProductModalProps {
   product: Product;

@@ -590,15 +590,38 @@ export class AuthService {
       },
     });
 
-    await this.mailService.sendEmailVerification({
-      to: email,
-      name: name ?? undefined,
-      token,
-      verificationUrl: this.buildActionUrl(process.env.VERIFY_EMAIL_URL, token),
-      expiresInMinutes: Number(
-        process.env.EMAIL_VERIFICATION_EXPIRES_MINUTES ?? '60',
-      ),
+    // Send email verification asynchronously without blocking registration
+    // This prevents registration from timing out if email service is slow or fails
+    this.sendEmailVerificationAsync(email, name, token).catch((error) => {
+      console.error(
+        `[EMAIL_VERIFICATION_ERROR] Failed to send verification email to ${email}:`,
+        error,
+      );
     });
+  }
+
+  private async sendEmailVerificationAsync(
+    email: string,
+    name: string | null | undefined,
+    token: string,
+  ) {
+    try {
+      await this.mailService.sendEmailVerification({
+        to: email,
+        name: name ?? undefined,
+        token,
+        verificationUrl: this.buildActionUrl(process.env.VERIFY_EMAIL_URL, token),
+        expiresInMinutes: Number(
+          process.env.EMAIL_VERIFICATION_EXPIRES_MINUTES ?? '60',
+        ),
+      });
+    } catch (error) {
+      console.error(
+        `[EMAIL_VERIFICATION_ERROR] Failed to send verification email to ${email}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      throw error;
+    }
   }
 
   private async issuePasswordReset(
@@ -624,15 +647,37 @@ export class AuthService {
       },
     });
 
-    await this.mailService.sendPasswordReset({
-      to: email,
-      name: name ?? undefined,
-      token,
-      resetUrl: this.buildActionUrl(process.env.RESET_PASSWORD_URL, token),
-      expiresInMinutes: Number(
-        process.env.PASSWORD_RESET_EXPIRES_MINUTES ?? '30',
-      ),
+    // Send password reset email asynchronously without blocking the request
+    this.sendPasswordResetAsync(email, name, token).catch((error) => {
+      console.error(
+        `[PASSWORD_RESET_ERROR] Failed to send password reset email to ${email}:`,
+        error,
+      );
     });
+  }
+
+  private async sendPasswordResetAsync(
+    email: string,
+    name: string | null | undefined,
+    token: string,
+  ) {
+    try {
+      await this.mailService.sendPasswordReset({
+        to: email,
+        name: name ?? undefined,
+        token,
+        resetUrl: this.buildActionUrl(process.env.RESET_PASSWORD_URL, token),
+        expiresInMinutes: Number(
+          process.env.PASSWORD_RESET_EXPIRES_MINUTES ?? '30',
+        ),
+      });
+    } catch (error) {
+      console.error(
+        `[PASSWORD_RESET_ERROR] Failed to send password reset email to ${email}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      throw error;
+    }
   }
 
   private ensurePublicRole(role: Role) {
