@@ -227,6 +227,7 @@ export class ProductsService {
     }
 
     const { secureUrl } = await this.cloudinary.uploadProductImage(file.buffer);
+    console.log(secureUrl);
 
     const image = await this.prisma.productImage.create({
       data: { productId, imageUrl: secureUrl },

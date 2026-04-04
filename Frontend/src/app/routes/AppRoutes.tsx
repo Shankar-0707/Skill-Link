@@ -113,6 +113,7 @@ export const AppRoutes: React.FC = () => {
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           </Route>
         </Route>
+        
       </Route>
 
       <Route path="/preview" element={<ThemePreview />} />
