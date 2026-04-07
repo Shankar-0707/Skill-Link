@@ -41,6 +41,8 @@ import PendingReservationsPage from "@/pages/organisation/PendingReservationsPag
 import { AdminLayout } from "@/features/admin/components/layout/AdminLayout";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { AdminJobsPage } from "@/pages/admin/AdminJobsPage";
+import { AdminReservationsPage } from "@/pages/admin/AdminReservationsPage";
+import { AdminUsersPage } from "@/pages/admin/AdminUsersPage";
 import { KycManagementPage } from "@/pages/admin/KycManagementPage";
 
 
@@ -106,8 +108,8 @@ export const AppRoutes: React.FC = () => {
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/jobs" element={<AdminJobsPage />} />
-            <Route path="/admin/reservations" element={<ComingSoonPage />} />
-            <Route path="/admin/users" element={<ComingSoonPage />} />
+            <Route path="/admin/reservations" element={<AdminReservationsPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/kyc" element={<KycManagementPage />} />
             <Route path="/admin/help" element={<ComingSoonPage />} />
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />

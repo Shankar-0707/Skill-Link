@@ -1,5 +1,10 @@
 import { api } from '../../../services/api/api';
-import type { RecentJob, UserMetrics } from '../types';
+import type {
+  AdminUserSummary,
+  RecentJob,
+  RecentReservation,
+  UserMetrics,
+} from '../types';
 
 type ApiEnvelope<T> = {
   success: boolean;
@@ -55,5 +60,39 @@ export const adminApi = {
       price: job.budget ?? undefined,
       scheduledAt: job.scheduledAt,
     }));
+  },
+
+  getReservations: async (): Promise<RecentReservation[]> => {
+    const response = await api.get('/admin/dashboard/reservations');
+
+    const reservations = unwrapResponse<
+      Array<{
+        id: string;
+        productName: string;
+        organisationName: string;
+        customerName: string;
+        status: string;
+        quantity: number;
+        createdAt: string;
+        updatedAt: string;
+        expiresAt: string | null;
+      }>
+    >(response.data);
+
+    return reservations.map((reservation) => ({
+      id: reservation.id,
+      productName: reservation.productName,
+      organisationName: reservation.organisationName,
+      customerName: reservation.customerName,
+      status: reservation.status,
+      quantity: reservation.quantity,
+      date: reservation.updatedAt,
+      expiresAt: reservation.expiresAt,
+    }));
+  },
+
+  getUsers: async (): Promise<AdminUserSummary[]> => {
+    const response = await api.get('/admin/users');
+    return unwrapResponse<AdminUserSummary[]>(response.data);
   },
 };

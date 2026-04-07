@@ -4,6 +4,7 @@ import {
   Building2,
   CheckCircle2,
   Clock,
+  PackageCheck,
   ShoppingBag,
   Users,
 } from 'lucide-react';
@@ -15,25 +16,6 @@ import type {
   UserMetrics,
 } from '../../features/admin/types';
 import { cn } from '@/shared/utils/cn';
-
-const mockReservations: AdminDashboardData['recentReservations'] = [
-  {
-    id: '1',
-    productName: 'Eco Bricks Pack',
-    organisationName: 'GreenBuild Materials',
-    customerName: 'TechCorp Inc.',
-    status: 'Confirmed',
-    date: 'Today',
-  },
-  {
-    id: '2',
-    productName: 'Electric Drill',
-    organisationName: 'Urban Tools Hub',
-    customerName: 'Alice Moore',
-    status: 'Pending',
-    date: 'Yesterday',
-  },
-];
 
 const formatTrend = (trend: number) => {
   const absoluteValue = Math.abs(trend).toFixed(1);
@@ -75,6 +57,28 @@ const getJobBadgeClassName = (status: string) =>
         : 'bg-slate-100 text-slate-700',
   );
 
+const formatReservationStatusLabel = (status: string) => status.replace('_', ' ');
+
+const formatReservationTimestamp = (date: string) =>
+  new Intl.DateTimeFormat('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(date));
+
+const getReservationBadgeClassName = (status: string) =>
+  cn(
+    'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider',
+    status === 'CONFIRMED'
+      ? 'bg-emerald-50 text-emerald-700'
+      : status === 'PENDING'
+        ? 'bg-amber-50 text-amber-700'
+        : status === 'PICKED_UP'
+          ? 'bg-blue-50 text-blue-700'
+          : 'bg-slate-100 text-slate-700',
+  );
+
 type StatCardProps = {
   title: string;
   metric: MetricSummary;
@@ -113,17 +117,23 @@ export const AdminDashboard = () => {
   const navigate = useNavigate();
   const [metrics, setMetrics] = useState<UserMetrics | null>(null);
   const [recentJobs, setRecentJobs] = useState<AdminDashboardData['recentJobs']>([]);
+  const [recentReservations, setRecentReservations] = useState<
+    AdminDashboardData['recentReservations']
+  >([]);
   const [metricsError, setMetricsError] = useState<string | null>(null);
   const [jobsError, setJobsError] = useState<string | null>(null);
+  const [reservationsError, setReservationsError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
 
     const loadDashboard = async () => {
       try {
-        const [metricsResponse, activeJobsResponse] = await Promise.all([
+        const [metricsResponse, activeJobsResponse, reservationsResponse] =
+          await Promise.all([
           adminApi.getDashboardMetrics(),
           adminApi.getActiveJobs(),
+          adminApi.getReservations(),
         ]);
 
         if (!active) {
@@ -131,9 +141,11 @@ export const AdminDashboard = () => {
         }
 
         setMetrics(metricsResponse);
-        setRecentJobs(activeJobsResponse.slice(0, 5));
+        setRecentJobs(activeJobsResponse.slice(0, 4));
+        setRecentReservations(reservationsResponse.slice(0, 4));
         setMetricsError(null);
         setJobsError(null);
+        setReservationsError(null);
       } catch {
         if (!active) {
           return;
@@ -141,6 +153,7 @@ export const AdminDashboard = () => {
 
         setMetricsError('Unable to load admin metrics right now.');
         setJobsError('Unable to load active jobs right now.');
+        setReservationsError('Unable to load reservations right now.');
       }
     };
 
@@ -155,7 +168,7 @@ export const AdminDashboard = () => {
     ? {
         metrics,
         recentJobs,
-        recentReservations: mockReservations,
+        recentReservations,
       }
     : null;
 
@@ -178,9 +191,9 @@ export const AdminDashboard = () => {
             Real-time performance metrics and active logistical status.
           </p>
         </div>
-        <button className="px-6 py-2.5 bg-[#001F3F] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#001F3F]/20 hover:bg-[#001F3F]/90 transition-all">
+        {/* <button className="px-6 py-2.5 bg-[#001F3F] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#001F3F]/20 hover:bg-[#001F3F]/90 transition-all">
           Generate Report
-        </button>
+        </button> */}
       </div>
 
       {metricsError ? (
@@ -265,44 +278,57 @@ export const AdminDashboard = () => {
                 <h2 className="text-lg font-bold text-[#001F3F]">
                   Recent Reservations
                 </h2>
-                <button className="text-xs font-bold text-[#001F3F] hover:underline">
+                <button
+                  onClick={() => navigate('/admin/reservations')}
+                  className="text-xs font-bold text-[#001F3F] hover:underline"
+                >
                   View All
                 </button>
               </div>
+              {reservationsError ? (
+                <div className="p-6 text-sm font-medium text-rose-700 bg-rose-50 border-t border-rose-100">
+                  {reservationsError}
+                </div>
+              ) : null}
               <div className="divide-y divide-gray-100 flex-1">
-                {data.recentReservations.map((reservation) => (
-                  <div
-                    key={reservation.id}
-                    className="p-6 hover:bg-[#f8f9fb] transition-colors group flex justify-between items-center"
-                  >
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-900 group-hover:text-[#001F3F] transition-colors">
-                        {reservation.productName}
-                      </h4>
-                      <p className="text-xs font-medium text-gray-500 mt-1">
-                        {reservation.organisationName}
-                      </p>
+                {data.recentReservations.length > 0 ? (
+                  data.recentReservations.map((reservation) => (
+                    <div
+                      key={reservation.id}
+                      className="p-6 hover:bg-[#f8f9fb] transition-colors group flex justify-between items-center"
+                    >
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-900 group-hover:text-[#001F3F] transition-colors">
+                          {reservation.productName}
+                        </h4>
+                        <p className="text-xs font-medium text-gray-500 mt-1">
+                          {reservation.organisationName}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className={getReservationBadgeClassName(reservation.status)}>
+                          {reservation.status === 'CONFIRMED' && (
+                            <CheckCircle2 size={12} />
+                          )}
+                          {reservation.status === 'PENDING' && (
+                            <Clock size={12} />
+                          )}
+                          {reservation.status === 'PICKED_UP' && (
+                            <PackageCheck size={12} />
+                          )}
+                          {formatReservationStatusLabel(reservation.status)}
+                        </span>
+                        <p className="text-xs font-semibold text-gray-400 mt-1">
+                          {formatReservationTimestamp(reservation.date)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span
-                        className={cn(
-                          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider',
-                          reservation.status === 'Confirmed'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-gray-100 text-gray-700',
-                        )}
-                      >
-                        {reservation.status === 'Confirmed' && (
-                          <CheckCircle2 size={12} />
-                        )}
-                        {reservation.status}
-                      </span>
-                      <p className="text-xs font-semibold text-gray-400 mt-2">
-                        {reservation.customerName}
-                      </p>
-                    </div>
+                  ))
+                ) : (
+                  <div className="p-6 text-sm font-medium text-gray-500">
+                    No reservations found right now.
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
