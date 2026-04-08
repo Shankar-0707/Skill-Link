@@ -3,6 +3,7 @@ import {
   LayoutDashboard, 
   Package, 
   Settings, 
+  HelpCircle,
   LogOut, 
   Building2,
   ChevronRight,
@@ -246,6 +247,13 @@ export const Sidebar: React.FC = () => {
                </button>
             </div>
         )}
+        <SidebarItem 
+          icon={HelpCircle}
+          label="Help Center"
+          href="/organisation/help"
+          isActive={location.pathname === "/organisation/help"}
+          isCollapsed={isCollapsed}
+        />
         <SidebarItem 
           icon={Settings} 
           label="Settings" 

@@ -6,6 +6,7 @@ import {
   Briefcase,
   IndianRupee,
   // Calendar,
+  HelpCircle,
   Settings,
   Zap,
 } from 'lucide-react';
@@ -71,6 +72,17 @@ export const WorkerSidebar: React.FC<WorkerSidebarProps> = ({
 
       {/* Availability Toggle */}
       <div className="px-3 pb-5">
+        <Link
+          to="/worker/help"
+          className={`mb-3 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-left transition-all duration-150
+            ${location.pathname === '/worker/help'
+              ? 'bg-gray-900 text-white'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+            }`}
+        >
+          <HelpCircle className="w-4 h-4 flex-shrink-0" />
+          Help Center
+        </Link>
         <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-gray-600">Availability</span>

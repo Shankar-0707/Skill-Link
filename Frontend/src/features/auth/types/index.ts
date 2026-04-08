@@ -19,8 +19,13 @@ export interface User {
   isActive?: boolean;
   businessName?: string;
   businessType?: string;
-  customer?: unknown;
+  customer?: {
+    id: string;
+    userId: string;
+  } | null;
   worker?: {
+    id: string;
+    userId?: string;
     skills?: string[];
     bio?: string | null;
     experience?: number | null;
@@ -28,6 +33,8 @@ export interface User {
     isAvailable?: boolean;
   } | null;
   organisation?: {
+    id: string;
+    userId?: string;
     businessName?: string;
     businessType?: string;
     description?: string | null;

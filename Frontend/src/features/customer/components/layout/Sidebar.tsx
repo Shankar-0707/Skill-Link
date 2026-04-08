@@ -35,6 +35,7 @@ export const Sidebar: React.FC = () => {
     if (location.pathname === '/user/my-jobs') return 'my-jobs';
     if (location.pathname === '/user/products/reservations') return 'reservations';
     if (location.pathname.startsWith('/user/products')) return 'products';
+    if (location.pathname === '/user/help') return 'help';
     if (location.pathname === '/user/schedule') return 'schedule';
     if (location.pathname === '/user/settings') return 'settings';
     return '';
@@ -90,15 +91,22 @@ export const Sidebar: React.FC = () => {
         </button>
 
         <button
+          onClick={() => navigate('/user/help')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-label font-medium transition-all
+            ${activePage === 'help'
+              ? 'bg-foreground text-background shadow-sm'
+              : 'text-muted-foreground hover:bg-surface-container hover:text-foreground'
+            }`}
+        >
+          <HelpCircle className="w-4 h-4" />
+          Help
+        </button>
+        <button
           onClick={() => navigate('/user/settings')}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-label font-medium text-muted-foreground hover:bg-surface-container hover:text-foreground transition-all"
         >
           <Settings className="w-4 h-4" />
           Settings
-        </button>
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-label font-medium text-muted-foreground hover:bg-surface-container hover:text-foreground transition-all">
-          <HelpCircle className="w-4 h-4" />
-          Help
         </button>
       </div>
     </aside>

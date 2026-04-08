@@ -9,7 +9,11 @@ import {
 import { ReservationStatus, EscrowStatus, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EscrowService } from '../escrow/escrow.service';
-import { paginate, PaginationDto } from '../common/dto/pagination.dto';
+import {
+  paginate,
+  PaginationDto,
+  parsePaginationInts,
+} from '../common/dto/pagination.dto';
 import {
   CreateReservationDto,
   CancelReservationDto,
@@ -139,6 +143,7 @@ export class ReservationsService {
     userId: string,
     query: ListReservationsDto & PaginationDto,
   ) {
+    const { page, limit, skip } = parsePaginationInts(query);
     const customer = await this.prisma.customer.findFirst({
       where: { userId, deletedAt: null },
       select: { id: true },
@@ -153,8 +158,8 @@ export class ReservationsService {
     const [items, total] = await this.prisma.$transaction([
       this.prisma.reservation.findMany({
         where,
-        skip: query.skip,
-        take: query.limit,
+        skip,
+        take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
           product: {
@@ -169,7 +174,7 @@ export class ReservationsService {
       this.prisma.reservation.count({ where }),
     ]);
 
-    return paginate(items, total, query);
+    return paginate(items, total, { page, limit } as PaginationDto);
   }
 
   // ─── Org: List incoming reservations for their products ──────────────────
@@ -178,6 +183,7 @@ export class ReservationsService {
     userId: string,
     query: ListIncomingReservationsDto & PaginationDto,
   ) {
+    const { page, limit, skip } = parsePaginationInts(query);
     const org = await this.prisma.organisation.findFirst({
       where: { userId, deletedAt: null },
       select: { id: true },
@@ -193,8 +199,8 @@ export class ReservationsService {
     const [items, total] = await this.prisma.$transaction([
       this.prisma.reservation.findMany({
         where,
-        skip: query.skip,
-        take: query.limit,
+        skip,
+        take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
           product: { select: { id: true, name: true, price: true } },
@@ -216,7 +222,7 @@ export class ReservationsService {
       this.prisma.reservation.count({ where }),
     ]);
 
-    return paginate(items, total, query);
+    return paginate(items, total, { page, limit } as PaginationDto);
   }
 
   // ─── Get single reservation (customer or org) ─────────────────────────────

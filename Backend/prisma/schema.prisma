@@ -77,6 +77,12 @@ enum KycRequestStatus {
   REJECTED
 }
 
+enum HelpTicketStatus {
+  OPEN
+  RESOLVED
+  REJECTED
+}
+
 //// USERS
 
 model User {
@@ -106,6 +112,8 @@ model User {
   refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens     PasswordResetToken[]
+  submittedHelpTickets    HelpTicket[] @relation("HelpTicketCreatedBy")
+  reviewedHelpTickets     HelpTicket[] @relation("HelpTicketReviewedBy")
 
   @@index([role])
 }
@@ -197,6 +205,7 @@ model Worker {
 
   documents   WorkerDocument[]
   kycRequests KycRequest[]
+  helpTickets HelpTicket[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -223,6 +232,7 @@ model Organisation {
   ratingCount Int   @default(0)
 
   products Product[]
+  helpTickets HelpTicket[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -253,6 +263,7 @@ model Job {
   scheduledAt DateTime?
 
   escrow Escrow?
+  helpTickets HelpTicket[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -325,6 +336,7 @@ model Reservation {
   expiresAt DateTime?
 
   escrow Escrow?
+  helpTickets HelpTicket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -439,4 +451,49 @@ model KycRequest {
 
   @@index([workerId])
   @@index([status])
+}
+
+model HelpTicket {
+  id String @id @default(uuid())
+  ticketNumber String @unique
+
+  createdByUserId String
+  createdByUser   User   @relation("HelpTicketCreatedBy", fields: [createdByUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  jobId String?
+  job   Job? @relation(fields: [jobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  workerId String?
+  worker   Worker? @relation(fields: [workerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  organisationId String?
+  organisation   Organisation? @relation(fields: [organisationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  subject String
+  message String
+
+  status HelpTicketStatus @default(OPEN)
+
+  resolutionNote  String?
+  rejectionReason String?
+
+  reviewedByUserId String?
+  reviewedByUser   User? @relation("HelpTicketReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  reviewedAt       DateTime?
+  resolvedAt       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdByUserId])
+  @@index([status])
+  @@index([reviewedByUserId])
+  @@index([ticketNumber])
+  @@index([jobId])
+  @@index([reservationId])
+  @@index([workerId])
+  @@index([organisationId])
 }
