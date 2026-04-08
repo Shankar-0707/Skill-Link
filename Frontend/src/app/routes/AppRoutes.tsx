@@ -48,6 +48,7 @@ import { AdminReservationsPage } from "@/pages/admin/AdminReservationsPage";
 import { AdminUsersPage } from "@/pages/admin/AdminUsersPage";
 import { KycManagementPage } from "@/pages/admin/KycManagementPage";
 import { AdminHelpCenterPage } from "@/pages/admin/AdminHelpCenterPage";
+import { AdminHelpTicketPage } from "@/pages/admin/AdminHelpTicketPage";
 
 
 export const AppRoutes: React.FC = () => {
@@ -119,6 +120,7 @@ export const AppRoutes: React.FC = () => {
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/kyc" element={<KycManagementPage />} />
             <Route path="/admin/help" element={<AdminHelpCenterPage />} />
+            <Route path="/admin/help/:ticketId" element={<AdminHelpTicketPage />} />
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           </Route>
         </Route>

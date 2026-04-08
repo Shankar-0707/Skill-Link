@@ -148,7 +148,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           icon={HelpCircle} 
           label="Help Center" 
           href="/admin/help" 
-          isActive={location.pathname === "/admin/help"}
+          isActive={location.pathname.startsWith("/admin/help")}
           isCollapsed={isCollapsed}
         />
         <button
