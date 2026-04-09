@@ -18,6 +18,7 @@ import { SettingsPage as CustomerSettingsPage } from "../../pages/customer/Setti
 import { ProductsPage } from "../../pages/customer/ProductsPage";
 import { MyReservationsPage } from "../../pages/customer/MyReservationsPage";
 import { CustomerHelpCenterPage } from "../../pages/customer/HelpCenterPage";
+import { CustomerHelpTicketPage } from "../../pages/customer/HelpTicketPage";
 // import { WorkerHomePage } from "../../pages/WorkerHomePage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicOnlyRoute } from "./PublicOnlyRoute";
@@ -30,6 +31,7 @@ import { MyAssignmentsPage as MyWork } from "@/pages/worker/MyAssignments";
 import { WorkerJobDetailPage as WorkerJobDetail } from "@/pages/worker/JobDetail";
 import { WorkerSettingsPage as WorkerSettings } from "@/pages/worker/Settings";
 import { WorkerHelpCenterPage } from "@/pages/worker/HelpCenterPage";
+import { WorkerHelpTicketPage } from "@/pages/worker/HelpTicketPage";
 import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
 import OrganisationLayout from "@/pages/organisation/OrganisationLayout";
 import OrganisationPage from "@/pages/organisation/OrganisationPage";
@@ -40,6 +42,7 @@ import ProductExplorePage from "@/pages/organisation/ProductExplorePage";
 import AllReservationsPage from "@/pages/organisation/AllReservationsPage";
 import PendingReservationsPage from "@/pages/organisation/PendingReservationsPage";
 import OrganisationHelpCenterPage from "@/pages/organisation/HelpCenterPage";
+import OrganisationHelpTicketPage from "@/pages/organisation/HelpTicketPage";
 // import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
 import { AdminLayout } from "@/features/admin/components/layout/AdminLayout";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
@@ -80,6 +83,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/user/products" element={<ProductsPage />} />
           <Route path="/user/products/reservations" element={<MyReservationsPage />} />
           <Route path="/user/help" element={<CustomerHelpCenterPage />} />
+          <Route path="/user/help/ticket" element={<CustomerHelpTicketPage />} />
           <Route path="/user/schedule" element={<ComingSoonPage />} />
           <Route path="/user/settings" element={<CustomerSettingsPage />} />
         </Route>
@@ -92,6 +96,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/worker/earnings" element={<ComingSoonPage />} />
           <Route path="/worker/schedule" element={<ComingSoonPage />} />
           <Route path="/worker/help" element={<WorkerHelpCenterPage />} />
+          <Route path="/worker/help/ticket" element={<WorkerHelpTicketPage />} />
           <Route path="/worker/settings" element={<WorkerSettings />} />
           <Route path="/worker" element={<Navigate to="/worker/dashboard" replace />} />
         </Route>
@@ -105,6 +110,7 @@ export const AppRoutes: React.FC = () => {
             <Route path="/organisation/products/edit/:id" element={<EditProductPage />} />
             <Route path="/organisation/products/:id/explore" element={<ProductExplorePage />} />
             <Route path="/organisation/help" element={<OrganisationHelpCenterPage />} />
+            <Route path="/organisation/help/ticket" element={<OrganisationHelpTicketPage />} />
             
             {/* Reservations */}
             <Route path="/organisation/reservations/all" element={<AllReservationsPage />} />
