@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { LandingPage } from "../../pages/landing/LandingPage";
 import { LoginPage } from "../../pages/auth/LoginPage";
 import { RegisterPage } from "../../pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "../../pages/auth/ForgotPasswordPage";
@@ -117,7 +118,7 @@ export const AppRoutes: React.FC = () => {
       </Route>
 
       <Route path="/preview" element={<ThemePreview />} />
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
