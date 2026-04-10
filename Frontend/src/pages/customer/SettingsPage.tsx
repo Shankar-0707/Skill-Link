@@ -1,24 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, Bell, Palette, Trash2, LogOut, Camera, Shield, Mail, ChevronRight } from 'lucide-react';
+import { User, Lock, Bell, Palette, Trash2, Camera, Shield, Mail, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { Layout } from '../../features/customer/components/layout/Layout';
 import { useAuth } from "../../app/context/useAuth";
+import { authApi } from "../../features/auth/api/auth";
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout, deleteAccount } = useAuth();
+  const { user, deleteAccount } = useAuth();
   const [activeSection, setActiveSection] = useState<'profile' | 'security' | 'notifications' | 'appearance'>('profile');
+  const [passwordResetSent, setPasswordResetSent] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [resetToken, setResetToken] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetError, setResetError] = useState<string | null>(null);
 
   if (!user) return null;
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (err) {
-      console.error('Logout failed:', err);
-    }
-  };
+  // console.log('SettingsPage: Current User Context:', user);
+
+  // const handleLogout = async () => {
+  //   try {
+  //     await logout();
+  //     navigate('/login');
+  //   } catch (err) {
+  //     console.error('Logout failed:', err);
+  //   }
+  // };
 
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to permanently delete your account? This action cannot be undone.')) {
@@ -28,6 +37,56 @@ export const SettingsPage: React.FC = () => {
       } catch (err) {
         console.error('Delete account failed:', err);
       }
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!user?.email) {
+      alert("Account email not found in your profile. Please try logging out and back in, or contact support.");
+      return;
+    }
+    
+    try {
+      setIsResettingPassword(true);
+      setResetError(null);
+      await authApi.forgotPassword(user.email);
+      setPasswordResetSent(true);
+    } catch (err: any) {
+      console.error('Failed to send password reset:', err);
+      setResetError('Failed to send reset link. Please try again.');
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  const handleCompletePasswordReset = async () => {
+    if (!resetToken || !newPassword || !confirmPassword) {
+      setResetError('All fields are required.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setResetError('Passwords do not match.');
+      return;
+    }
+    if (newPassword.length < 8) {
+      setResetError('Password must be at least 8 characters.');
+      return;
+    }
+
+    try {
+      setIsResettingPassword(true);
+      setResetError(null);
+      await authApi.resetPassword(resetToken, newPassword);
+      setPasswordResetSent(false);
+      setResetToken('');
+      setNewPassword('');
+      setConfirmPassword('');
+      alert('Password updated successfully!');
+    } catch (err: any) {
+      console.error('Failed to reset password:', err);
+      setResetError(err?.response?.data?.message || 'Failed to reset password. Please check your token.');
+    } finally {
+      setIsResettingPassword(false);
     }
   };
 
@@ -65,13 +124,13 @@ export const SettingsPage: React.FC = () => {
             </nav>
 
             <div className="mt-8 pt-8 border-t border-border">
-              <button
+              {/* <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-label font-medium text-muted-foreground hover:bg-red-50 hover:text-destructive transition-all"
               >
                 <LogOut className="w-4 h-4" />
                 Logout
-              </button>
+              </button> */}
               <button
                 onClick={handleDeleteAccount}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-label font-medium text-muted-foreground hover:bg-red-50 hover:text-destructive transition-all mt-1"
@@ -158,20 +217,96 @@ export const SettingsPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <button className="w-full flex items-center justify-between p-4 border border-border rounded-xl hover:bg-surface-container transition-all group">
-                    <div className="flex items-center gap-4">
-                      <Lock className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-label font-medium text-foreground">Change Password</span>
+                  {!passwordResetSent ? (
+                    <button 
+                      type="button"
+                      onClick={handleChangePassword}
+                      disabled={isResettingPassword}
+                      className="w-full flex items-center justify-between p-4 border border-border rounded-xl hover:bg-surface-container transition-all group disabled:opacity-70 disabled:cursor-not-allowed select-none"
+                    > 
+                      <div className="flex items-center gap-4"> 
+                        <Lock className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-label font-medium text-foreground">
+                          {isResettingPassword ? 'Sending link...' : 'Change Password'}
+                        </span>
+                      </div>
+                      {!isResettingPassword && (
+                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" /> 
+                      )}
+                    </button>
+                  ) : (
+                    <div className="p-6 border border-border rounded-xl bg-surface-container/30 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                      <div className="flex items-center gap-2 text-green-600 mb-2">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span className="text-sm font-semibold">Reset token sent to your email!</span>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-label font-bold text-muted-foreground uppercase tracking-wider">Reset Token</label>
+                          <input 
+                            type="text" 
+                            value={resetToken}
+                            onChange={(e) => setResetToken(e.target.value)}
+                            placeholder="Enter the token from your email"
+                            className="w-full px-4 py-2.5 bg-background border border-border rounded-xl text-sm font-body text-foreground focus:outline-none focus:border-outline" 
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-label font-bold text-muted-foreground uppercase tracking-wider">New Password</label>
+                            <input 
+                              type="password" 
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              placeholder="Min 8 characters"
+                              className="w-full px-4 py-2.5 bg-background border border-border rounded-xl text-sm font-body text-foreground focus:outline-none focus:border-outline" 
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-label font-bold text-muted-foreground uppercase tracking-wider">Confirm Password</label>
+                            <input 
+                              type="password" 
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              placeholder="Repeat password"
+                              className="w-full px-4 py-2.5 bg-background border border-border rounded-xl text-sm font-body text-foreground focus:outline-none focus:border-outline" 
+                            />
+                          </div>
+                        </div>
+
+                        {resetError && (
+                          <p className="text-xs text-destructive font-medium bg-red-50 p-2 rounded-lg">{resetError}</p>
+                        )}
+
+                        <div className="flex gap-3 pt-2">
+                          <button
+                            onClick={() => setPasswordResetSent(false)}
+                            className="flex-1 px-4 py-2.5 border border-border text-foreground text-sm font-label font-semibold rounded-xl hover:bg-surface-container transition-all"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleCompletePasswordReset}
+                            disabled={isResettingPassword}
+                            className="flex-[2] px-4 py-2.5 bg-foreground text-background text-sm font-label font-semibold rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                          >
+                            {isResettingPassword ? (
+                              <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                            ) : 'Update Password'}
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-                  </button>
-                  <button className="w-full flex items-center justify-between p-4 border border-border rounded-xl hover:bg-surface-container transition-all group">
+                  )}
+                  {/* <button className="w-full flex items-center justify-between p-4 border border-border rounded-xl hover:bg-surface-container transition-all group">
                     <div className="flex items-center gap-4">
                       <Shield className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm font-label font-medium text-foreground">Login Activity</span>
                     </div>
                     <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-                  </button>
+                  </button> */}
                 </div>
               </div>
             )}

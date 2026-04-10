@@ -15,6 +15,7 @@ import { JobDetailPage } from "../../pages/customer/JobDetailPage";
 import { WorkerProfilePage } from "../../pages/customer/WorkerProfilePage";
 import { ComingSoonPage } from "../../pages/customer/ComingSoonPage";
 import { SettingsPage as CustomerSettingsPage } from "../../pages/customer/SettingsPage";
+import { HelpPage } from "../../pages/customer/HelpPage";
 import { ProductsPage } from "../../pages/customer/ProductsPage";
 import { MyReservationsPage } from "../../pages/customer/MyReservationsPage";
 // import { WorkerHomePage } from "../../pages/WorkerHomePage";
@@ -74,6 +75,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/user/products/reservations" element={<MyReservationsPage />} />
           <Route path="/user/schedule" element={<ComingSoonPage />} />
           <Route path="/user/settings" element={<CustomerSettingsPage />} />
+          <Route path="/user/help" element={<HelpPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRole="WORKER" />}>

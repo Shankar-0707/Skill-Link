@@ -14,7 +14,9 @@ import {
   AlertCircle,
   Loader2,
   Trash2,
-  ChevronRight
+  // ChevronRight,
+  Search,
+  // IndianRupee
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/shared/utils/cn";
@@ -39,6 +41,7 @@ export const MyReservationsPage: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchReservations = useCallback(async () => {
     setLoading(true);
@@ -55,6 +58,11 @@ export const MyReservationsPage: React.FC = () => {
   useEffect(() => {
     fetchReservations();
   }, [fetchReservations]);
+  
+  const filteredReservations = reservations.filter(res => 
+    res.product?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    res.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handlePickUp = async (id: string) => {
     setIsActionLoading(id);
@@ -88,107 +96,122 @@ export const MyReservationsPage: React.FC = () => {
         subtitle="Manage your current and past history of product reservations from local shops."
       />
 
+      {/* Search Bar Section */}
+      <div className="mb-8 max-w-lg">
+        <div className="relative group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-foreground transition-colors" />
+          <input
+            type="text"
+            placeholder="Search products by name or reservation ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3.5 bg-surface-container border border-border/80 rounded-2xl text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-outline focus:ring-4 focus:ring-foreground/5 transition-all"
+          />
+        </div>
+      </div>
+
       {loading && reservations.length === 0 ? (
         <div className="py-24 flex flex-col items-center justify-center">
           <Loader2 size={40} className="animate-spin text-foreground opacity-20" />
           <p className="mt-4 text-sm font-bold text-muted-foreground uppercase tracking-widest animate-pulse">Syncing History...</p>
         </div>
-      ) : reservations.length > 0 ? (
-        <div className="space-y-6 max-w-5xl">
-          {reservations.map(res => (
+      ) : filteredReservations.length > 0 ? (
+        <div className="flex flex-col gap-4 max-w-5xl">
+          {filteredReservations.map(res => (
             <div 
               key={res.id}
-              className="bg-white rounded-3xl border border-border/60 shadow-sm hover:shadow-md transition-all p-6 relative group overflow-hidden"
+              className="bg-background border border-border rounded-2xl p-4 hover:shadow-md hover:border-outline transition-all duration-200 group flex flex-col md:flex-row md:items-center gap-6"
             >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-center gap-6">
-                  <div className="w-20 h-20 bg-secondary/30 rounded-2xl overflow-hidden shrink-0">
-                    {res.product?.images?.[0]?.imageUrl ? (
-                      <img src={res.product.images[0].imageUrl} alt={res.product.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
-                        <ShoppingBag size={32} />
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                       <span className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
-                        STATUS_CLASSES[res.status as keyof typeof STATUS_CLASSES] || "bg-secondary text-foreground"
-                      )}>
-                        {STATUS_ICONS[res.status as keyof typeof STATUS_ICONS] || <History size={16} />}
-                        {res.status}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-bold tracking-widest flex items-center gap-1">
-                        <ChevronRight size={10} />
-                        ID: #{res.id.substring(0, 8)}
-                      </span>
+              {/* Left Section: Image and Core Info */}
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className="w-16 h-16 bg-surface-container rounded-xl overflow-hidden shrink-0 border border-border/40">
+                  {res.product?.images?.[0]?.imageUrl ? (
+                    <img src={res.product.images[0].imageUrl} alt={res.product.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                      <ShoppingBag size={24} />
                     </div>
-                    <h3 className="text-xl font-black text-foreground">{res.product?.name || "Unknown Product"}</h3>
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                      Reserved from <span className="text-primary">{res.product?.organisationId ? "Local Business" : "Shop"}</span>
-                    </p>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className={cn(
+                      "inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter border",
+                      STATUS_CLASSES[res.status as keyof typeof STATUS_CLASSES] || "bg-secondary text-foreground"
+                    )}>
+                      {STATUS_ICONS[res.status as keyof typeof STATUS_ICONS] || <History size={10} />}
+                      {res.status.replace('_', ' ')}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-bold tracking-tight bg-surface-container px-1.5 py-0.5 rounded-lg">
+                      #{res.id.substring(0, 6)}
+                    </span>
+                  </div>
+                  <h3 className="font-headline font-bold text-sm text-foreground truncate max-w-xs">
+                    {res.product?.name || "Unknown Product"}
+                  </h3>
+                  <div className="flex items-center gap-3 mt-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                    <div className="flex items-center gap-1">
+                      <Calendar size={12} className="opacity-50" />
+                      {format(parseISO(res.createdAt), "dd MMM, HH:mm")}
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 py-4 md:py-0 border-y md:border-y-0 border-border/40">
-                  <div className="flex flex-col md:items-end">
-                    <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1">Details</span>
-                    <p className="text-sm font-bold text-foreground">{res.quantity}x Units @ ₹{res.product?.price || 0}</p>
-                  </div>
-                  <div className="flex flex-col md:items-end">
-                    <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mb-1">Total Paid</span>
-                    <p className="text-2xl font-black text-primary tracking-tighter">₹{(res.quantity * (res.product?.price || 0)).toLocaleString()}</p>
-                  </div>
+              {/* Middle Section: Quantity & Price */}
+              <div className="flex items-center gap-8 px-6 border-x border-border/40 border-dashed hidden md:flex">
+                <div>
+                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Quantity</p>
+                  <p className="text-sm font-black text-foreground">{res.quantity} units</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Price / Unit</p>
+                  <p className="text-sm font-black text-foreground">₹{(res.product?.price || 0).toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* Right Section: Total & Actions */}
+              <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 shrink-0 transition-all">
+                <div className="text-left md:text-right">
+                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Total Paid</p>
+                  <p className="text-xl font-black text-primary tracking-tight">
+                    ₹{(res.quantity * (res.product?.price || 0)).toLocaleString()}
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-2">
                   {res.status === "CONFIRMED" && (
                     <button 
                       onClick={() => handlePickUp(res.id)}
                       disabled={!!isActionLoading}
-                      className="flex-1 md:flex-none px-6 py-3.5 bg-foreground text-background rounded-2xl text-xs font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                      className="px-5 py-2.5 bg-foreground text-background rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-sm"
                     >
-                      {isActionLoading === res.id ? <Loader2 size={16} className="animate-spin" /> : <Package size={16} />}
-                      Mark Picked Up
+                      {isActionLoading === res.id ? <Loader2 size={12} className="animate-spin" /> : <Package size={12} />}
+                      Pick Up
                     </button>
                   )}
                   {["PENDING", "CONFIRMED"].includes(res.status) && (
                     <button 
                       onClick={() => handleCancelByCustomer(res.id)}
                       disabled={!!isActionLoading}
-                      className="px-6 py-3.5 border border-red-500/20 text-red-500 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-50 transition-all flex items-center gap-2"
+                      className="px-5 py-2.5 border border-red-500/10 text-red-500 bg-red-50/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition-all flex items-center gap-2"
                     >
-                      {isActionLoading === res.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                      {isActionLoading === res.id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
                       Cancel
                     </button>
                   )}
                 </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap items-center gap-6 pt-6 border-t border-border/40 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                <div className="flex items-center gap-2">
-                  <Calendar size={14} className="opacity-50" />
-                  Reserved: {format(parseISO(res.createdAt), "dd MMM yyyy, HH:mm")}
-                </div>
-                {res.expiresAt && (
-                  <div className="flex items-center gap-2 text-amber-600/80">
-                    <Clock size={14} className="opacity-50" />
-                    Expires: {format(parseISO(res.expiresAt), "dd MMM, HH:mm")}
-                  </div>
-                )}
               </div>
             </div>
           ))}
         </div>
       ) : (
         <EmptyState 
-          icon="🛍️" 
-          title="No reservations yet" 
-          description="You haven't made any product reservations yet. Explore the marketplace to find premium items."
-          action={{ label: "Go to Marketplace", onClick: () => window.location.href = "/user/products" }}
+          icon={searchQuery ? "🔍" : "🛍️"} 
+          title={searchQuery ? "No matching results" : "No reservations yet"} 
+          description={searchQuery ? `No reservations found for "${searchQuery}".` : "You haven't made any product reservations yet."}
+          action={searchQuery ? { label: "Clear Search", onClick: () => setSearchQuery("") } : { label: "Go to Marketplace", onClick: () => window.location.href = "/user/products" }}
         />
       )}
     </Layout>

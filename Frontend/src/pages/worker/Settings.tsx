@@ -13,6 +13,7 @@ import type { Worker } from '../../features/customer/types';
 import { Toast } from '../../features/worker/components/ui';
 import { kycService } from '../../features/worker/api/kycService';
 import type { KycStatusResponse, DocumentType, KycDraftDocument } from '../../features/worker/api/kycService';
+import { authApi } from '../../features/auth/api/auth';
 
 type Section = 'profile' | 'service' | 'kyc' | 'security';
 
@@ -322,6 +323,12 @@ export const WorkerSettingsPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState<Section>('profile');
   const [toast, setToast] = useState('');
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [passwordResetSent, setPasswordResetSent] = useState(false);
+  const [resetToken, setResetToken] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetError, setResetError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -368,6 +375,57 @@ export const WorkerSettingsPage: React.FC = () => {
   const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } };
   const removeSkill = (i: number) => setFormData({ ...formData, skills: formData.skills.filter((_, idx) => idx !== i) });
   const handleLogout = async () => { try { await logout(); navigate('/login'); } catch { showToast('Logout failed. Please try again.'); } };
+  
+  const handlePasswordReset = async () => {
+    if (!user?.email) return;
+    try {
+      setIsResettingPassword(true);
+      setResetError(null);
+      await authApi.forgotPassword(user.email);
+      setPasswordResetSent(true);
+      showToast('Password reset link sent to your email!');
+    } catch (err) {
+      console.error('Failed to send password reset:', err);
+      showToast('Failed to send reset link. Try again.');
+      setResetError('Failed to send reset link.');
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  const handleCompletePasswordReset = async () => {
+    if (!resetToken || !newPassword || !confirmPassword) {
+      setResetError('All fields are required.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setResetError('Passwords do not match.');
+      return;
+    }
+    if (newPassword.length < 8) {
+      setResetError('Password must be at least 8 characters.');
+      return;
+    }
+
+    try {
+      setIsResettingPassword(true);
+      setResetError(null);
+      await authApi.resetPassword(resetToken, newPassword);
+      setPasswordResetSent(false);
+      setResetToken('');
+      setNewPassword('');
+      setConfirmPassword('');
+      showToast('Password updated successfully!');
+    } catch (err: any) {
+      console.error('Failed to reset password:', err);
+      const msg = err?.response?.data?.message || 'Failed to reset password. Check your token.';
+      setResetError(msg);
+      showToast(msg);
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -522,16 +580,91 @@ export const WorkerSettingsPage: React.FC = () => {
             {activeSection === 'security' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="space-y-4">
-                  <button className="w-full flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 transition-all">
-                    <div className="flex items-center gap-3 text-left">
-                      <Lock className="w-4 h-4 text-gray-400" />
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">Change Password</p>
-                        <p className="text-xs text-gray-400">Keep your account secure with a strong password.</p>
+                  {!passwordResetSent ? (
+                    <button 
+                      onClick={handlePasswordReset}
+                      disabled={isResettingPassword}
+                      className="w-full flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 transition-all hover:bg-gray-100 disabled:opacity-70 disabled:cursor-not-allowed group transition-all"
+                    >
+                      <div className="flex items-center gap-3 text-left">
+                        <Lock className="w-4 h-4 text-gray-400" />
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">
+                            {isResettingPassword ? 'Sending link...' : 'Change Password'}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            'Keep your account secure with a strong password.'
+                          </p>
+                        </div>
+                      </div>
+                      {!isResettingPassword && <ChevronRight className="w-4 h-4 text-gray-300 group-hover:translate-x-1 transition-transform" />}
+                    </button>
+                  ) : (
+                    <div className="p-6 bg-gray-50 border border-gray-200 rounded-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+                      <div className="flex items-center gap-2 text-green-600">
+                        <CheckCircle2 className="w-5 h-5" />
+                        <span className="text-sm font-bold">Reset token sent to your email!</span>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Reset Token</label>
+                          <input 
+                            type="text"
+                            value={resetToken}
+                            onChange={(e) => setResetToken(e.target.value)}
+                            placeholder="Enter token from email"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">New Password</label>
+                            <input 
+                              type="password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              placeholder="Min 8 chars"
+                              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Confirm Password</label>
+                            <input 
+                              type="password"
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              placeholder="Repeat it"
+                              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400"
+                            />
+                          </div>
+                        </div>
+
+                        {resetError && (
+                          <p className="text-xs text-red-500 font-bold bg-red-50 p-2 rounded-lg border border-red-100">{resetError}</p>
+                        )}
+
+                        <div className="flex gap-3 pt-2">
+                          <button
+                            onClick={() => setPasswordResetSent(false)}
+                            className="flex-1 py-3 border border-gray-200 text-gray-600 font-bold text-sm rounded-xl hover:bg-white transition-all"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleCompletePasswordReset}
+                            disabled={isResettingPassword}
+                            className="flex-[2] py-3 bg-gray-900 text-white font-bold text-sm rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                          >
+                            {isResettingPassword ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : 'Update Password'}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                  </button>
+                  )}
                   <button className="w-full flex items-center justify-between p-4 bg-red-50/30 border border-red-100 rounded-xl hover:border-red-200 transition-all group">
                     <div className="flex items-center gap-3 text-left">
                       <AlertCircle className="w-4 h-4 text-red-400" />

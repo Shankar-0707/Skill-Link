@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CATEGORIES } from '../../shared/constants/categories';
 import type { Worker } from '../../features/customer/types';
 import { WorkerCard } from '../../features/customer/worker/Workercard';
@@ -19,6 +19,8 @@ export const UserHomePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('Electricians');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,16 +58,20 @@ export const UserHomePage: React.FC = () => {
 
   if (!user) return null;
 
-  const filteredWorkers = workers
-    .filter(w => 
-      w.skills.some(skill => {
-        const s = skill.toLowerCase();
-        const c = activeCategory.toLowerCase();
-        // Match "Electrician" skill to "Electricians" category, and vice-versa
-        return s.includes(c) || c.includes(s) || (c.endsWith('s') && s.includes(c.slice(0, -1)));
-      })
-    )
-    .slice(0, 4);
+  const allFilteredWorkers = workers.filter(w => 
+    w.skills.some(skill => {
+      const s = skill.toLowerCase();
+      const c = activeCategory.toLowerCase();
+      // Match "Electrician" skill to "Electricians" category, and vice-versa
+      return s.includes(c) || c.includes(s) || (c.endsWith('s') && s.includes(c.slice(0, -1)));
+    })
+  );
+
+  const totalPages = Math.ceil(allFilteredWorkers.length / itemsPerPage);
+  const paginatedWorkers = allFilteredWorkers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleHire = (worker: Worker) => {
     navigate(`/user/worker/${worker.id}`);
@@ -81,10 +87,10 @@ export const UserHomePage: React.FC = () => {
       <PageHeader
         title="Find your local expert."
         subtitle="Connect with verified professionals and local hardware suppliers within your immediate vicinity."
-        action={{
-          label: 'Create Request',
-          onClick: () => navigate('/user/create-job')
-        }}
+        // action={{
+        //   label: 'Create Request',
+        //   onClick: () => navigate('/user/create-job')
+        // }}
       />
 
       {/* ── Category Pills ── */}
@@ -95,7 +101,10 @@ export const UserHomePage: React.FC = () => {
             label={cat.label}
             icon={cat.icon}
             active={activeCategory === cat.label}
-            onClick={() => setActiveCategory(cat.label)}
+            onClick={() => {
+              setActiveCategory(cat.label);
+              setCurrentPage(1);
+            }}
           />
         ))}
       </div>
@@ -104,7 +113,6 @@ export const UserHomePage: React.FC = () => {
       <div className="mb-12">
         <SectionHeader
           title="Nearby Experts"
-          action={{ label: 'View All', onClick: () => navigate('/user/browse-workers') }}
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -122,15 +130,15 @@ export const UserHomePage: React.FC = () => {
                 action={{ label: 'Try Again', onClick: () => window.location.reload() }}
               />
             </div>
-          ) : filteredWorkers.length > 0 ? (
-            filteredWorkers.map((worker, i) => (
+          ) : paginatedWorkers.length > 0 ? (
+            paginatedWorkers.map((worker, i) => (
               <WorkerCard
                 key={worker.id}
                 worker={worker}
                 onHire={handleHire}
                 onViewProfile={handleViewProfile}
-                distanceMiles={i === 0 ? 0.8 : 1.2}
-                startsFrom={i === 0 ? 45 : 55}
+                distanceMiles={0.8 + ((currentPage - 1) * 0.5)}
+                startsFrom={45 + ((currentPage - 1) * 10)}
               />
             ))
           ) : (
@@ -143,6 +151,42 @@ export const UserHomePage: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* ── Pagination Controls ── */}
+        {!loading && totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-8">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-background text-foreground hover:bg-surface-container disabled:opacity-30 disabled:cursor-not-allowed transition-all mr-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            
+            <div className="flex items-center gap-2">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-9 h-9 flex items-center justify-center rounded-xl text-xs font-bold transition-all
+                    ${currentPage === page 
+                      ? 'bg-foreground text-background shadow-md scale-110 active:scale-95' 
+                      : 'bg-background text-muted-foreground border border-border hover:border-outline hover:text-foreground active:scale-95'}`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-background text-foreground hover:bg-surface-container disabled:opacity-30 disabled:cursor-not-allowed transition-all ml-2"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Popular at Local Shops ── */}
@@ -190,4 +234,4 @@ export const UserHomePage: React.FC = () => {
     </Layout>
   );
 };
-
+
