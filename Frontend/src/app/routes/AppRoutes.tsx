@@ -38,6 +38,7 @@ import EditProductPage from "@/pages/organisation/EditProductPage";
 import ProductExplorePage from "@/pages/organisation/ProductExplorePage";
 import AllReservationsPage from "@/pages/organisation/AllReservationsPage";
 import PendingReservationsPage from "@/pages/organisation/PendingReservationsPage";
+import ReservationDetailPage from "@/pages/organisation/ReservationDetailPage";
 // import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
 import { AdminLayout } from "@/features/admin/components/layout/AdminLayout";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
@@ -100,6 +101,7 @@ export const AppRoutes: React.FC = () => {
             {/* Reservations */}
             <Route path="/organisation/reservations/all" element={<AllReservationsPage />} />
             <Route path="/organisation/reservations/pending" element={<PendingReservationsPage />} />
+            <Route path="/organisation/reservations/:id" element={<ReservationDetailPage />} />
           </Route>
         </Route>
 

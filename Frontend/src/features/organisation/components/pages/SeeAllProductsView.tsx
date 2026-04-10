@@ -118,50 +118,48 @@ export const SeeAllProductsView = () => {
   const activeSortLabel = SORT_OPTIONS.find(opt => opt.key === activeSort)?.label || "Sort";
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-20 px-4 sm:px-6">
+    <div className="max-w-7xl mx-auto space-y-6 pb-20 px-4 sm:px-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pt-8">
-        <div className="space-y-2">
-          <h1 className="text-5xl font-black text-foreground tracking-tighter leading-none">My Products</h1>
-          <p className="text-muted-foreground font-medium max-w-xl text-lg leading-relaxed">
-            Manage your entire product catalog, monitor stock levels, and optimize your business performance.
-          </p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-6">
+        <div className="space-y-1">
+          <p className="text-primary/70 font-semibold tracking-[0.2em] uppercase text-[9px] mb-1">Inventory Management</p>
+          <h1 className="text-3xl font-black text-foreground tracking-tighter leading-none">My Products</h1>
         </div>
         <Link
           to="/organisation/products/create"
-          className="flex items-center gap-2.5 px-8 py-4 bg-primary text-white rounded-[1.5rem] font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all group shrink-0"
+          className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all group shrink-0 text-sm"
         >
-          <Plus size={20} className="group-hover:rotate-90 transition-transform" />
-          <span>Create New Product</span>
+          <Plus size={18} className="group-hover:rotate-90 transition-transform" />
+          <span>New Product</span>
         </Link>
       </div>
 
       {/* Control Bar */}
-      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-4 rounded-[2.5rem] border border-border/50 shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3 rounded-2xl border border-border/50 shadow-sm">
         {/* Search */}
-        <div className="relative w-full lg:max-w-md group">
+        <div className="relative w-full sm:max-w-xs group">
           <Search
-            className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
-            size={20}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
+            size={16}
           />
           <input
             type="text"
-            placeholder="Search products by name..."
+            placeholder="Search catalog..."
             value={params.search}
             onChange={(e) => setParams((prev) => ({ ...prev, search: e.target.value }))}
-            className="w-full pl-14 pr-6 py-4 bg-secondary/20 rounded-[1.5rem] border-transparent focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all outline-none font-medium placeholder:text-muted-foreground/60"
+            className="w-full pl-9 pr-4 py-2 bg-secondary/20 rounded-xl border-transparent focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all outline-none text-xs font-medium placeholder:text-muted-foreground/60"
           />
         </div>
 
         {/* Sort Dropdown */}
-        <div className="relative sort-dropdown-container w-full lg:w-auto">
+        <div className="relative sort-dropdown-container w-full sm:w-auto">
           <button 
             onClick={() => setIsSortOpen(!isSortOpen)}
-            className="flex items-center justify-center gap-3 px-8 py-4 rounded-[1.5rem] bg-secondary/30 text-foreground font-bold hover:bg-secondary/50 transition-all border border-transparent w-full lg:w-48 shadow-sm group"
+            className="flex items-center justify-center gap-2 px-5 py-2 rounded-xl bg-secondary/30 text-foreground text-xs font-bold hover:bg-secondary/50 transition-all border border-transparent w-full sm:w-40 shadow-sm group"
           >
-            <Filter size={18} className="text-primary group-hover:rotate-180 transition-transform duration-500" />
-            <span className="flex-1 text-left">{activeSort === "latest" ? "Filter" : activeSortLabel}</span>
-            <Clock size={14} className={cn("text-muted-foreground/40 transition-transform duration-300", isSortOpen && "rotate-180")} />
+            <Filter size={14} className="text-primary group-hover:rotate-180 transition-transform duration-500" />
+            <span className="flex-1 text-left">{activeSort === "latest" ? "Sort" : activeSortLabel}</span>
+            <Clock size={12} className={cn("text-muted-foreground/40 transition-transform duration-300", isSortOpen && "rotate-180")} />
           </button>
 
           {isSortOpen && (

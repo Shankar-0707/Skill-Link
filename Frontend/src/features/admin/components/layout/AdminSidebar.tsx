@@ -60,7 +60,7 @@ export const AdminSidebar: React.FC = () => {
   return (
     <aside 
       className={cn(
-        "h-screen sticky top-0 bg-[#f2f4f6] flex flex-col pt-8 pb-4 transition-all duration-300 ease-in-out z-40 shrink-0",
+        "h-screen sticky top-0 bg-[#f2f4f6] flex flex-col pt-8 pb-4 transition-all duration-300 ease-in-out z-40 shrink-0 overflow-hidden",
         isCollapsed ? "w-20" : "w-64"
       )}
     >
@@ -99,7 +99,7 @@ export const AdminSidebar: React.FC = () => {
         )}
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar">
+      <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden no-scrollbar">
         <SidebarItem 
           icon={LayoutDashboard} 
           label="Dashboard" 
