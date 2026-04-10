@@ -90,7 +90,7 @@ export const LoginForm: React.FC = () => {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="Enter your email"
-            className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
+            className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50/80 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition-all placeholder:text-slate-500 focus:border-primary/30 focus:bg-white focus:ring-4 focus:ring-primary/10"
           />
         </div>
       </div>

@@ -1,0 +1,8 @@
+import React from 'react';
+import { ReservationDetailView } from '@/features/organisation/components/pages/ReservationDetailView';
+
+const ReservationDetailPage = () => {
+  return <ReservationDetailView />;
+};
+
+export default ReservationDetailPage;
