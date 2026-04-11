@@ -87,7 +87,7 @@ export const MyJobsPage: React.FC = () => {
       {/* Stats row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <StatCard label="Total Jobs"    value={stats.total}     />
-        <StatCard label="Active"        value={stats.active}    accent="warning"  sub="posted, assigned or in progress" />
+        <StatCard label="Active"        value={stats.active}    accent="warning"   />
         <StatCard label="Completed"     value={stats.completed} accent="success"  />
         <StatCard label="Total Spent"   value={`₹${stats.totalSpend.toLocaleString()}`} sub="on completed jobs" />
       </div>
@@ -135,4 +135,4 @@ export const MyJobsPage: React.FC = () => {
       )}
     </Layout>
   );
-};
+};

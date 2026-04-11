@@ -11,9 +11,12 @@ import {
   HelpCircle,
   Zap,
   Plus,
+  LogOut
 } from 'lucide-react';
 
 import { useNavigate, useLocation } from 'react-router-dom';
+
+import { useAuth } from "../../../../app/context/useAuth";
 
 const NAV_ITEMS = [
   { id: 'marketplace',    label: 'Marketplace',      icon: LayoutGrid,  path: '/user/home' },
@@ -37,8 +40,19 @@ export const Sidebar: React.FC = () => {
     if (location.pathname.startsWith('/user/products')) return 'products';
     if (location.pathname === '/user/schedule') return 'schedule';
     if (location.pathname === '/user/settings') return 'settings';
+    if (location.pathname === '/user/help') return 'help';
     return '';
   };
+
+  const { logout } = useAuth();
+   const handleLogout = async () => {
+      try {
+        await logout();
+        navigate('/login');
+      } catch (err) {
+        console.error('Logout failed:', err);
+      }
+    };
 
   const activePage = getActiveTab();
 
@@ -89,14 +103,33 @@ export const Sidebar: React.FC = () => {
           Post New Listing
         </button>
 
+          <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-label font-medium text-muted-foreground hover:bg-red-50 hover:text-destructive transition-all"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+
         <button
           onClick={() => navigate('/user/settings')}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-label font-medium text-muted-foreground hover:bg-surface-container hover:text-foreground transition-all"
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-label font-medium transition-all ${
+            activePage === 'settings'
+              ? 'bg-foreground text-background shadow-sm'
+              : 'text-muted-foreground hover:bg-surface-container hover:text-foreground'
+          }`}
         >
           <Settings className="w-4 h-4" />
           Settings
         </button>
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-label font-medium text-muted-foreground hover:bg-surface-container hover:text-foreground transition-all">
+        <button
+          onClick={() => navigate('/user/help')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-label font-medium transition-all ${
+            activePage === 'help'
+              ? 'bg-foreground text-background shadow-sm'
+              : 'text-muted-foreground hover:bg-surface-container hover:text-foreground'
+          }`}
+        >
           <HelpCircle className="w-4 h-4" />
           Help
         </button>

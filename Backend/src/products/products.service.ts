@@ -8,7 +8,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrganisationsService } from '../organisations/organisations.service';
-import { paginate, PaginationDto } from '../common/dto/pagination.dto';
+import { paginate, PaginationDto, parsePaginationInts } from '../common/dto/pagination.dto';
 import {
   CreateProductDto,
   UpdateProductDto,
@@ -34,7 +34,8 @@ export class ProductsService {
   // ─── Public: List products ────────────────────────────────────────────────
 
   async findAll(query: ListProductsDto & PaginationDto) {
-    const { organisationId, search, skip, limit, page } = query;
+    const { organisationId, search } = query;
+    const { page, limit, skip } = parsePaginationInts(query);
 
     const where: Prisma.ProductWhereInput = {
       isActive: true,
@@ -51,8 +52,8 @@ export class ProductsService {
     const [items, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
         where,
-        skip: Number(skip) || 0,
-        take: Number(limit) || 20,
+        skip,
+        take: limit,
         orderBy,
         include: {
           images: { take: 1, orderBy: { createdAt: 'asc' } },
@@ -257,6 +258,7 @@ export class ProductsService {
   async findMyProducts(userId: string, query: ListProductsDto & PaginationDto) {
     const orgId = await this.organisationsService.resolveOrgId(userId);
     const { search } = query;
+    const { page, limit, skip } = parsePaginationInts(query);
 
     const where: Prisma.ProductWhereInput = {
       organisationId: orgId,
@@ -271,8 +273,8 @@ export class ProductsService {
     const [items, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
         where,
-        skip: Number(query.skip) || 0,
-        take: Number(query.limit) || 20,
+        skip,
+        take: limit,
         orderBy,
         include: {
           images: true,
@@ -282,7 +284,7 @@ export class ProductsService {
       this.prisma.product.count({ where }),
     ]);
 
-    return paginate(items, total, query as PaginationDto);
+    return paginate(items, total, { page, limit } as PaginationDto);
   }
 
   // ─── Private: Ownership guard ─────────────────────────────────────────────

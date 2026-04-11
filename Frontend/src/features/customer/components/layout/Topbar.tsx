@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Bell, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { CurrentUser } from '../../types/index';
 
 interface TopbarProps {
@@ -12,6 +13,7 @@ const TABS = [''];
 
 export const Topbar: React.FC<TopbarProps> = ({ user, activeTab, onTabChange }) => {
   const [searchValue, setSearchValue] = useState('');
+  const navigate = useNavigate();
 
   return (
     <header className="fixed top-0 left-[200px] right-0 h-[64px] bg-background border-b border-border z-10 flex items-center px-6 gap-6">
@@ -63,7 +65,8 @@ export const Topbar: React.FC<TopbarProps> = ({ user, activeTab, onTabChange }) 
           <img
             src={user.profileImage ?? `https://i.pravatar.cc/36?u=${user.id}`}
             alt={user.name}
-            className="w-9 h-9 rounded-full object-cover border-2 border-border"
+            className="w-9 h-9 rounded-full object-cover border-2 border-border cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/user/settings')}
           />
         </div>
       </div>
