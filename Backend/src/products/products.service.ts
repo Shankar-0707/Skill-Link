@@ -112,7 +112,7 @@ export class ProductsService {
           description: dto.description,
           price: dto.price,
           stockQuantity: dto.stockQuantity,
-          category: dto.category,
+          ...(dto.category && { category: dto.category }),
         },
       });
 

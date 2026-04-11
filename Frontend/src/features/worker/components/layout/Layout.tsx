@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { WorkerSidebar } from './Sidebar';
 import { WorkerTopbar } from './Topbar';
 import { useAuth } from '../../../../app/context/useAuth';
-import { workerService } from '../../../customer/services/workerService';
+// import { workerService } from '../../../customer/services/workerService';
 
 interface WorkerLayoutProps {
   children: React.ReactNode;

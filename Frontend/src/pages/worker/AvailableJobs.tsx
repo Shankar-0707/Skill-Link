@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, IndianRupee, SlidersHorizontal, Loader2, AlertCircle } from 'lucide-react';
-import { CATEGORIES } from '../../shared/constants/categories';
+// import { CATEGORIES } from '../../shared/constants/categories';
 import { workerService } from '../../features/customer/services/workerService';
 import { jobService } from '../../features/customer/services/jobService';
 import type { Worker, Job } from '../../features/customer/types';

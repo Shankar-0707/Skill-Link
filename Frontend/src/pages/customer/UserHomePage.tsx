@@ -139,7 +139,7 @@ export const UserHomePage: React.FC = () => {
               />
             </div>
           ) : paginatedWorkers.length > 0 ? (
-            paginatedWorkers.map((worker, i) => (
+            paginatedWorkers.map((worker) => (
               <WorkerCard
                 key={worker.id}
                 worker={worker}
