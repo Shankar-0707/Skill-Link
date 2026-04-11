@@ -43,6 +43,11 @@ export class CreateProductDto {
   @Min(0)
   stockQuantity: number;
 
+  @ApiProperty({ example: 'Hardware' })
+  @IsString()
+  @IsNotEmpty()
+  category: string;
+
   @ApiPropertyOptional({
     type: [String],
     example: ['https://cdn.example.com/img1.jpg'],
@@ -83,6 +88,11 @@ export class UpdateProductDto {
   @Min(0)
   stockQuantity?: number;
 
+  @ApiPropertyOptional({ example: 'Tools' })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsBoolean()
@@ -111,4 +121,9 @@ export class ListProductsDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by category' })
+  @IsOptional()
+  @IsString()
+  category?: string;
 }

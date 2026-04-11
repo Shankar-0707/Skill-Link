@@ -288,6 +288,7 @@ model Product {
   price Float
 
   stockQuantity Int
+  category      String  @default("Others")
 
   isActive Boolean @default(true)
 
