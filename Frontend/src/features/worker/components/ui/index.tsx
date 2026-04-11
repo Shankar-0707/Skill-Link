@@ -182,6 +182,27 @@ export const KycBanner: React.FC<KycBannerProps> = ({ status, onAction }) => {
   );
 };
 
+// ── Skills Banner ─────────────────────────────────────────────────────────────
+// Shown when KYC is verified but no skills are listed
+
+export const SkillsBanner: React.FC<{ onAction: () => void }> = ({ onAction }) => {
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 border border-violet-200 bg-violet-50 rounded-xl">
+      <span className="text-xl flex-shrink-0">⚡</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-bold text-violet-700">Skills Needed</p>
+        <p className="text-xs text-violet-600">List your skills in settings to start seeing jobs that match your expertise.</p>
+      </div>
+      <button
+        onClick={onAction}
+        className="flex-shrink-0 px-3 py-1.5 text-xs font-semibold rounded-lg bg-violet-500 hover:bg-violet-600 text-white transition-colors"
+      >
+        Add Skills
+      </button>
+    </div>
+  );
+};
+
 // ── Progress Step ─────────────────────────────────────────────────────────────
 // Used in the job detail timeline
 

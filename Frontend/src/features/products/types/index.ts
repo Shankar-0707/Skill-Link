@@ -20,6 +20,7 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   images?: ProductImage[];
+  category: string;
   organisation?: {
     businessName: string;
     businessType: string;
@@ -31,6 +32,7 @@ export interface CreateProductPayload {
   description?: string;
   price: number;
   stockQuantity: number;
+  category: string;
   imageUrls?: string[];
 }
 
@@ -39,12 +41,14 @@ export interface UpdateProductPayload {
   description?: string;
   price?: number;
   stockQuantity?: number;
+  category?: string;
   isActive?: boolean;
 }
 
 export interface ListProductsParams {
   organisationId?: string;
   search?: string;
+  category?: string;
   page?: number;
   limit?: number;
 }
