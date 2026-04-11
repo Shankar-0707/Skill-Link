@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { JobStatus, Role } from '@prisma/client';
+import { JobStatus, ReservationStatus, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 type DashboardMetric = {
@@ -27,6 +27,18 @@ type ActiveJobSummary = {
   customerName: string | null;
 };
 
+type ReservationSummary = {
+  id: string;
+  productName: string;
+  organisationName: string;
+  customerName: string;
+  status: ReservationStatus;
+  quantity: number;
+  createdAt: Date;
+  updatedAt: Date;
+  expiresAt: Date | null;
+};
+
 @Injectable()
 export class AdminDashboardService {
   constructor(private readonly prisma: PrismaService) {}
@@ -39,6 +51,13 @@ export class AdminDashboardService {
     const activeUsersWhere = {
       deletedAt: null,
       isActive: true,
+    } as const;
+
+    const activeNonAdminUsersWhere = {
+      ...activeUsersWhere,
+      role: {
+        not: Role.ADMIN,
+      },
     } as const;
 
     const [
@@ -55,7 +74,7 @@ export class AdminDashboardService {
       newOrganisationsThisMonth,
       newOrganisationsLastMonth,
     ] = await Promise.all([
-      this.prisma.user.count({ where: activeUsersWhere }),
+      this.prisma.user.count({ where: activeNonAdminUsersWhere }),
       this.prisma.user.count({
         where: { ...activeUsersWhere, role: Role.CUSTOMER },
       }),
@@ -68,12 +87,14 @@ export class AdminDashboardService {
       this.prisma.user.count({
         where: {
           ...activeUsersWhere,
+          role: { not: Role.ADMIN },
           createdAt: { gte: currentMonthStart },
         },
       }),
       this.prisma.user.count({
         where: {
           ...activeUsersWhere,
+          role: { not: Role.ADMIN },
           createdAt: { gte: previousMonthStart, lt: currentMonthStart },
         },
       }),
@@ -198,6 +219,53 @@ export class AdminDashboardService {
       scheduledAt: job.scheduledAt,
       workerName: job.worker?.user.name ?? null,
       customerName: job.customer.user.name ?? null,
+    }));
+  }
+
+  async getRecentReservations(): Promise<ReservationSummary[]> {
+    const reservations = await this.prisma.reservation.findMany({
+      orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
+      select: {
+        id: true,
+        quantity: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        expiresAt: true,
+        product: {
+          select: {
+            name: true,
+            organisation: {
+              select: {
+                businessName: true,
+              },
+            },
+          },
+        },
+        customer: {
+          select: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return reservations.map((reservation) => ({
+      id: reservation.id,
+      productName: reservation.product.name,
+      organisationName: reservation.product.organisation.businessName,
+      customerName:
+        reservation.customer.user.name ?? reservation.customer.user.email,
+      status: reservation.status,
+      quantity: reservation.quantity,
+      createdAt: reservation.createdAt,
+      updatedAt: reservation.updatedAt,
+      expiresAt: reservation.expiresAt,
     }));
   }
 

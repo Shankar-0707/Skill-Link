@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Package, 
-  User, 
   Info,
   Phone,
   Mail,
@@ -19,7 +18,6 @@ import type { Reservation } from '@/features/organisation/types/reservation.type
 import { ReservationStatus } from '@/features/organisation/types/reservation.types';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
-import { cn } from '@/shared/utils/cn';
 
 export const ReservationDetailView: React.FC = () => {
   const { id } = useParams<{ id: string }>();

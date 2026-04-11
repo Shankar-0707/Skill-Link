@@ -15,14 +15,10 @@ import {
   ChevronRight
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { useAuth } from "@/app/context/useAuth";
-import { useNavigate } from "react-router-dom";
 
 type Section = "profile" | "update" | "security";
 
 export const SettingsView = () => {
-  const {  } = useAuth();
-  const navigate = useNavigate();
   const [organisation, setOrganisation] = useState<Organisation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<Section>("profile");

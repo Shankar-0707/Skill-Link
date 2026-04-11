@@ -5,7 +5,7 @@ import {
   Search,
   Briefcase,
   IndianRupee,
-  // Calendar,
+  HelpCircle,
   Settings,
   Zap,
   LogOut,
@@ -18,10 +18,10 @@ interface WorkerSidebarProps {
 }
 
 const NAV_ITEMS = [
-  { id: 'dashboard',      label: 'Dashboard', icon: LayoutGrid,  path: '/worker/dashboard'      },
-  { id: 'available-jobs', label: 'Find Jobs',  icon: Search,      path: '/worker/available-jobs' },
-  { id: 'my-assignments', label: 'My Work',    icon: Briefcase,   path: '/worker/my-assignments' },
-  { id: 'earnings',       label: 'Earnings',   icon: IndianRupee, path: '/worker/earnings'       },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/worker/dashboard' },
+  { id: 'available-jobs', label: 'Find Jobs', icon: Search, path: '/worker/available-jobs' },
+  { id: 'my-assignments', label: 'My Work', icon: Briefcase, path: '/worker/my-assignments' },
+  { id: 'earnings', label: 'Earnings', icon: IndianRupee, path: '/worker/earnings' },
 ];
 
 export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
@@ -31,7 +31,7 @@ export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
 
   const handleLogout = async () => {
     try {
-      if (window.confirm("Are you sure you want to logout?")) {
+      if (window.confirm('Are you sure you want to logout?')) {
         await logout();
         navigate('/login');
       }
@@ -42,8 +42,6 @@ export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-[200px] bg-white border-r border-gray-100 flex flex-col z-20">
-
-      {/* Logo */}
       <div className="px-5 py-5 border-b border-gray-100">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -58,7 +56,6 @@ export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
         </div>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
         {NAV_ITEMS.map(({ id, label, icon: Icon, path }) => {
           const isActive = location.pathname === path;
@@ -67,9 +64,10 @@ export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
               key={id}
               onClick={() => navigate(path)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-left transition-all duration-150
-                ${isActive
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                ${
+                  isActive
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                 }`}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
@@ -79,8 +77,19 @@ export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
         })}
       </nav>
 
-      {/* Bottom section */}
       <div className="px-3 pb-5 flex flex-col gap-1">
+        <button
+          onClick={() => navigate('/worker/help')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            location.pathname === '/worker/help' || location.pathname.startsWith('/worker/help/')
+              ? 'bg-gray-900 text-white shadow-sm'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+          }`}
+        >
+          <HelpCircle className="w-4 h-4 shrink-0" />
+          Help Center
+        </button>
+
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all font-label"
@@ -101,7 +110,6 @@ export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
           Settings
         </button>
       </div>
-
     </aside>
   );
 };

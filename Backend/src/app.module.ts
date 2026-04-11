@@ -4,6 +4,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { EscrowModule } from './escrow/escrow.module';
+import { HelpModule } from './help/help.module';
 import { JobsModule } from './jobs/jobs.module';
 import { KycModule } from './kyc/kyc.module';
 import { AdminModule } from './admin/admin.module';
@@ -40,6 +41,7 @@ import { WorkersModule } from './workers/workers.module';
     ReservationsModule,
     PaymentsModule,
     EscrowModule,
+    HelpModule,
     KycModule,
     AdminModule,
   ],

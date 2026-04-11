@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Filter, Search, Inbox } from 'lucide-react';
+import { Filter, Search } from 'lucide-react';
 import { reservationApi } from '@/features/organisation/api/reservation.service';
 import type { Reservation } from '@/features/organisation/types/reservation.types';
 import { ReservationStatus } from '@/features/organisation/types/reservation.types';

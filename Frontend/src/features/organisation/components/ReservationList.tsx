@@ -5,7 +5,6 @@ import {
   Package, 
   User, 
   ChevronRight,
-  Mail,
   Calendar
 } from 'lucide-react';
 import { Badge } from '@/shared/components/ui/badge';
@@ -19,7 +18,6 @@ interface ReservationListProps {
   reservations: Reservation[];
   onConfirm?: (id: string) => void;
   onCancel?: (id: string) => void;
-  onViewDetails?: (id: string) => void;
   isLoading?: boolean;
 }
 
@@ -27,7 +25,6 @@ export const ReservationList: React.FC<ReservationListProps> = ({
   reservations,
   onConfirm,
   onCancel,
-  onViewDetails,
   isLoading
 }) => {
   const navigate = useNavigate();

@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Package,
   Settings,
+  HelpCircle,
   LogOut,
   Building2,
   ChevronRight,
@@ -193,7 +194,20 @@ export const Sidebar: React.FC = () => {
         "mt-auto pt-6 border-t border-border/50 transition-all duration-300 space-y-1",
         "px-0"
       )}>
-
+        <div className="px-6 mb-4">
+          <button
+            onClick={() => window.location.href = "/organisation/products/create"}
+            className="w-full bg-primary text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+          >
+            Post New Listing
+          </button>
+        </div>
+        <SidebarItem
+          icon={HelpCircle}
+          label="Help Center"
+          href="/organisation/help"
+          isActive={location.pathname.startsWith("/organisation/help")}
+        />
         <SidebarItem
           icon={Settings}
           label="Settings"

@@ -14,11 +14,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onEdit, onDel
   const navigate = useNavigate();
   const mainImage = product.images?.[0]?.imageUrl || "";
 
-  const handleExplore = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/organisation/products/${product.id}/explore`);
-  };
-
   return (
     <div 
       onClick={() => navigate(`/organisation/products/${product.id}/explore`)}
