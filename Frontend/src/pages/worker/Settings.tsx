@@ -4,8 +4,11 @@ import {
   User, Lock, Shield, Loader2, Camera, 
   MapPin, Briefcase, CheckCircle2, AlertCircle, LogOut, X,
   Upload, FileText, RotateCcw, Send, Clock, Image, BadgeCheck,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
+
+import { CATEGORIES } from '../../shared/constants/categories';
 import { useAuth } from "../../app/context/useAuth";
 import { workerService } from '../../features/customer/services/workerService';
 import { WorkerLayout } from '../../features/worker/components/layout/Layout';
@@ -339,6 +342,7 @@ export const WorkerSettingsPage: React.FC = () => {
     skills: [] as string[],
   });
   const [skillInput, setSkillInput] = useState('');
+  const [selectedSkillValue, setSelectedSkillValue] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -366,11 +370,12 @@ export const WorkerSettingsPage: React.FC = () => {
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
 
   const addSkill = () => {
-    const trimmed = skillInput.trim();
-    if (trimmed && !formData.skills.includes(trimmed)) {
-      setFormData({ ...formData, skills: [...formData.skills, trimmed] });
+    const valueToAdd = selectedSkillValue === 'Other' ? skillInput.trim() : selectedSkillValue;
+    if (valueToAdd && !formData.skills.includes(valueToAdd)) {
+      setFormData({ ...formData, skills: [...formData.skills, valueToAdd] });
+      setSkillInput('');
+      setSelectedSkillValue('');
     }
-    setSkillInput('');
   };
   const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } };
   const removeSkill = (i: number) => setFormData({ ...formData, skills: formData.skills.filter((_, idx) => idx !== i) });
@@ -423,6 +428,27 @@ export const WorkerSettingsPage: React.FC = () => {
       showToast(msg);
     } finally {
       setIsResettingPassword(false);
+    }
+  };
+
+  const handleToggleAvailability = async () => {
+    const newStatus = !formData.isAvailable;
+    const action = newStatus ? "go ONLINE" : "go OFFLINE";
+    const message = `Are you sure you want to ${action}? ${newStatus ? "You will start receiving job alerts." : "You will stop receiving new job alerts until you are back."}`;
+    
+    if (window.confirm(message)) {
+      try {
+        setSaving(true);
+        const updatedFields = { ...formData, isAvailable: newStatus };
+        const updated = await workerService.updateMe(updatedFields);
+        setProfile(updated);
+        setFormData(updatedFields);
+        showToast(`You are now ${newStatus ? 'Online' : 'Offline'}`);
+      } catch (err) {
+        showToast('Failed to update availability. Please try again.');
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
@@ -523,10 +549,46 @@ export const WorkerSettingsPage: React.FC = () => {
                     <input type="text" value={user.email} disabled className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm text-gray-400 cursor-not-allowed" />
                   </div>
                   <div className="col-span-2 space-y-1.5">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Skills</label>
-                    <div className="flex border border-gray-200 bg-gray-50 rounded-xl overflow-hidden focus-within:border-gray-400 transition-colors shadow-sm">
-                      <input type="text" value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={handleSkillKeyDown} placeholder="e.g. Plumbing, Electrical (Press Enter)" className="flex-1 px-4 py-2.5 bg-transparent text-sm focus:outline-none" />
-                      <button type="button" onClick={addSkill} className="px-5 bg-gray-900 text-white hover:bg-gray-800 font-semibold text-sm transition-colors border-l border-gray-900">Add</button>
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <select 
+                            value={selectedSkillValue} 
+                            onChange={(e) => setSelectedSkillValue(e.target.value)}
+                            className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 appearance-none cursor-pointer transition-colors shadow-sm"
+                          >
+                            <option value="">Select a missing skill...</option>
+                            {CATEGORIES.map(c => (
+                              <option key={c.label} value={c.label}>{c.label}</option>
+                            ))}
+                            <option value="Other">Other (Type below)</option>
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={addSkill} 
+                          disabled={!selectedSkillValue || (selectedSkillValue === 'Other' && !skillInput.trim())}
+                          className="px-5 bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm transition-all rounded-xl shadow-sm"
+                        >
+                          Add
+                        </button>
+                      </div>
+
+                      {selectedSkillValue === 'Other' && (
+                        <div className="animate-in slide-in-from-top-1 duration-200">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Custom Skill Name</label>
+                          <input 
+                            type="text" 
+                            value={skillInput} 
+                            onChange={e => setSkillInput(e.target.value)} 
+                            onKeyDown={handleSkillKeyDown}
+                            placeholder="e.g. Pet Grooming, Deep Cleaning..." 
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 transition-colors shadow-sm" 
+                            autoFocus
+                          />
+                        </div>
+                      )}
                     </div>
                     {formData.skills.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2.5">
@@ -556,7 +618,10 @@ export const WorkerSettingsPage: React.FC = () => {
                     <p className="text-sm font-bold text-amber-900 uppercase tracking-wider">Availability Status</p>
                     <p className="text-xs text-amber-700/70">When active, you'll receive new job alerts in your area.</p>
                   </div>
-                  <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${formData.isAvailable ? 'bg-gray-900' : 'bg-gray-200'}`} onClick={() => setFormData({ ...formData, isAvailable: !formData.isAvailable })}>
+                  <div 
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${formData.isAvailable ? 'bg-gray-900' : 'bg-gray-200'} ${saving ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                    onClick={() => !saving && handleToggleAvailability()}
+                  >
                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isAvailable ? 'translate-x-6' : 'translate-x-1'}`} />
                   </div>
                 </div>

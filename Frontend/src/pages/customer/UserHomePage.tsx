@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CATEGORIES } from '../../shared/constants/categories';
 import type { Worker } from '../../features/customer/types';
@@ -8,11 +8,12 @@ import { CategoryPill, SectionHeader, PageHeader, EmptyState } from '../../featu
 import { Layout } from '../../features/customer/components/layout/Layout';
 import { useAuth } from "../../app/context/useAuth";
 import { workerService } from '../../features/customer/services/workerService';
-import { productsApi } from "@/features/products/api/productsApi";
-import type { Product } from "@/features/products/types";
+import { productsApi } from "../../features/products/api/productsApi";
+import type { Product } from "../../features/products/types";
 
 export const UserHomePage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -21,6 +22,8 @@ export const UserHomePage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('Electricians');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+
+  const searchQuery = searchParams.get('q')?.toLowerCase() || '';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,14 +61,19 @@ export const UserHomePage: React.FC = () => {
 
   if (!user) return null;
 
-  const allFilteredWorkers = workers.filter(w => 
-    w.skills.some(skill => {
+  const allFilteredWorkers = workers.filter(w => {
+    const matchesCategory = w.skills.some(skill => {
       const s = skill.toLowerCase();
       const c = activeCategory.toLowerCase();
-      // Match "Electrician" skill to "Electricians" category, and vice-versa
       return s.includes(c) || c.includes(s) || (c.endsWith('s') && s.includes(c.slice(0, -1)));
-    })
-  );
+    });
+
+    const matchesSearch = !searchQuery || 
+      w.user.name?.toLowerCase().includes(searchQuery) ||
+      w.skills.some(s => s.toLowerCase().includes(searchQuery));
+
+    return matchesCategory && matchesSearch;
+  });
 
   const totalPages = Math.ceil(allFilteredWorkers.length / itemsPerPage);
   const paginatedWorkers = allFilteredWorkers.slice(
@@ -195,7 +203,9 @@ export const UserHomePage: React.FC = () => {
           title="Popular at Local Shops"
         />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {products.map(product => (
+          {products
+            .filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery))
+            .map(product => (
             <div key={product.id} onClick={() => navigate('/user/products')}
               className="bg-background border border-border rounded-xl overflow-hidden hover:shadow-lg hover:border-outline transition-all cursor-pointer group">
               <div className="relative aspect-video overflow-hidden">

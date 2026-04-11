@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, IndianRupee, SlidersHorizontal, Loader2, AlertCircle } from 'lucide-react';
 import { CATEGORIES } from '../../shared/constants/categories';
-import type { Job } from '../../features/customer/types';
+import { workerService } from '../../features/customer/services/workerService';
 import { jobService } from '../../features/customer/services/jobService';
+import type { Worker, Job } from '../../features/customer/types';
 import { PageHeader, EmptyState } from '../../features/worker/components/ui';
 import { AvailableJobCard } from '../../features/worker/components/jobs/JobsCard';
 import { WorkerLayout } from '../../features/worker/components/layout/Layout';
@@ -11,19 +12,23 @@ import { WorkerLayout } from '../../features/worker/components/layout/Layout';
 export const AvailableJobsPage: React.FC = () => {
   const navigate = useNavigate();
   const [jobs,       setJobs]       = useState<Job[]>([]);
+  const [profile,    setProfile]    = useState<Worker | null>(null);
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState<string | null>(null);
   const [search,     setSearch]     = useState('');
-  const [category,   setCategory]   = useState('All');
   const [maxBudget,  setMaxBudget]  = useState('');
   const [showFilter, setShowFilter] = useState(false);
 
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const availableJobs = await jobService.getAvailableJobs();
+        const [availableJobs, profileData] = await Promise.all([
+          jobService.getAvailableJobs(),
+          workerService.getMe()
+        ]);
         setJobs(availableJobs);
+        setProfile(profileData);
         setError(null);
       } catch (err) {
         console.error('Failed to fetch available jobs:', err);
@@ -33,27 +38,28 @@ export const AvailableJobsPage: React.FC = () => {
       }
     };
 
-    fetchJobs();
+    fetchData();
   }, []);
 
   const filtered = jobs.filter(j => {
     const matchSearch   = !search || j.title.toLowerCase().includes(search.toLowerCase()) || j.description.toLowerCase().includes(search.toLowerCase());
     
-    // Normalize categories to handle "Electrician" vs "Electricians"
+    // Strict match against worker skills
     const normalize = (cat: string) => cat.toLowerCase().trim().replace(/s$/, '');
-    const matchCategory = category === 'All' || normalize(j.category) === normalize(category);
+    const matchSkill = profile?.skills.some(skill => 
+      normalize(j.category) === normalize(skill)
+    );
     
     const matchBudget   = !maxBudget || (j.budget ?? 0) <= Number(maxBudget);
-    return matchSearch && matchCategory && matchBudget;
+    return matchSearch && matchSkill && matchBudget;
   });
 
   const clearFilters = () => {
     setSearch('');
-    setCategory('All');
     setMaxBudget('');
   };
 
-  const hasActiveFilters = search || category !== 'All' || maxBudget;
+  const hasActiveFilters = search || maxBudget;
 
   if (loading) {
     return (
@@ -147,46 +153,25 @@ export const AvailableJobsPage: React.FC = () => {
         </div>
       )}
 
-      {/* ── Category pills ── */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6" style={{ scrollbarWidth: 'none' }}>
-        <button
-          onClick={() => setCategory('All')}
-          className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all
-            ${category === 'All'
-              ? 'bg-gray-900 text-white border-gray-900'
-              : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700'
-            }`}
-        >
-          All Categories
-        </button>
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat.label}
-            onClick={() => setCategory(cat.label)}
-            className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-all
-              ${category === cat.label
-                ? 'bg-gray-900 text-white border-gray-900'
-                : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700'
-              }`}
-          >
-            <span>{cat.icon}</span>
-            {cat.label}
-          </button>
-        ))}
-      </div>
-
       {/* ── Results count ── */}
       <p className="text-xs text-gray-400 mb-4">
         {filtered.length} job{filtered.length !== 1 ? 's' : ''} found
       </p>
 
       {/* ── Job list ── */}
-      {filtered.length === 0 ? (
+      {!profile || profile.skills.length === 0 ? (
+        <EmptyState
+          icon="⚡"
+          title="Skills mandatory"
+          description="Please add your skills in settings to start seeing jobs that match your expertise."
+          action={{ label: 'Add Skills', onClick: () => navigate('/worker/settings') }}
+        />
+      ) : filtered.length === 0 ? (
         <EmptyState
           icon="📋"
-          title="No jobs match your filters"
-          description="Try broadening your search or removing filters."
-          action={{ label: 'Clear Filters', onClick: clearFilters }}
+          title="No jobs match your skill set"
+          description={hasActiveFilters ? "Try broadening your search or removing filters." : "We'll notify you when new jobs in your area match your skills."}
+          action={hasActiveFilters ? { label: 'Clear Filters', onClick: clearFilters } : undefined}
         />
       ) : (
         <div className="flex flex-col gap-4">

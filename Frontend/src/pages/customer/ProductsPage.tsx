@@ -4,7 +4,8 @@ import { PageHeader, EmptyState } from "../../features/customer/components/ui";
 import { productService } from "../../features/customer/services/productService";
 import { ReserveProductModal } from "../../features/customer/components/ui/ReserveProductModal";
 import type { Product, ListProductsParams } from "../../features/customer/types";
-import { Search, Filter, ShoppingBag, Loader2, Package, ChevronLeft, ChevronRight } from "lucide-react";
+import { PRODUCT_CATEGORIES } from "../../shared/constants/productCategories";
+import { Search, Filter, ShoppingBag, Loader2, Package, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 
 export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -78,10 +79,20 @@ export const ProductsPage: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <button className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-surface-container border border-border/80 text-foreground text-sm font-bold hover:bg-secondary/10 transition-all shrink-0">
-            <Filter size={16} />
-            <span>Filter</span>
-          </button>
+          <div className="relative group min-w-[160px]">
+            <Filter size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-foreground pointer-events-none" />
+            <select
+              value={params.category || ""}
+              onChange={(e) => setParams(prev => ({ ...prev, category: e.target.value || undefined, page: 1 }))}
+              className="w-full pl-10 pr-10 py-3.5 bg-surface-container border border-border/80 rounded-2xl text-sm font-bold text-foreground focus:outline-none focus:border-outline focus:ring-4 focus:ring-foreground/5 transition-all outline-none appearance-none cursor-pointer"
+            >
+              <option value="">All Categories</option>
+              {PRODUCT_CATEGORIES.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none transition-transform group-focus-within:rotate-180" />
+          </div>
           <div className="h-6 w-[1px] bg-border/50 hidden md:block mx-1" />
           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden md:block">
             {products.length} Items Listed
@@ -118,7 +129,9 @@ export const ProductsPage: React.FC = () => {
 
               <div className="p-6 flex flex-col flex-1">
                 <div className="mb-4">
-                  <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1.5">{product.organisation?.businessName || "Local Shop"}</p>
+                  <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1.5">
+                    {product.category || "General"} · {product.organisation?.businessName || "Local Shop"}
+                  </p>
                   <h3 className="text-lg font-bold text-foreground line-clamp-1 leading-tight">{product.name}</h3>
                 </div>
                 

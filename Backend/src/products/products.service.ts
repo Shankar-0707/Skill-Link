@@ -34,13 +34,14 @@ export class ProductsService {
   // ─── Public: List products ────────────────────────────────────────────────
 
   async findAll(query: ListProductsDto & PaginationDto) {
-    const { organisationId, search } = query;
+    const { organisationId, search, category } = query;
     const { page, limit, skip } = parsePaginationInts(query);
 
     const where: Prisma.ProductWhereInput = {
       isActive: true,
       deletedAt: null,
       ...(organisationId && { organisationId }),
+      ...(category && { category }),
       ...(search && { name: { contains: search, mode: 'insensitive' } }),
     };
 
@@ -111,6 +112,7 @@ export class ProductsService {
           description: dto.description,
           price: dto.price,
           stockQuantity: dto.stockQuantity,
+          category: dto.category,
         },
       });
 
@@ -147,6 +149,7 @@ export class ProductsService {
         ...(dto.stockQuantity !== undefined && {
           stockQuantity: dto.stockQuantity,
         }),
+        ...(dto.category && { category: dto.category }),
         ...(dto.isActive !== undefined && { isActive: dto.isActive }),
       },
       include: { images: true },
