@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, IndianRupee, Calendar, Tag, AlignLeft, Type, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, IndianRupee, Calendar, Tag, AlignLeft, Type, Loader2, AlertCircle, Plus } from 'lucide-react';
 import { CATEGORIES } from '../../shared/constants/categories';
 import { jobService } from '../../features/customer/services/jobService';
+import { Layout } from '../../features/customer/components/layout/Layout';
 
 interface CreateJobPageProps {
   // onNavigate removed to use useNavigate hook
@@ -12,6 +13,7 @@ interface FormState {
   title: string;
   description: string;
   category: string;
+  customCategory: string;
   budget: string;
   scheduledAt: string;
 }
@@ -20,6 +22,7 @@ const FORM_INITIAL: FormState = {
   title: '',
   description: '',
   category: '',
+  customCategory: '',
   budget: '',
   scheduledAt: '',
 };
@@ -43,6 +46,9 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
     if (!form.title.trim())       e.title       = 'Job title is required';
     if (!form.description.trim()) e.description = 'Description is required';
     if (!form.category)           e.category    = 'Please select a category';
+    if (form.category === 'Others' && !form.customCategory.trim()) {
+      e.customCategory = 'Please specify your custom category';
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -58,7 +64,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
       await jobService.createJob({
         title: form.title,
         description: form.description,
-        category: form.category,
+        category: form.category === 'Others' ? form.customCategory : form.category,
         budget: form.budget ? Number(form.budget) : undefined,
         scheduledAt: form.scheduledAt || undefined,
       });
@@ -88,6 +94,9 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
   }
 
   return (
+    <Layout>
+
+    
     <div className="max-w-2xl mx-auto py-8 px-4">
       {/* Back nav */}
       <button
@@ -170,15 +179,48 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
                 {cat.label}
               </button>
             ))}
+            
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => update('category', 'Others')}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-label font-medium border transition-all
+                ${form.category === 'Others'
+                  ? 'bg-foreground text-background border-foreground shadow-sm'
+                  : 'bg-background border-border text-foreground hover:border-outline hover:bg-surface-container'
+                }`}
+            >
+              <span><Plus className="w-3.5 h-3.5" /></span>
+              Others
+            </button>
           </div>
           {errors.category && <p className="text-xs text-destructive mt-2">{errors.category}</p>}
+          
+          {/* Custom Category Input */}
+          {form.category === 'Others' && (
+            <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <label className="block text-sm font-label font-medium text-foreground mb-1.5 italic text-muted-foreground">
+                Please specify your category:
+              </label>
+              <input
+                type="text"
+                value={form.customCategory}
+                onChange={e => update('customCategory', e.target.value)}
+                disabled={loading}
+                placeholder="e.g. Pet Grooming, Deep Cleaning, etc."
+                className={`w-full px-4 py-2.5 bg-background border rounded-xl text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20 transition
+                  ${errors.customCategory ? 'border-destructive' : 'border-border focus:border-outline'}`}
+              />
+              {errors.customCategory && <p className="text-xs text-destructive mt-1">{errors.customCategory}</p>}
+            </div>
+          )}
         </div>
 
         {/* Budget + Scheduled Date — two columns */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-label font-medium text-foreground mb-1.5">
-              <span className="flex items-center gap-1.5"><IndianRupee className="w-3.5 h-3.5" /> Budget (optional)</span>
+              <span className="flex items-center gap-1.5"><IndianRupee className="w-3.5 h-3.5" /> Budget</span>
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-body">₹</span>
@@ -196,7 +238,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
 
           <div>
             <label className="block text-sm font-label font-medium text-foreground mb-1.5">
-              <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Schedule (optional)</span>
+              <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Schedule</span>
             </label>
             <input
               type="datetime-local"
@@ -215,7 +257,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
             <p className="font-headline font-semibold text-sm text-foreground">{form.title || 'Your job title'}</p>
             {form.category && (
               <span className="inline-block mt-1.5 text-[10px] font-label text-muted-foreground bg-background border border-border px-2 py-0.5 rounded-full">
-                {form.category}
+                {form.category === 'Others' ? (form.customCategory || 'Custom Category') : form.category}
               </span>
             )}
             {form.budget && (
@@ -252,5 +294,6 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
 
       </form>
     </div>
+    </Layout>
   );
 };

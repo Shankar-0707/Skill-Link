@@ -11,7 +11,6 @@ import { cn } from '@/shared/utils/cn';
 import {
   AlertCircle,
   ArrowLeft,
-  BookOpen,
   Briefcase,
   CheckCircle2,
   ChevronRight,
@@ -23,7 +22,6 @@ import {
   Search,
   Send,
   ShoppingBag,
-  Sparkles,
   Ticket,
   UserRound,
 } from 'lucide-react';
@@ -229,6 +227,7 @@ export const UserHelpCenterView = ({
   mode = 'home',
 }: UserHelpCenterViewProps) => {
   const { user } = useAuth();
+  const [homeSection, setHomeSection] = useState<'faq' | 'complaint' | 'contact'>('faq');
   const [tickets, setTickets] = useState<HelpTicket[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -289,11 +288,6 @@ export const UserHelpCenterView = ({
       [article.category, article.title, article.body].join(' ').toLowerCase().includes(term),
     );
   }, [helpArticles, search]);
-
-  const categories = useMemo(() => {
-    const set = new Set(helpArticles.map((article) => article.category));
-    return Array.from(set);
-  }, [helpArticles]);
 
   const fieldErrors = useMemo(
     () => ({
@@ -409,6 +403,268 @@ export const UserHelpCenterView = ({
     }
   };
 
+  const recentTickets = tickets.slice(0, 3);
+
+  if (mode === 'home') {
+    const homeTitle =
+      role === 'WORKER' ? 'Worker Help & Support' : role === 'ORGANISATION' ? 'Organisation Help & Support' : 'Help & Support';
+    const homeDescription =
+      role === 'WORKER'
+        ? 'Get answers for assignments, payouts, and account access, or open a real support ticket when something needs admin help.'
+        : role === 'ORGANISATION'
+          ? 'Get answers for reservations, products, and account operations, or open a real support ticket when something needs admin help.'
+          : 'Get answers for your account, jobs, and reservations, or open a real support ticket when you need help.';
+    const complaintDescription =
+      role === 'WORKER'
+        ? 'Use the current ticket workflow for assignment, payout, or account issues.'
+        : role === 'ORGANISATION'
+          ? 'Use the current ticket workflow for reservation, catalogue, or account issues.'
+          : 'Keep the new ticket workflow, but use it from a simpler support layout.';
+    const secondaryMetricLabel =
+      role === 'WORKER' ? 'Assignments' : role === 'ORGANISATION' ? 'Reservations' : 'Reservations';
+    const secondaryMetricValue = role === 'WORKER' ? jobs.length : reservations.length;
+    const tertiaryMetricLabel =
+      role === 'WORKER' ? 'Worker ID' : role === 'ORGANISATION' ? 'Organisation ID' : 'Posted Jobs';
+    const tertiaryMetricValue =
+      role === 'WORKER' ? workerId || 'Loading...' : role === 'ORGANISATION' ? organisationId || 'Loading...' : jobs.length;
+
+    return (
+      <div className="space-y-8">
+        {toast && (
+          <div
+            className={cn(
+              'fixed right-5 top-5 z-50 flex items-center gap-3 rounded-2xl px-5 py-4 text-sm font-semibold shadow-xl',
+              toast.ok ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white',
+            )}
+          >
+            {toast.ok ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+            {toast.msg}
+          </div>
+        )}
+
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-8 text-left">
+            <h1 className="font-headline text-3xl font-bold text-foreground">{homeTitle}</h1>
+            <p className="mt-1 font-body text-muted-foreground">{homeDescription}</p>
+          </div>
+
+          <div className="flex flex-col gap-8 lg:flex-row">
+            <div className="w-full shrink-0 lg:w-64">
+              <nav className="flex flex-col gap-1">
+                {[
+                  { id: 'faq' as const, label: 'FAQs', icon: CircleHelp },
+                  { id: 'complaint' as const, label: 'Submit Complaint', icon: Ticket },
+                  { id: 'contact' as const, label: 'Contact Us', icon: Phone },
+                ].map(({ id, label, icon: Icon }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setHomeSection(id)}
+                    className={cn(
+                      'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-label font-medium transition-all',
+                      homeSection === id
+                        ? 'bg-foreground text-background shadow-md'
+                        : 'text-muted-foreground hover:bg-surface-container hover:text-foreground',
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </button>
+                ))}
+              </nav>
+            </div>
+
+            <div className="min-h-[500px] flex-1 rounded-2xl border border-border bg-background p-8 shadow-sm">
+              {homeSection === 'faq' && (
+                <div className="space-y-8 text-left animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div>
+                    <h2 className="mb-1 font-headline text-xl font-bold text-foreground">Frequently Asked Questions</h2>
+                    <p className="text-sm font-body text-muted-foreground">
+                      Search the current help center articles before raising a ticket.
+                    </p>
+                  </div>
+
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                      placeholder="Search jobs, reservations, account help..."
+                      className="w-full rounded-xl border border-border bg-surface-container px-11 py-3 text-sm text-foreground outline-none transition-colors focus:border-foreground"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    {filteredArticles.length === 0 ? (
+                      <div className="rounded-xl border border-border bg-surface-container/30 p-6 text-sm text-muted-foreground">
+                        No help articles matched your search.
+                      </div>
+                    ) : (
+                      filteredArticles.map((article) => (
+                        <div key={article.id} className="rounded-xl border border-border bg-surface-container/30 p-4">
+                          <p className="text-xs font-label font-bold uppercase tracking-wider text-muted-foreground">
+                            {article.category}
+                          </p>
+                          <h3 className="mt-2 text-sm font-label font-semibold text-foreground">{article.title}</h3>
+                          <p className="mt-2 text-sm font-body text-muted-foreground">{article.body}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {homeSection === 'complaint' && (
+                <div className="space-y-8 text-left animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div>
+                    <h2 className="mb-1 font-headline text-xl font-bold text-foreground">Submit a Complaint</h2>
+                    <p className="text-sm font-body text-muted-foreground">{complaintDescription}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-border bg-surface-container/30 p-6">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <h3 className="font-label text-base font-semibold text-foreground">Open a support ticket</h3>
+                        <p className="mt-2 text-sm font-body text-muted-foreground">
+                          Link the ticket to a job or reservation so admin can inspect the exact record and resolve it faster.
+                        </p>
+                      </div>
+                      <Link
+                        to={`${basePath}/ticket`}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-foreground px-6 py-3 text-sm font-label font-semibold text-background transition-opacity hover:opacity-90"
+                      >
+                        <Send className="h-4 w-4" />
+                        Submit Complaint
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="rounded-2xl border border-border bg-surface-container/30 p-5">
+                      <p className="text-xs font-label font-bold uppercase tracking-wider text-muted-foreground">Total Raised</p>
+                      <p className="mt-3 text-3xl font-headline font-bold text-foreground">{tickets.length}</p>
+                    </div>
+                    <div className="rounded-2xl border border-border bg-surface-container/30 p-5">
+                      <p className="text-xs font-label font-bold uppercase tracking-wider text-muted-foreground">{secondaryMetricLabel}</p>
+                      <p className="mt-3 text-3xl font-headline font-bold text-foreground">{secondaryMetricValue}</p>
+                    </div>
+                    <div className="rounded-2xl border border-border bg-surface-container/30 p-5">
+                      <p className="text-xs font-label font-bold uppercase tracking-wider text-muted-foreground">{tertiaryMetricLabel}</p>
+                      <p className="mt-3 truncate text-sm font-label font-semibold text-foreground">{tertiaryMetricValue}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-label font-semibold text-foreground">Recent support tickets</h3>
+                      <p className="mt-1 text-sm font-body text-muted-foreground">
+                        Your latest ticket activity still appears here.
+                      </p>
+                    </div>
+
+                    {loading ? (
+                      <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface-container/30">
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        <p className="mt-3 text-sm font-medium text-muted-foreground">Loading tickets...</p>
+                      </div>
+                    ) : recentTickets.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-border bg-surface-container/30 p-6 text-center">
+                        <Ticket className="mx-auto h-8 w-8 text-muted-foreground/40" />
+                        <p className="mt-3 text-sm font-body text-muted-foreground">
+                          No complaints submitted yet. Use the button above to create your first support ticket.
+                        </p>
+                      </div>
+                    ) : (
+                      recentTickets.map((ticket) => (
+                        <article key={ticket.id} className="rounded-xl border border-border bg-surface-container/30 p-4">
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="rounded-full bg-foreground px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-background">
+                                  {ticket.ticketNumber}
+                                </span>
+                                <span
+                                  className={cn(
+                                    'rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em]',
+                                    statusClasses[ticket.status] ?? 'bg-slate-50 text-slate-700 border-slate-200',
+                                  )}
+                                >
+                                  {ticket.status}
+                                </span>
+                              </div>
+                              <h3 className="mt-3 text-sm font-label font-semibold text-foreground">{ticket.subject}</h3>
+                              <p className="mt-2 text-sm font-body text-muted-foreground">{ticket.message}</p>
+                            </div>
+                            <p className="text-xs font-medium text-muted-foreground">{formatDate(ticket.createdAt)}</p>
+                          </div>
+                        </article>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {homeSection === 'contact' && (
+                <div className="space-y-8 text-left animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div>
+                    <h2 className="mb-1 font-headline text-xl font-bold text-foreground">Contact Us</h2>
+                    <p className="text-sm font-body text-muted-foreground">
+                      Reach support directly or open a tracked ticket for issues that need admin review.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-3 rounded-2xl border border-border bg-surface-container/50 p-5">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground text-background">
+                        <Phone className="h-5 w-5" />
+                      </div>
+                      <h3 className="font-label font-semibold text-foreground">Phone Support</h3>
+                      <p className="text-xs font-body text-muted-foreground">Available Mon-Fri, 9am - 6pm</p>
+                      <p className="text-sm font-medium tracking-wide text-foreground">+1 (800) 123-4567</p>
+                    </div>
+
+                    <div className="space-y-3 rounded-2xl border border-border bg-surface-container/50 p-5">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground text-background">
+                        <Ticket className="h-5 w-5" />
+                      </div>
+                      <h3 className="font-label font-semibold text-foreground">Tracked Ticket Support</h3>
+                      <p className="text-xs font-body text-muted-foreground">Best for platform issues that need admin review</p>
+                      <Link to={`${basePath}/ticket`} className="inline-flex text-sm font-medium text-foreground underline underline-offset-4">
+                        Open ticket form
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-border bg-surface-container/30 p-6">
+                    <h3 className="font-label text-base font-semibold text-foreground">Support profile</h3>
+                    <div className="mt-4 grid gap-4 md:grid-cols-2">
+                      <div>
+                        <p className="text-xs font-label font-bold uppercase tracking-wider text-muted-foreground">Name</p>
+                        <p className="mt-2 text-sm font-body text-foreground">{user?.name ?? 'Unnamed user'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-label font-bold uppercase tracking-wider text-muted-foreground">Email</p>
+                        <p className="mt-2 text-sm font-body text-foreground">{user?.email ?? 'Not available'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-label font-bold uppercase tracking-wider text-muted-foreground">Open Tickets</p>
+                        <p className="mt-2 text-sm font-body text-foreground">{activeCount}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-label font-bold uppercase tracking-wider text-muted-foreground">{secondaryMetricLabel}</p>
+                        <p className="mt-2 text-sm font-body text-foreground">{secondaryMetricValue}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {toast && (
@@ -452,9 +708,7 @@ export const UserHelpCenterView = ({
           </div>
 
           <div className="rounded-[1.75rem] border border-border bg-background p-6 shadow-sm">
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-muted-foreground">
-              {mode === 'home' ? 'Support Snapshot' : 'Ticket Snapshot'}
-            </p>
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-muted-foreground">Ticket Snapshot</p>
             <div className="mt-5 space-y-3">
               <div className="rounded-2xl bg-surface-container px-4 py-4">
                 <div className="flex items-center gap-3">
@@ -484,210 +738,23 @@ export const UserHelpCenterView = ({
               )}
 
               <div className="rounded-2xl border border-border bg-background px-4 py-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                  {mode === 'home' ? 'Need faster help?' : 'Linked Profile'}
-                </p>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">Linked Profile</p>
                 <p className="mt-2 text-sm font-semibold text-foreground">
-                  {mode === 'home'
-                    ? 'Search common answers first, then raise a case if you still need support.'
-                    : role === 'WORKER'
-                      ? workerId || 'Loading worker profile'
-                      : role === 'ORGANISATION'
-                        ? organisationId || 'Loading organisation profile'
-                        : user?.customer?.id || 'Customer account'}
+                  {role === 'WORKER'
+                    ? workerId || 'Loading worker profile'
+                    : role === 'ORGANISATION'
+                      ? organisationId || 'Loading organisation profile'
+                      : user?.customer?.id || 'Customer account'}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {mode === 'home'
-                    ? 'Your support page is designed as a self-serve help center with a direct fallback to issue reporting.'
-                    : 'Admin will always see your sender role, contact details, and any linked job or reservation context.'}
+                  Admin will always see your sender role, contact details, and any linked job or reservation context.
                 </p>
               </div>
-
-              {mode === 'home' && (
-                <Link
-                  to={`${basePath}/ticket`}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-foreground px-5 py-3 text-sm font-bold text-background transition-opacity hover:opacity-90"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  Raise Issue
-                </Link>
-              )}
             </div>
           </div>
         </div>
       </section>
-
-      {mode === 'home' ? (
-        <>
-          <section className="rounded-[2rem] border border-border bg-background p-6 shadow-sm">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-muted-foreground">Knowledge Base</p>
-                <h2 className="mt-2 font-headline text-2xl font-bold text-foreground">Find answers before you raise a ticket</h2>
-              </div>
-              <div className="relative lg:w-[420px]">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search topics, FAQs, or account help"
-                  className="w-full rounded-xl border border-border bg-background py-2.5 pl-9 pr-4 text-sm text-foreground outline-none transition-colors focus:border-foreground"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              {categories.map((category) => (
-                <div
-                  key={category}
-                  className="rounded-full border border-border bg-surface-container px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground"
-                >
-                  {category}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 grid gap-4 xl:grid-cols-2">
-              {filteredArticles.map((article) => (
-                <article
-                  key={article.id}
-                  className="rounded-[1.5rem] border border-border bg-surface-container/20 p-5"
-                >
-                  <div className="inline-flex rounded-full bg-background px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
-                    {article.category}
-                  </div>
-                  <h3 className="mt-4 text-lg font-bold text-foreground">{article.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{article.body}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
-            <section className="rounded-[2rem] border border-border bg-background p-6 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-muted-foreground">Common Topics</p>
-                  <h2 className="mt-2 font-headline text-2xl font-bold text-foreground">What we can help with</h2>
-                </div>
-                <div className="rounded-2xl bg-surface-container p-3 text-foreground">
-                  <BookOpen className="h-5 w-5" />
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-4">
-                {[
-                  {
-                    icon: Briefcase,
-                    title: role === 'ORGANISATION' ? 'Operational issues' : 'Job-related support',
-                    body:
-                      role === 'ORGANISATION'
-                        ? 'Get help with fulfilment, linked operations, and activity connected to reservations.'
-                        : 'Get help with posted jobs, assigned work, status mismatches, and execution issues.',
-                  },
-                  {
-                    icon: ShoppingBag,
-                    title: role === 'WORKER' ? 'Assignment history' : 'Reservation support',
-                    body:
-                      role === 'WORKER'
-                        ? 'Review active assignment issues, escalations, and work history before opening a case.'
-                        : 'Get help with reservation states, pickup flow, product fulfilment, and linked marketplace issues.',
-                  },
-                  {
-                    icon: CircleHelp,
-                    title: 'Account and platform help',
-                    body: 'Use general support for access issues, dashboard problems, profile concerns, or anything not tied to a single record.',
-                  },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <div
-                      key={item.title}
-                      className="rounded-[1.5rem] border border-border bg-surface-container/20 p-5"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="rounded-2xl bg-background p-3">
-                          <Icon className="h-5 w-5 text-foreground" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-foreground">{item.title}</p>
-                          <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.body}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="rounded-[2rem] border border-border bg-background p-6 shadow-sm">
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-muted-foreground">Recent Support</p>
-                  <h2 className="mt-2 font-headline text-2xl font-bold text-foreground">Your latest tickets</h2>
-                </div>
-                <Link
-                  to={`${basePath}/ticket`}
-                  className="rounded-xl border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-surface-container"
-                >
-                  Open Ticket Form
-                </Link>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                {loading ? (
-                  <div className="flex min-h-[280px] flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-surface-container/30">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                    <p className="mt-3 text-sm font-medium text-muted-foreground">Loading tickets...</p>
-                  </div>
-                ) : tickets.length === 0 ? (
-                  <div className="flex min-h-[280px] flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-surface-container/30 px-8 text-center">
-                    <Ticket className="h-10 w-10 text-muted-foreground/40" />
-                    <h3 className="mt-4 text-lg font-bold text-foreground">No tickets yet</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Search the help topics above or open the ticket form if you still need support.
-                    </p>
-                  </div>
-                ) : (
-                  tickets.slice(0, 3).map((ticket) => (
-                    <article
-                      key={ticket.id}
-                      className="rounded-[1.5rem] border border-border bg-surface-container/30 p-5"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full bg-foreground px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-background">
-                              {ticket.ticketNumber}
-                            </span>
-                            <span
-                              className={cn(
-                                'rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em]',
-                                statusClasses[ticket.status] ?? 'bg-slate-50 text-slate-700 border-slate-200',
-                              )}
-                            >
-                              {ticket.status}
-                            </span>
-                          </div>
-                          <h3 className="mt-3 text-lg font-bold text-foreground">{ticket.subject}</h3>
-                          <p className="mt-2 text-sm leading-6 text-muted-foreground">{ticket.message}</p>
-                        </div>
-                        <div className="text-right text-xs font-semibold text-muted-foreground">
-                          <div className="inline-flex items-center gap-1">
-                            <Clock3 className="h-3.5 w-3.5" />
-                            {formatDate(ticket.createdAt)}
-                          </div>
-                        </div>
-                      </div>
-                    </article>
-                  ))
-                )}
-              </div>
-            </section>
-          </div>
-        </>
-      ) : (
-        <div className="grid gap-8 xl:grid-cols-[1fr_1fr]">
+      <div className="grid gap-8 xl:grid-cols-[1fr_1fr]">
           <section className="rounded-[2rem] border border-border bg-background p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -946,8 +1013,7 @@ export const UserHelpCenterView = ({
               )}
             </div>
           </section>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -19,6 +20,8 @@ import type { JwtPayload } from './types/jwt-payload.type';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -343,7 +346,9 @@ export class AuthService {
 
   async getProfile(userId: string) {
     const user = await this.findActiveUserById(userId);
-    return this.toPublicUser(user);
+    const publicUser = this.toPublicUser(user);
+    this.logger.debug(`Fetching profile for user ${userId}: ${JSON.stringify(publicUser)}`);
+    return publicUser;
   }
 
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
@@ -355,7 +360,7 @@ export class AuthService {
       );
     }
 
-    const nextEmail = updateProfileDto.email
+    const nextEmail = updateProfileDto.email?.trim()
       ? this.normalizeEmail(updateProfileDto.email)
       : undefined;
     const nextPhone =
@@ -769,7 +774,11 @@ export class AuthService {
   }
 
   private normalizeEmail(email: string) {
-    return email.trim().toLowerCase();
+    const normalized = email.trim().toLowerCase();
+    if (!normalized) {
+      throw new BadRequestException('Email cannot be empty.');
+    }
+    return normalized;
   }
 
   private normalizeOptionalString(value?: string | null) {

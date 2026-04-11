@@ -4,7 +4,7 @@ import { PageHeader, EmptyState } from "../../features/customer/components/ui";
 import { productService } from "../../features/customer/services/productService";
 import { ReserveProductModal } from "../../features/customer/components/ui/ReserveProductModal";
 import type { Product, ListProductsParams } from "../../features/customer/types";
-import { Search, Filter, ShoppingBag, Loader2, Package } from "lucide-react";
+import { Search, Filter, ShoppingBag, Loader2, Package, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -12,8 +12,9 @@ export const ProductsPage: React.FC = () => {
   const [params, setParams] = useState<ListProductsParams>({
     search: "",
     page: 1,
-    limit: 50,
+    limit: 8,
   });
+  const [totalPages, setTotalPages] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const fetchProducts = useCallback(async (currentParams: ListProductsParams) => {
@@ -28,10 +29,18 @@ export const ProductsPage: React.FC = () => {
       const res = result as any;
       if (Array.isArray(res)) {
         items = res;
+        setTotalPages(1);
       } else if (res && typeof res === 'object') {
-        if (Array.isArray(res.items)) items = res.items;
-        else if (res.data && Array.isArray(res.data.items)) items = res.data.items;
-        else if (res.data && Array.isArray(res.data)) items = res.data;
+        if (Array.isArray(res.items)) {
+          items = res.items;
+          setTotalPages(res.meta?.totalPages || 1);
+        } else if (res.data && Array.isArray(res.data.items)) {
+          items = res.data.items;
+          setTotalPages(res.data.meta?.totalPages || 1);
+        } else if (res.data && Array.isArray(res.data)) {
+          items = res.data;
+          setTotalPages(1);
+        }
       }
       setProducts(items);
     } catch (error) {
@@ -55,27 +64,27 @@ export const ProductsPage: React.FC = () => {
         subtitle="Browse and reserve high-quality materials and tools from trusted local shops."
       />
 
-      {/* Control Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-10 bg-white p-4 rounded-[2.5rem] border border-border/50 shadow-sm">
-        <div className="relative w-full md:max-w-md group">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-foreground" size={20} />
+      {/* Search Bar Section (Compact) */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-8 max-w-4xl">
+        <div className="relative w-full md:max-w-lg group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-foreground transition-colors" />
           <input
             type="text"
             placeholder="Search for tools, materials, etc..."
             value={params.search}
-            onChange={(e) => setParams(prev => ({ ...prev, search: e.target.value }))}
-            className="w-full pl-14 pr-6 py-4 bg-secondary/20 rounded-[1.5rem] border-transparent focus:border-foreground/20 focus:bg-white transition-all outline-none font-medium"
+            onChange={(e) => setParams(prev => ({ ...prev, search: e.target.value, page: 1 }))}
+            className="w-full pl-12 pr-6 py-3.5 bg-surface-container border border-border/80 rounded-2xl text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-outline focus:ring-4 focus:ring-foreground/5 transition-all outline-none font-medium"
           />
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <button className="flex items-center gap-2 px-6 py-4 rounded-[1.5rem] bg-secondary/30 text-foreground font-bold hover:bg-secondary/50 transition-all border border-transparent shrink-0">
-            <Filter size={18} />
+          <button className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-surface-container border border-border/80 text-foreground text-sm font-bold hover:bg-secondary/10 transition-all shrink-0">
+            <Filter size={16} />
             <span>Filter</span>
           </button>
-          <div className="h-10 w-[1px] bg-border/50 hidden md:block mx-2" />
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest hidden md:block">
-            {products.length} Products Found
+          <div className="h-6 w-[1px] bg-border/50 hidden md:block mx-1" />
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden md:block">
+            {products.length} Items Listed
           </p>
         </div>
       </div>
@@ -100,9 +109,11 @@ export const ProductsPage: React.FC = () => {
                     <Package size={48} />
                   </div>
                 )}
-                {product.stockQuantity < 10 && (
+                {product.stockQuantity === 0 ? (
+                  <span className="absolute top-4 left-4 bg-slate-500/90 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm backdrop-blur-md">Out of Stock</span>
+                ) : product.stockQuantity < 10 ? (
                   <span className="absolute top-4 left-4 bg-red-500/90 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm backdrop-blur-md">Low Stock</span>
-                )}
+                ) : null}
               </div>
 
               <div className="p-6 flex flex-col flex-1">
@@ -137,8 +148,44 @@ export const ProductsPage: React.FC = () => {
           icon="🔍" 
           title="No products found" 
           description="Try searching for something else or browse different categories."
-          action={{ label: "Reset Search", onClick: () => setParams({ search: "", page: 1, limit: 50 }) }}
+          action={{ label: "Reset Search", onClick: () => setParams({ search: "", page: 1, limit: 12 }) }}
         />
+      )}
+
+      {/* ── Pagination Controls ── */}
+      {!loading && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-12 pb-8">
+          <button
+            onClick={() => setParams(prev => ({ ...prev, page: Math.max(1, (prev.page || 1) - 1) }))}
+            disabled={params.page === 1}
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-background text-foreground hover:bg-surface-container disabled:opacity-30 disabled:cursor-not-allowed transition-all mr-2 shadow-sm"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          
+          <div className="flex items-center gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setParams(prev => ({ ...prev, page: page }))}
+                className={`w-9 h-9 flex items-center justify-center rounded-xl text-xs font-bold transition-all
+                  ${params.page === page 
+                    ? 'bg-foreground text-background shadow-md scale-110 active:scale-95' 
+                    : 'bg-background text-muted-foreground border border-border hover:border-outline hover:text-foreground active:scale-95'}`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setParams(prev => ({ ...prev, page: Math.min(totalPages, (prev.page || 1) + 1) }))}
+            disabled={params.page === totalPages}
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-background text-foreground hover:bg-surface-container disabled:opacity-30 disabled:cursor-not-allowed transition-all ml-2 shadow-sm"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       )}
 
       {selectedProduct && (
