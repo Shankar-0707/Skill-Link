@@ -120,7 +120,7 @@ export const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = (
                   <div className="flex items-center gap-1.5 mt-1">
                     <Tag className="w-3 h-3 text-muted-foreground" />
                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      {reservation.product.category.name}
+                      {reservation.product.category}
                     </span>
                   </div>
                 )}

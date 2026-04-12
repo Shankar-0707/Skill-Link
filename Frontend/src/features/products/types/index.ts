@@ -6,8 +6,6 @@ export interface ProductImage {
 }
 
 export interface Product {
-  imageUrl: any;
-  category: any;
   id: string;
   name: string;
   description?: string | null;
@@ -20,6 +18,7 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   images?: ProductImage[];
+  imageUrl?: string;
   category: string;
   organisation?: {
     businessName: string;
