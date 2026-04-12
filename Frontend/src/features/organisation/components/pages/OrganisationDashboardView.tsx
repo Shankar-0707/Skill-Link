@@ -98,7 +98,7 @@ export const OrganisationDashboardView = () => {
     const query = searchQuery.toLowerCase();
     return products.filter(p => 
       p.name.toLowerCase().includes(query) || 
-      p.category?.name?.toLowerCase().includes(query)
+      p.category?.toLowerCase().includes(query)
     );
   }, [products, searchQuery]);
 
@@ -190,7 +190,7 @@ export const OrganisationDashboardView = () => {
 
             </div>
             <div className="p-4 space-y-2">
-            <p className="text-[9px] font-black text-primary/60 uppercase tracking-widest">{p.category?.name || "Product"}</p>
+            <p className="text-[9px] font-black text-primary/60 uppercase tracking-widest">{p.category || "Product"}</p>
             <h4 className="text-sm font-bold text-foreground line-clamp-1">{p.name}</h4>
             <div className="flex justify-between items-end pt-3 border-t border-secondary/50 mt-3">
                 <div>
