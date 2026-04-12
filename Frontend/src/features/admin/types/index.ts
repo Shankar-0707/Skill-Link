@@ -29,10 +29,24 @@ export interface RecentReservation {
   customerName: string;
   status: string;
   date: string;
+  quantity: number;
+  expiresAt?: string | null;
 }
 
 export interface AdminDashboardData {
   metrics: UserMetrics;
   recentJobs: RecentJob[];
   recentReservations: RecentReservation[];
+}
+
+export interface AdminUserSummary {
+  id: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  role: string;
+  isActive: boolean;
+  emailVerified: boolean;
+  createdAt: string;
+  organisationName: string | null;
 }

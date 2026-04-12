@@ -4,8 +4,11 @@ import {
   User, Lock, Shield, Loader2, Camera, 
   MapPin, Briefcase, CheckCircle2, AlertCircle, LogOut, X,
   Upload, FileText, RotateCcw, Send, Clock, Image, BadgeCheck,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
+
+import { CATEGORIES } from '../../shared/constants/categories';
 import { useAuth } from "../../app/context/useAuth";
 import { workerService } from '../../features/customer/services/workerService';
 import { WorkerLayout } from '../../features/worker/components/layout/Layout';
@@ -13,6 +16,7 @@ import type { Worker } from '../../features/customer/types';
 import { Toast } from '../../features/worker/components/ui';
 import { kycService } from '../../features/worker/api/kycService';
 import type { KycStatusResponse, DocumentType, KycDraftDocument } from '../../features/worker/api/kycService';
+import { authApi } from '../../features/auth/api/auth';
 
 type Section = 'profile' | 'service' | 'kyc' | 'security';
 
@@ -322,6 +326,12 @@ export const WorkerSettingsPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState<Section>('profile');
   const [toast, setToast] = useState('');
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [passwordResetSent, setPasswordResetSent] = useState(false);
+  const [resetToken, setResetToken] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetError, setResetError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -332,6 +342,7 @@ export const WorkerSettingsPage: React.FC = () => {
     skills: [] as string[],
   });
   const [skillInput, setSkillInput] = useState('');
+  const [selectedSkillValue, setSelectedSkillValue] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -359,15 +370,88 @@ export const WorkerSettingsPage: React.FC = () => {
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
 
   const addSkill = () => {
-    const trimmed = skillInput.trim();
-    if (trimmed && !formData.skills.includes(trimmed)) {
-      setFormData({ ...formData, skills: [...formData.skills, trimmed] });
+    const valueToAdd = selectedSkillValue === 'Other' ? skillInput.trim() : selectedSkillValue;
+    if (valueToAdd && !formData.skills.includes(valueToAdd)) {
+      setFormData({ ...formData, skills: [...formData.skills, valueToAdd] });
+      setSkillInput('');
+      setSelectedSkillValue('');
     }
-    setSkillInput('');
   };
   const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } };
   const removeSkill = (i: number) => setFormData({ ...formData, skills: formData.skills.filter((_, idx) => idx !== i) });
   const handleLogout = async () => { try { await logout(); navigate('/login'); } catch { showToast('Logout failed. Please try again.'); } };
+  
+  const handlePasswordReset = async () => {
+    if (!user?.email) return;
+    try {
+      setIsResettingPassword(true);
+      setResetError(null);
+      await authApi.forgotPassword(user.email);
+      setPasswordResetSent(true);
+      showToast('Password reset link sent to your email!');
+    } catch (err) {
+      console.error('Failed to send password reset:', err);
+      showToast('Failed to send reset link. Try again.');
+      setResetError('Failed to send reset link.');
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  const handleCompletePasswordReset = async () => {
+    if (!resetToken || !newPassword || !confirmPassword) {
+      setResetError('All fields are required.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setResetError('Passwords do not match.');
+      return;
+    }
+    if (newPassword.length < 8) {
+      setResetError('Password must be at least 8 characters.');
+      return;
+    }
+
+    try {
+      setIsResettingPassword(true);
+      setResetError(null);
+      await authApi.resetPassword(resetToken, newPassword);
+      setPasswordResetSent(false);
+      setResetToken('');
+      setNewPassword('');
+      setConfirmPassword('');
+      showToast('Password updated successfully!');
+    } catch (err: any) {
+      console.error('Failed to reset password:', err);
+      const msg = err?.response?.data?.message || 'Failed to reset password. Check your token.';
+      setResetError(msg);
+      showToast(msg);
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  const handleToggleAvailability = async () => {
+    const newStatus = !formData.isAvailable;
+    const action = newStatus ? "go ONLINE" : "go OFFLINE";
+    const message = `Are you sure you want to ${action}? ${newStatus ? "You will start receiving job alerts." : "You will stop receiving new job alerts until you are back."}`;
+    
+    if (window.confirm(message)) {
+      try {
+        setSaving(true);
+        const updatedFields = { ...formData, isAvailable: newStatus };
+        const updated = await workerService.updateMe(updatedFields);
+        setProfile(updated);
+        setFormData(updatedFields);
+        showToast(`You are now ${newStatus ? 'Online' : 'Offline'}`);
+      } catch (err) {
+        showToast('Failed to update availability. Please try again.');
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -465,10 +549,46 @@ export const WorkerSettingsPage: React.FC = () => {
                     <input type="text" value={user.email} disabled className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm text-gray-400 cursor-not-allowed" />
                   </div>
                   <div className="col-span-2 space-y-1.5">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Skills</label>
-                    <div className="flex border border-gray-200 bg-gray-50 rounded-xl overflow-hidden focus-within:border-gray-400 transition-colors shadow-sm">
-                      <input type="text" value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={handleSkillKeyDown} placeholder="e.g. Plumbing, Electrical (Press Enter)" className="flex-1 px-4 py-2.5 bg-transparent text-sm focus:outline-none" />
-                      <button type="button" onClick={addSkill} className="px-5 bg-gray-900 text-white hover:bg-gray-800 font-semibold text-sm transition-colors border-l border-gray-900">Add</button>
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <select 
+                            value={selectedSkillValue} 
+                            onChange={(e) => setSelectedSkillValue(e.target.value)}
+                            className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 appearance-none cursor-pointer transition-colors shadow-sm"
+                          >
+                            <option value="">Select a missing skill...</option>
+                            {CATEGORIES.map(c => (
+                              <option key={c.label} value={c.label}>{c.label}</option>
+                            ))}
+                            <option value="Other">Other (Type below)</option>
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={addSkill} 
+                          disabled={!selectedSkillValue || (selectedSkillValue === 'Other' && !skillInput.trim())}
+                          className="px-5 bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm transition-all rounded-xl shadow-sm"
+                        >
+                          Add
+                        </button>
+                      </div>
+
+                      {selectedSkillValue === 'Other' && (
+                        <div className="animate-in slide-in-from-top-1 duration-200">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Custom Skill Name</label>
+                          <input 
+                            type="text" 
+                            value={skillInput} 
+                            onChange={e => setSkillInput(e.target.value)} 
+                            onKeyDown={handleSkillKeyDown}
+                            placeholder="e.g. Pet Grooming, Deep Cleaning..." 
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400 transition-colors shadow-sm" 
+                            autoFocus
+                          />
+                        </div>
+                      )}
                     </div>
                     {formData.skills.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2.5">
@@ -498,7 +618,10 @@ export const WorkerSettingsPage: React.FC = () => {
                     <p className="text-sm font-bold text-amber-900 uppercase tracking-wider">Availability Status</p>
                     <p className="text-xs text-amber-700/70">When active, you'll receive new job alerts in your area.</p>
                   </div>
-                  <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${formData.isAvailable ? 'bg-gray-900' : 'bg-gray-200'}`} onClick={() => setFormData({ ...formData, isAvailable: !formData.isAvailable })}>
+                  <div 
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${formData.isAvailable ? 'bg-gray-900' : 'bg-gray-200'} ${saving ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                    onClick={() => !saving && handleToggleAvailability()}
+                  >
                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isAvailable ? 'translate-x-6' : 'translate-x-1'}`} />
                   </div>
                 </div>
@@ -522,16 +645,91 @@ export const WorkerSettingsPage: React.FC = () => {
             {activeSection === 'security' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="space-y-4">
-                  <button className="w-full flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 transition-all">
-                    <div className="flex items-center gap-3 text-left">
-                      <Lock className="w-4 h-4 text-gray-400" />
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">Change Password</p>
-                        <p className="text-xs text-gray-400">Keep your account secure with a strong password.</p>
+                  {!passwordResetSent ? (
+                    <button 
+                      onClick={handlePasswordReset}
+                      disabled={isResettingPassword}
+                      className="w-full flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 transition-all hover:bg-gray-100 disabled:opacity-70 disabled:cursor-not-allowed group transition-all"
+                    >
+                      <div className="flex items-center gap-3 text-left">
+                        <Lock className="w-4 h-4 text-gray-400" />
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">
+                            {isResettingPassword ? 'Sending link...' : 'Change Password'}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            'Keep your account secure with a strong password.'
+                          </p>
+                        </div>
+                      </div>
+                      {!isResettingPassword && <ChevronRight className="w-4 h-4 text-gray-300 group-hover:translate-x-1 transition-transform" />}
+                    </button>
+                  ) : (
+                    <div className="p-6 bg-gray-50 border border-gray-200 rounded-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+                      <div className="flex items-center gap-2 text-green-600">
+                        <CheckCircle2 className="w-5 h-5" />
+                        <span className="text-sm font-bold">Reset token sent to your email!</span>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Reset Token</label>
+                          <input 
+                            type="text"
+                            value={resetToken}
+                            onChange={(e) => setResetToken(e.target.value)}
+                            placeholder="Enter token from email"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">New Password</label>
+                            <input 
+                              type="password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              placeholder="Min 8 chars"
+                              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Confirm Password</label>
+                            <input 
+                              type="password"
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              placeholder="Repeat it"
+                              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400"
+                            />
+                          </div>
+                        </div>
+
+                        {resetError && (
+                          <p className="text-xs text-red-500 font-bold bg-red-50 p-2 rounded-lg border border-red-100">{resetError}</p>
+                        )}
+
+                        <div className="flex gap-3 pt-2">
+                          <button
+                            onClick={() => setPasswordResetSent(false)}
+                            className="flex-1 py-3 border border-gray-200 text-gray-600 font-bold text-sm rounded-xl hover:bg-white transition-all"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleCompletePasswordReset}
+                            disabled={isResettingPassword}
+                            className="flex-[2] py-3 bg-gray-900 text-white font-bold text-sm rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                          >
+                            {isResettingPassword ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : 'Update Password'}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                  </button>
+                  )}
                   <button className="w-full flex items-center justify-between p-4 bg-red-50/30 border border-red-100 rounded-xl hover:border-red-200 transition-all group">
                     <div className="flex items-center gap-3 text-left">
                       <AlertCircle className="w-4 h-4 text-red-400" />

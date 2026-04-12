@@ -7,7 +7,7 @@ export const LoginPage: React.FC = () => {
     <AuthLayout 
       title="Sign In" 
       subtitle="Welcome back to Skill-Link"
-      showBackButton={false}
+      showBackButton={true}
     >
       <LoginForm />
     </AuthLayout>

@@ -1,19 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { Filter } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Filter, Search } from 'lucide-react';
 import { reservationApi } from '@/features/organisation/api/reservation.service';
 import type { Reservation } from '@/features/organisation/types/reservation.types';
 import { ReservationStatus } from '@/features/organisation/types/reservation.types';
 import { ReservationList } from '@/features/organisation/components/ReservationList';
-import { ReservationDetailsModal } from '@/features/organisation/components/ReservationDetailsModal';
 import { CancelReservationModal } from '@/features/organisation/components/CancelReservationModal';
 
 export const AllReservationsView: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<ReservationStatus | 'ALL'>('ALL');
-  
-  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
@@ -23,7 +20,7 @@ export const AllReservationsView: React.FC = () => {
     setIsLoading(true);
     try {
       const params = filter === 'ALL' ? {} : { status: filter };
-      const data = await reservationApi.getIncoming(params);
+      const data = await reservationApi.getIncoming({ ...params, limit: 100 });
       setReservations(data.items);
     } catch (error) {
       console.error('Failed to fetch reservations:', error);
@@ -62,34 +59,51 @@ export const AllReservationsView: React.FC = () => {
     }
   };
 
-  const openDetails = (id: string) => {
-    const res = reservations.find(r => r.id === id);
-    if (res) {
-      setSelectedReservation(res);
-      setIsDetailsOpen(true);
-    }
-  };
-
   const openCancel = (id: string) => {
     setCancellingId(id);
     setIsCancelOpen(true);
   };
 
+  const filteredReservations = useMemo(() => {
+    if (!searchQuery.trim()) return reservations;
+    const query = searchQuery.toLowerCase();
+    return reservations.filter(res => 
+      res.customer.user.name.toLowerCase().includes(query) ||
+      res.product.name.toLowerCase().includes(query) ||
+      res.id.toLowerCase().includes(query)
+    );
+  }, [reservations, searchQuery]);
+
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Reservations</h1>
-          <p className="text-muted-foreground mt-1 font-medium">Manage all incoming product reservations from your customers.</p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700 pb-20 px-4 sm:px-6">
+      {/* Dynamic Header */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pt-6">
+        <section>
+          <p className="text-primary/70 font-semibold tracking-[0.2em] uppercase text-[9px] mb-1">Logistics Center</p>
+          <h1 className="text-4xl font-black text-primary tracking-tighter leading-tight mb-3">Reservations</h1>
+          <div className="w-16 h-1 bg-primary rounded-full"></div>
+        </section>
+
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+          {/* Search Bar */}
+          <div className="relative w-full sm:w-80 group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <input 
+              type="text"
+              placeholder="Search by customer, product..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-white border border-border/60 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div className="relative w-full sm:w-auto">
+            <Filter className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <select 
               value={filter}
               onChange={(e) => setFilter(e.target.value as any)}
-              className="pl-9 pr-4 py-2 bg-white border border-border rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 appearance-none min-w-[160px]"
+              className="w-full sm:w-44 pl-9 pr-6 py-2 bg-white border border-border/60 rounded-xl text-xs font-black uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none shadow-sm cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value={ReservationStatus.PENDING}>Pending</option>
@@ -101,23 +115,14 @@ export const AllReservationsView: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white border border-border rounded-[2rem] p-8 shadow-sm overflow-hidden relative">
+      <div className="bg-white/50 backdrop-blur-sm border border-border/40 rounded-[2rem] p-4 sm:p-8 shadow-sm">
         <ReservationList 
-          reservations={reservations}
+          reservations={filteredReservations}
           isLoading={isLoading}
           onConfirm={handleConfirm}
           onCancel={openCancel}
-          onViewDetails={openDetails}
         />
       </div>
-
-      <ReservationDetailsModal 
-        reservation={selectedReservation}
-        isOpen={isDetailsOpen}
-        onClose={() => setIsDetailsOpen(false)}
-        onConfirm={handleConfirm}
-        onCancel={openCancel}
-      />
 
       <CancelReservationModal 
         reservationId={cancellingId}

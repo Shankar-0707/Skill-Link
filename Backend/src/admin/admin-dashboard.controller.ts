@@ -30,4 +30,12 @@ export class AdminDashboardController {
   getActiveJobs() {
     return this.adminDashboardService.getActiveJobs();
   }
+
+  @Get('reservations')
+  @ApiOperation({
+    summary: 'Get recent reservations for admin dashboard and reservations page',
+  })
+  getRecentReservations() {
+    return this.adminDashboardService.getRecentReservations();
+  }
 }

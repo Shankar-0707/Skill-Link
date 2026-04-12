@@ -13,8 +13,10 @@ import {
   CheckCircle2,
   ChevronRight,
   UploadCloud,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "../../../shared/components/ui/button";
+import { PRODUCT_CATEGORIES } from "../../../shared/constants/productCategories";
 
 export const CreateProduct: React.FC = () => {
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ export const CreateProduct: React.FC = () => {
   const [formData, setFormData] = useState<Omit<CreateProductPayload, 'price' | 'stockQuantity'> & { price?: number; stockQuantity?: number }>({
     name: "",
     description: "",
+    category: "Others",
     price: undefined,
     stockQuantity: undefined,
     imageUrls: [],
@@ -180,6 +183,26 @@ export const CreateProduct: React.FC = () => {
                   placeholder="Describe your product in detail..."
                   className="w-full p-4 bg-secondary/30 rounded-xl border border-border/80 focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all outline-none font-medium leading-relaxed resize-none"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
+                  Category
+                </label>
+                <div className="relative group">
+                  <select
+                    required
+                    name="category"
+                    value={formData.category}
+                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                    className="w-full h-12 px-4 bg-secondary/30 rounded-xl border border-border/80 focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all outline-none font-medium appearance-none cursor-pointer"
+                  >
+                    {PRODUCT_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none transition-transform group-focus-within:rotate-180" />
+                </div>
               </div>
             </div>
           </div>

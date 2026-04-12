@@ -4,7 +4,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { workerService } from '../../features/customer/services/workerService';
 import { jobService } from '../../features/customer/services/jobService';
 import type { Worker, Job } from '../../features/customer/types';
-import { StatCard, SectionHeader, KycBanner } from '../../features/worker/components/ui';
+import { StatCard, SectionHeader, KycBanner, SkillsBanner } from '../../features/worker/components/ui';
 import { DashboardJobRow } from '../../features/worker/components/jobs/JobsCard';
 import { WorkerLayout } from '../../features/worker/components/layout/Layout';
 
@@ -98,14 +98,21 @@ export const WorkerDashboardPage: React.FC = () => {
         </div>
 
         {/* KYC banner — only shown if not verified */}
-        {profile.kycStatus !== 'VERIFIED' && (
+        {/* KYC banner — only shown if not verified */}
+        {profile.kycStatus !== 'VERIFIED' ? (
           <div className="flex-shrink-0 max-w-sm w-full">
             <KycBanner
               status={profile.kycStatus}
               onAction={() => navigate('/worker/settings')}
             />
           </div>
-        )}
+        ) : profile.skills.length === 0 ? (
+          <div className="flex-shrink-0 max-w-sm w-full">
+            <SkillsBanner
+              onAction={() => navigate('/worker/settings')}
+            />
+          </div>
+        ) : null}
       </div>
 
       {/* ── Stats ── */}

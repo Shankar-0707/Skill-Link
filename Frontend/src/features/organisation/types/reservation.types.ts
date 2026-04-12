@@ -16,7 +16,11 @@ export interface Product {
   stockQuantity: number;
   organisationId: string;
   images?: { id: string; imageUrl: string }[];
-  category?: { id: string; name: string };
+  category: string;
+  organisation?: {
+    id: string;
+    businessName: string;
+  };
 }
 
 export interface Customer {
