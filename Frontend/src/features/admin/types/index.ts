@@ -50,3 +50,71 @@ export interface AdminUserSummary {
   createdAt: string;
   organisationName: string | null;
 }
+
+export interface AdminAnalyticsBreakdownItem {
+  label: string;
+  value: number;
+}
+
+export interface AdminAnalyticsMonthlyActivity {
+  label: string;
+  key: string;
+  users: number;
+  jobs: number;
+  reservations: number;
+  completedJobs: number;
+  pickedUpReservations: number;
+}
+
+export interface AdminAnalyticsHighlight {
+  label: string;
+  value: string;
+  detail: string;
+}
+
+export interface TopWorkerAnalytics {
+  name: string;
+  totalJobs: number;
+  activeJobs: number;
+  completedJobs: number;
+}
+
+export interface TopCustomerAnalytics {
+  name: string;
+  totalJobs: number;
+  activeJobs: number;
+  completedJobs: number;
+  reservations: number;
+}
+
+export interface TopOrganisationAnalytics {
+  name: string;
+  reservations: number;
+  pickedUpReservations: number;
+  quantity: number;
+}
+
+export interface TopProductAnalytics {
+  name: string;
+  organisationName: string;
+  reservations: number;
+  quantity: number;
+}
+
+export interface AdminAnalyticsData {
+  monthlyActivity: AdminAnalyticsMonthlyActivity[];
+  jobsByStatus: AdminAnalyticsBreakdownItem[];
+  reservationsByStatus: AdminAnalyticsBreakdownItem[];
+  jobsByCategory: AdminAnalyticsBreakdownItem[];
+  jobsByBudgetRange: AdminAnalyticsBreakdownItem[];
+  reservationsByQuantityRange: AdminAnalyticsBreakdownItem[];
+  usersByRole: AdminAnalyticsBreakdownItem[];
+  userHealth: AdminAnalyticsBreakdownItem[];
+  jobCoverage: AdminAnalyticsBreakdownItem[];
+  reservationFlow: AdminAnalyticsBreakdownItem[];
+  topWorkers: TopWorkerAnalytics[];
+  topCustomers: TopCustomerAnalytics[];
+  topOrganisations: TopOrganisationAnalytics[];
+  topProducts: TopProductAnalytics[];
+  highlights: AdminAnalyticsHighlight[];
+}

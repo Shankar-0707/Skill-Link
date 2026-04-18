@@ -38,4 +38,12 @@ export class AdminDashboardController {
   getRecentReservations() {
     return this.adminDashboardService.getRecentReservations();
   }
+
+  @Get('analytics')
+  @ApiOperation({
+    summary: 'Get aggregated admin analytics for charts and leaderboards',
+  })
+  getAnalytics() {
+    return this.adminDashboardService.getAnalytics();
+  }
 }

@@ -4,6 +4,7 @@ import {
   Briefcase, 
   CalendarCheck, 
   Users, 
+  BarChart3,
   HelpCircle,
   LogOut, 
   ShieldCheck,
@@ -131,6 +132,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label="Users" 
           href="/admin/users" 
           isActive={location.pathname.startsWith("/admin/users")}
+          isCollapsed={isCollapsed}
+        />
+        <SidebarItem 
+          icon={BarChart3} 
+          label="Analytics" 
+          href="/admin/analytics" 
+          isActive={location.pathname.startsWith("/admin/analytics")}
           isCollapsed={isCollapsed}
         />
         <SidebarItem 

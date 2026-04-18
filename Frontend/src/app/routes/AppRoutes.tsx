@@ -55,6 +55,7 @@ import { AdminUsersPage } from "@/pages/admin/AdminUsersPage";
 import { KycManagementPage } from "@/pages/admin/KycManagementPage";
 import { AdminHelpCenterPage } from "@/pages/admin/AdminHelpCenterPage";
 import { AdminHelpTicketPage } from "@/pages/admin/AdminHelpTicketPage";
+import { AdminAnalyticsPage } from "@/pages/admin/AdminAnalyticsPage";
 
 
 export const AppRoutes: React.FC = () => {
@@ -129,6 +130,7 @@ export const AppRoutes: React.FC = () => {
             <Route path="/admin/jobs" element={<AdminJobsPage />} />
             <Route path="/admin/reservations" element={<AdminReservationsPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
             <Route path="/admin/kyc" element={<KycManagementPage />} />
             <Route path="/admin/help" element={<AdminHelpCenterPage />} />
             <Route path="/admin/help/:ticketId" element={<AdminHelpTicketPage />} />

@@ -1,5 +1,6 @@
 import { api } from '../../../services/api/api';
 import type {
+  AdminAnalyticsData,
   AdminUserSummary,
   RecentJob,
   RecentReservation,
@@ -94,5 +95,10 @@ export const adminApi = {
   getUsers: async (): Promise<AdminUserSummary[]> => {
     const response = await api.get('/admin/users');
     return unwrapResponse<AdminUserSummary[]>(response.data);
+  },
+
+  getAnalytics: async (): Promise<AdminAnalyticsData> => {
+    const response = await api.get('/admin/dashboard/analytics');
+    return unwrapResponse<AdminAnalyticsData>(response.data);
   },
 };
