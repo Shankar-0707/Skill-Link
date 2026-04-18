@@ -7,7 +7,8 @@ import {
   LogOut,
   Building2,
   ChevronRight,
-  ClipboardList
+  ClipboardList,
+  Wallet
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/app/context/useAuth";
@@ -81,6 +82,13 @@ export const Sidebar: React.FC = () => {
           label="Dashboard"
           href="/organisation"
           isActive={location.pathname === "/organisation"}
+        />
+
+        <SidebarItem
+          icon={Wallet}
+          label="Wallet"
+          href="/organisation/wallet"
+          isActive={location.pathname === "/organisation/wallet"}
         />
 
         {/* Reservations Section with Dropdown */}

@@ -27,12 +27,12 @@ function unwrapResponse<T>(response: ApiEnvelope<T> | T): T {
 
 export const adminApi = {
   getDashboardMetrics: async (): Promise<UserMetrics> => {
-    const response = await api.get('/admin/dashboard/metrics');
+    const response = await api.get('/admin/dashboard');
     return unwrapResponse<UserMetrics>(response.data);
   },
 
   getActiveJobs: async (): Promise<RecentJob[]> => {
-    const response = await api.get('/admin/dashboard/active-jobs');
+    const response = await api.get('/admin/jobs');
 
     const jobs = unwrapResponse<
       Array<{
@@ -63,7 +63,7 @@ export const adminApi = {
   },
 
   getReservations: async (): Promise<RecentReservation[]> => {
-    const response = await api.get('/admin/dashboard/reservations');
+    const response = await api.get('/admin/reservations');
 
     const reservations = unwrapResponse<
       Array<{
@@ -94,5 +94,20 @@ export const adminApi = {
   getUsers: async (): Promise<AdminUserSummary[]> => {
     const response = await api.get('/admin/users');
     return unwrapResponse<AdminUserSummary[]>(response.data);
+  },
+
+  getHeldEscrows: async () => {
+    const response = await api.get('/admin/escrows');
+    return unwrapResponse<any[]>(response.data);
+  },
+
+  releaseEscrow: async (id: string) => {
+    const response = await api.post(`/admin/escrows/${id}/release`);
+    return response.data;
+  },
+
+  refundEscrow: async (id: string) => {
+    const response = await api.post(`/admin/escrows/${id}/refund`);
+    return response.data;
   },
 };

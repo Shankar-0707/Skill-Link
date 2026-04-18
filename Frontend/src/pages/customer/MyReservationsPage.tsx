@@ -97,17 +97,6 @@ export const MyReservationsPage: React.FC = () => {
   const organisations = Array.from(new Set(reservations.map(r => r.product?.organisation?.businessName))).filter(Boolean) as string[];
   const activeFiltersCount = (filters.dateRange !== "all" ? 1 : 0) + (filters.category !== "all" ? 1 : 0) + (filters.organisation !== "all" ? 1 : 0);
 
-  const handlePickUp = async (id: string) => {
-    setIsActionLoading(id);
-    try {
-      await customerReservationService.markPickedUp(id);
-      await fetchReservations();
-    } catch (err) {
-      console.error("Failed to mark picked up:", err);
-    } finally {
-      setIsActionLoading(null);
-    }
-  };
 
   const handleCancelByCustomer = async (id: string) => {
     if (!window.confirm("Are you sure you want to cancel this reservation?")) return;
@@ -320,15 +309,11 @@ export const MyReservationsPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {res.status === "CONFIRMED" && (
-                    <button 
-                      onClick={() => handlePickUp(res.id)}
-                      disabled={!!isActionLoading}
-                      className="px-5 py-2.5 bg-foreground text-background rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-sm"
-                    >
-                      {isActionLoading === res.id ? <Loader2 size={12} className="animate-spin" /> : <Package size={12} />}
-                      Pick Up
-                    </button>
+                  {res.status === "CONFIRMED" && res.pickupOtp && (
+                    <div className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-center shadow-inner border border-emerald-100">
+                      <p className="text-[9px] font-black uppercase tracking-widest opacity-80 mb-0.5">Pickup Code</p>
+                      <p className="text-xl font-black tracking-widest">{res.pickupOtp}</p>
+                    </div>
                   )}
                   {["PENDING", "CONFIRMED"].includes(res.status) && (
                     <button 

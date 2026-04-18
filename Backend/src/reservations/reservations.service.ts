@@ -9,6 +9,7 @@ import {
 import { ReservationStatus, EscrowStatus, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EscrowService } from '../escrow/escrow.service';
+import { PaymentsService } from '../payments/payments.service';
 import {
   paginate,
   PaginationDto,
@@ -19,6 +20,8 @@ import {
   CancelReservationDto,
   ListReservationsDto,
   ListIncomingReservationsDto,
+  VerifyPickupDto,
+  RejectReservationDto,
 } from './dto/reservation.dto';
 import { JwtPayload } from '../common';
 
@@ -29,7 +32,6 @@ interface ReservationViewAccessShape {
 }
 
 // ─── Valid transitions ────────────────────────────────────────────────────────
-// This map defines EXACTLY which transitions are allowed and who can make them.
 const VALID_TRANSITIONS: Record<
   ReservationStatus,
   { next: ReservationStatus[]; allowedRoles: Role[] }
@@ -56,6 +58,11 @@ const VALID_TRANSITIONS: Record<
   },
 };
 
+/** Generates a secure 4-digit numeric OTP */
+function generateOtp(): string {
+  return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
 @Injectable()
 export class ReservationsService {
   private readonly logger = new Logger(ReservationsService.name);
@@ -63,20 +70,19 @@ export class ReservationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly escrowService: EscrowService,
+    private readonly paymentsService: PaymentsService,
   ) {}
 
-  // ─── Customer: Create reservation ────────────────────────────────────────
+  // ─── Customer: Create reservation + Payment link ──────────────────────────
 
   async create(userId: string, dto: CreateReservationDto) {
-    // Resolve customerId from userId
     const customer = await this.prisma.customer.findFirst({
       where: { userId, deletedAt: null },
     });
     if (!customer) throw new NotFoundException('Customer profile not found');
 
-    // All checks and writes in a single transaction — prevents race conditions
     return this.prisma.$transaction(async (tx) => {
-      // Lock the product row (SELECT ... FOR UPDATE equivalent via findUnique inside tx)
+      // Lock product and check stock
       const product = await tx.product.findUnique({
         where: { id: dto.productId },
       });
@@ -96,7 +102,7 @@ export class ReservationsService {
         data: { stockQuantity: { decrement: dto.quantity } },
       });
 
-      // Create reservation with 24-hour expiry window
+      // Create reservation — status remains PENDING until payment confirmed
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       const reservation = await tx.reservation.create({
@@ -119,21 +125,26 @@ export class ReservationsService {
         },
       });
 
-      // Create escrow — holds the money until pickup
-      await this.escrowService.createEscrow(
-        {
-          reservationId: reservation.id,
-          amount: product.price * dto.quantity,
-        },
-        tx,
-      );
+      // Create a payment order (mock gateway) and get the checkout URL
+      const totalAmount = product.price * dto.quantity;
+      const paymentOrder = await this.paymentsService.createPaymentOrder({
+        userId,
+        amount: totalAmount,
+        type: 'RESERVATION',
+        reservationId: reservation.id,
+      }, tx);
 
       this.logger.log(
-        `Reservation ${reservation.id} created for customer ${customer.id}. ` +
-          `Product: ${dto.productId}, Qty: ${dto.quantity}`,
+        `Reservation ${reservation.id} created. Payment link: ${paymentOrder.checkoutUrl}`,
       );
 
-      return reservation;
+      // Return reservation + checkout URL so frontend can redirect
+      return {
+        ...reservation,
+        checkoutUrl: paymentOrder.checkoutUrl,
+        providerPaymentId: paymentOrder.providerPaymentId,
+        totalAmount,
+      };
     });
   }
 
@@ -169,12 +180,54 @@ export class ReservationsService {
             },
           },
           escrow: { select: { id: true, amount: true, status: true } },
+          payment: { select: { id: true, status: true, checkoutUrl: true, providerPaymentId: true } },
         },
       }),
       this.prisma.reservation.count({ where }),
     ]);
 
     return paginate(items, total, { page, limit } as PaginationDto);
+  }
+
+  // ─── Customer: Get single reservation detail ─────────────────────────────
+
+  async findMyReservationById(reservationId: string, userId: string) {
+    const customer = await this.prisma.customer.findFirst({
+      where: { userId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!customer) throw new NotFoundException('Customer profile not found');
+
+    const reservation = await this.prisma.reservation.findUnique({
+      where: { id: reservationId },
+      include: {
+        product: {
+          include: {
+            images: true,
+            organisation: { select: { id: true, businessName: true } },
+          },
+        },
+        escrow: true,
+        payment: {
+          select: {
+            id: true,
+            status: true,
+            amount: true,
+            checkoutUrl: true,
+            providerPaymentId: true,
+          },
+        },
+      },
+    });
+
+    if (!reservation) throw new NotFoundException('Reservation not found');
+    if (reservation.customerId !== customer.id) {
+      throw new ForbiddenException('This reservation does not belong to you');
+    }
+
+    // Only expose OTP to customer when status is CONFIRMED
+    // pickupOtp is already on the model — included by default if status is CONFIRMED
+    return reservation;
   }
 
   // ─── Org: List incoming reservations for their products ──────────────────
@@ -209,6 +262,7 @@ export class ReservationsService {
               user: {
                 select: {
                   id: true,
+                  name: true,
                   email: true,
                   phone: true,
                   profileImage: true,
@@ -241,22 +295,23 @@ export class ReservationsService {
         },
         customer: {
           include: {
-            user: { select: { id: true, email: true, phone: true } },
+            user: { select: { id: true, name: true, email: true, phone: true } },
           },
         },
         escrow: true,
+        payment: {
+          select: { id: true, status: true, amount: true, checkoutUrl: true, providerPaymentId: true },
+        },
       },
     });
 
     if (!reservation) throw new NotFoundException('Reservation not found');
-
-    // Access control: customer sees only own; org sees only their product's reservations
     this.assertViewAccess(reservation, actor);
 
     return reservation;
   }
 
-  // ─── Org: Confirm a pending reservation ──────────────────────────────────
+  // ─── Org: Confirm a pending reservation + generate OTP ───────────────────
 
   async confirm(reservationId: string, userId: string) {
     const reservation = await this.getReservationWithOrgCheck(
@@ -266,42 +321,123 @@ export class ReservationsService {
 
     this.assertTransition(reservation.status, ReservationStatus.CONFIRMED);
 
+    // Generate pickup OTP (valid for 24 hours)
+    const otp = generateOtp();
+    const otpExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
     const updated = await this.prisma.reservation.update({
       where: { id: reservationId },
-      data: { status: ReservationStatus.CONFIRMED },
+      data: {
+        status: ReservationStatus.CONFIRMED,
+        pickupOtp: otp,
+        pickupOtpExpiresAt: otpExpiresAt,
+      },
       include: { product: { select: { name: true } }, escrow: true },
     });
 
     this.logger.log(
-      `Reservation ${reservationId} confirmed by org user ${userId}`,
+      `Reservation ${reservationId} confirmed by org ${userId}. OTP generated for customer.`,
     );
     return updated;
   }
 
-  // ─── Customer: Mark as picked up → releases escrow ───────────────────────
+  // ─── Org: Reject PENDING reservation (dedicated endpoint) ────────────────
 
-  async markPickedUp(reservationId: string, userId: string) {
-    const reservation = await this.getReservationWithCustomerCheck(
+  async reject(
+    reservationId: string,
+    userId: string,
+    dto: RejectReservationDto,
+  ) {
+    const reservation = await this.getReservationWithOrgCheck(
       reservationId,
       userId,
     );
 
-    this.assertTransition(reservation.status, ReservationStatus.PICKED_UP);
+    if (reservation.status !== ReservationStatus.PENDING) {
+      throw new BadRequestException(
+        'Only PENDING reservations can be rejected by the organisation.',
+      );
+    }
 
     return this.prisma.$transaction(async (tx) => {
       const updated = await tx.reservation.update({
         where: { id: reservationId },
-        data: { status: ReservationStatus.PICKED_UP },
+        data: { status: ReservationStatus.CANCELLED },
+        include: { escrow: true },
+      });
+
+      // Restore stock
+      await tx.product.update({
+        where: { id: reservation.productId },
+        data: { stockQuantity: { increment: reservation.quantity } },
+      });
+
+      // Refund escrow if payment was made
+      if (updated.escrow?.status === EscrowStatus.HELD) {
+        await this.escrowService.refundEscrow(updated.escrow.id, tx);
+      }
+
+      this.logger.log(
+        `Reservation ${reservationId} rejected by org ${userId}. Reason: ${dto.reason ?? 'none'}.`,
+      );
+
+      return updated;
+    });
+  }
+
+  // ─── Org: Verify OTP and mark as PICKED_UP → releases escrow ─────────────
+
+  async verifyOtpAndPickup(
+    reservationId: string,
+    userId: string,
+    dto: VerifyPickupDto,
+  ) {
+    const reservation = await this.getReservationWithOrgCheck(
+      reservationId,
+      userId,
+    );
+
+    if (reservation.status !== ReservationStatus.CONFIRMED) {
+      throw new BadRequestException(
+        'Can only verify pickup for CONFIRMED reservations.',
+      );
+    }
+
+    // Validate OTP
+    if (!reservation.pickupOtp) {
+      throw new BadRequestException(
+        'No pickup OTP found for this reservation. Has the org confirmed it?',
+      );
+    }
+
+    if (reservation.pickupOtp !== dto.otp) {
+      throw new BadRequestException('Invalid OTP. Please ask the customer to check their app.');
+    }
+
+    if (reservation.pickupOtpExpiresAt && reservation.pickupOtpExpiresAt < new Date()) {
+      throw new BadRequestException(
+        'OTP has expired. Please cancel and re-confirm this reservation.',
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.reservation.update({
+        where: { id: reservationId },
+        data: {
+          status: ReservationStatus.PICKED_UP,
+          pickupOtp: null, // Clear OTP after use
+          pickupOtpExpiresAt: null,
+        },
         include: { product: { select: { name: true } }, escrow: true },
       });
 
-      // Release escrow — money goes to organisation
+      // Release escrow → org virtual wallet credited
       if (updated.escrow) {
         await this.escrowService.releaseEscrow(updated.escrow.id, tx);
       }
 
       this.logger.log(
-        `Reservation ${reservationId} picked up. Escrow released.`,
+        `Reservation ${reservationId} — OTP verified. Marked PICKED_UP. Escrow released.`,
       );
       return updated;
     });
@@ -327,7 +463,6 @@ export class ReservationsService {
 
     if (!reservation) throw new NotFoundException('Reservation not found');
 
-    // Check actor is either the customer or the org that owns the product
     const isCustomer = reservation.customer.user.id === actor.sub;
     const isOrg = reservation.product.organisation.userId === actor.sub;
 
@@ -352,7 +487,7 @@ export class ReservationsService {
         data: { stockQuantity: { increment: reservation.quantity } },
       });
 
-      // Refund escrow — money goes back to customer
+      // Refund escrow — money (virtual) goes back to customer
       if (updated.escrow && updated.escrow.status === EscrowStatus.HELD) {
         await this.escrowService.refundEscrow(updated.escrow.id, tx);
       }
@@ -389,13 +524,11 @@ export class ReservationsService {
             data: { status: ReservationStatus.EXPIRED },
           });
 
-          // Restore stock
           await tx.product.update({
             where: { id: reservation.productId },
             data: { stockQuantity: { increment: reservation.quantity } },
           });
 
-          // Refund escrow if held
           if (reservation.escrow?.status === EscrowStatus.HELD) {
             await this.escrowService.refundEscrow(reservation.escrow.id, tx);
           }
@@ -417,9 +550,6 @@ export class ReservationsService {
 
   // ─── Private helpers ──────────────────────────────────────────────────────
 
-  /**
-   * Validates that the status transition is legal.
-   */
   private assertTransition(
     current: ReservationStatus,
     target: ReservationStatus,
@@ -433,9 +563,6 @@ export class ReservationsService {
     }
   }
 
-  /**
-   * Loads a reservation and verifies the acting userId is the org that owns the product.
-   */
   private async getReservationWithOrgCheck(
     reservationId: string,
     userId: string,
@@ -461,9 +588,6 @@ export class ReservationsService {
     return reservation;
   }
 
-  /**
-   * Loads a reservation and verifies the acting userId is the customer who made it.
-   */
   private async getReservationWithCustomerCheck(
     reservationId: string,
     userId: string,
@@ -485,9 +609,6 @@ export class ReservationsService {
     return reservation;
   }
 
-  /**
-   * View access: customer sees own, org sees their product's reservations.
-   */
   private assertViewAccess(
     reservation: ReservationViewAccessShape,
     actor: JwtPayload,

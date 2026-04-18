@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { KycGateService } from '../kyc/kyc-gate.service';
+import { PaymentsService } from '../payments/payments.service';
+import { EscrowService } from '../escrow/escrow.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 
@@ -14,6 +16,8 @@ export class JobsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly kycGate: KycGateService,
+    private readonly paymentsService: PaymentsService,
+    private readonly escrowService: EscrowService,
   ) {}
 
   // ─────────────────────────────────────────────
@@ -60,26 +64,45 @@ export class JobsService {
     console.log(userId);
     const customerId = await this.getCustomerId(userId);
 
-    return this.prisma.job.create({
-      data: {
-        customerId,
-        title: dto.title,
-        description: dto.description,
-        category: dto.category,
-        budget: dto.budget ?? null,
-        scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : null,
-        // status defaults to POSTED per schema
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        category: true,
-        budget: true,
-        status: true,
-        scheduledAt: true,
-        createdAt: true,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const job = await tx.job.create({
+        data: {
+          customerId,
+          title: dto.title,
+          description: dto.description,
+          category: dto.category,
+          budget: dto.budget ?? null,
+          scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : null,
+        },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          category: true,
+          budget: true,
+          status: true,
+          scheduledAt: true,
+          createdAt: true,
+        },
+      });
+
+      // If a budget is set, create a payment order so customer can pay via mock checkout
+      if (dto.budget && dto.budget > 0) {
+        const paymentOrder = await this.paymentsService.createPaymentOrder({
+          userId,
+          amount: dto.budget,
+          type: 'JOB',
+          jobId: job.id,
+        }, tx);
+
+        return {
+          ...job,
+          checkoutUrl: paymentOrder.checkoutUrl,
+          providerPaymentId: paymentOrder.providerPaymentId,
+        };
+      }
+
+      return job;
     });
   }
 
@@ -382,16 +405,9 @@ export class JobsService {
         data: { isAvailable: false },
       });
 
-      // Create escrow — funds held until job confirmed
-      if (job.budget) {
-        await tx.escrow.create({
-          data: {
-            jobId: jobId,
-            amount: job.budget,
-            status: 'HELD',
-          },
-        });
-      }
+      // NOTE: Escrow is created by the payment webhook (simulatePaymentSuccess),
+      // NOT here. Only create if there was no budget (free job).
+      // If budget exists, customer should have already paid via mock checkout.
 
       return updatedJob;
     });
@@ -478,26 +494,9 @@ export class JobsService {
       );
 
     return this.prisma.$transaction(async (tx) => {
-      // Release escrow
+      // Release escrow → worker virtual wallet credited via EscrowService
       if (job.escrow) {
-        await tx.escrow.update({
-          where: { id: job.escrow.id },
-          data: {
-            status: 'RELEASED',
-            releasedAt: new Date(),
-          },
-        });
-
-        // Log payout as a Payment record
-        await tx.payment.create({
-          data: {
-            userId: userId, // payer is the customer (user id)
-            amount: job.escrow.amount,
-            type: 'JOB_PAYOUT',
-            status: 'SUCCESS',
-            idempotencyKey: `job_payout_${jobId}`,
-          },
-        });
+        await this.escrowService.releaseEscrow(job.escrow.id, tx);
       }
 
       // Make worker available again
@@ -509,7 +508,7 @@ export class JobsService {
       }
 
       return {
-        message: 'Job confirmed. Escrow released.',
+        message: 'Job confirmed. Escrow released to worker wallet.',
         jobId,
         escrowReleased: !!job.escrow,
       };

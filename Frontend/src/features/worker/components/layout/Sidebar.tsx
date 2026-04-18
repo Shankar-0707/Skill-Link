@@ -4,7 +4,7 @@ import {
   LayoutGrid,
   Search,
   Briefcase,
-  IndianRupee,
+  Wallet,
   HelpCircle,
   Settings,
   Zap,
@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/worker/dashboard' },
   { id: 'available-jobs', label: 'Find Jobs', icon: Search, path: '/worker/available-jobs' },
   { id: 'my-assignments', label: 'My Work', icon: Briefcase, path: '/worker/my-assignments' },
-  { id: 'earnings', label: 'Earnings', icon: IndianRupee, path: '/worker/earnings' },
+  { id: 'wallet', label: 'My Wallet', icon: Wallet, path: '/worker/wallet' },
 ];
 
 export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {

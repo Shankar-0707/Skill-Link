@@ -20,6 +20,8 @@ export interface Job {
   scheduledAt?: string;
   createdAt: string;
   worker?: WorkerSummary;
+  checkoutUrl?: string;
+  providerPaymentId?: string;
   escrow?: {
     amount: number;
     status: 'HELD' | 'RELEASED' | 'REFUNDED';
