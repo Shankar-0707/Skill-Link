@@ -23,6 +23,7 @@ export const AdminUsersPage = () => {
   const [users, setUsers] = useState<AdminUserSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
 
   const loadUsers = async () => {
     try {
@@ -40,6 +41,29 @@ export const AdminUsersPage = () => {
   useEffect(() => {
     void loadUsers();
   }, []);
+
+  const handleBlacklistToggle = async (user: AdminUserSummary) => {
+    try {
+      setPendingUserId(user.id);
+
+      const updatedUser = user.isBlacklisted
+        ? await adminApi.unblacklistUser(user.id)
+        : await adminApi.blacklistUser(
+            user.id,
+            'Suspended by admin review. User can contact linkskillofficial@gmail.com for support.',
+          );
+
+      setUsers((currentUsers) =>
+        currentUsers.map((currentUser) =>
+          currentUser.id === updatedUser.id ? updatedUser : currentUser,
+        ),
+      );
+    } catch {
+      setError('Unable to update blacklist status right now.');
+    } finally {
+      setPendingUserId(null);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -80,19 +104,21 @@ export const AdminUsersPage = () => {
         </div>
       ) : (
         <div className="bg-background rounded-xl border border-border overflow-hidden">
-          <div className="grid grid-cols-[1.3fr_1.1fr_0.8fr_0.8fr_0.8fr_0.8fr] gap-4 px-6 py-4 border-b border-border text-[11px] font-label uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-[1.25fr_1.05fr_0.75fr_0.95fr_0.75fr_0.55fr_0.8fr_0.8fr] gap-4 px-6 py-4 border-b border-border text-[11px] font-label uppercase tracking-wider text-muted-foreground">
             <span>User</span>
             <span>Contact</span>
             <span>Role</span>
             <span>Status</span>
             <span>Email</span>
+            <span>Tickets</span>
             <span>Joined</span>
+            <span>Action</span>
           </div>
           <div className="divide-y divide-border">
             {users.map((user) => (
               <div
                 key={user.id}
-                className="grid grid-cols-[1.3fr_1.1fr_0.8fr_0.8fr_0.8fr_0.8fr] gap-4 px-6 py-5 items-center hover:bg-surface-container/60 transition-colors"
+                className="grid grid-cols-[1.25fr_1.05fr_0.75fr_0.95fr_0.75fr_0.55fr_0.8fr_0.8fr] gap-4 px-6 py-5 items-center hover:bg-surface-container/60 transition-colors"
               >
                 <div>
                   <h3 className="text-sm font-label font-semibold text-foreground">
@@ -117,13 +143,24 @@ export const AdminUsersPage = () => {
                   <span
                     className={cn(
                       'inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider',
-                      user.isActive
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-rose-50 text-rose-700',
+                      user.isBlacklisted
+                        ? 'bg-rose-50 text-rose-700'
+                        : user.isActive
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-slate-100 text-slate-700',
                     )}
                   >
-                    {user.isActive ? 'Active' : 'Inactive'}
+                    {user.isBlacklisted
+                      ? 'Blacklisted'
+                      : user.isActive
+                        ? 'Active'
+                        : 'Inactive'}
                   </span>
+                  {user.blacklistedReason && (
+                    <p className="mt-1 text-[11px] font-body text-muted-foreground">
+                      {user.blacklistedReason}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <span
@@ -137,9 +174,29 @@ export const AdminUsersPage = () => {
                     {user.emailVerified ? 'Verified' : 'Pending'}
                   </span>
                 </div>
+                <p className="text-sm font-body text-foreground">{user.helpTicketCount}</p>
                 <p className="text-xs font-body text-muted-foreground">
                   {formatUserDate(user.createdAt)}
                 </p>
+                <div>
+                  <button
+                    onClick={() => void handleBlacklistToggle(user)}
+                    disabled={pendingUserId === user.id || user.role === 'ADMIN'}
+                    className={cn(
+                      'rounded-lg px-3 py-2 text-xs font-label font-semibold transition-colors',
+                      user.isBlacklisted
+                        ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                        : 'bg-rose-50 text-rose-700 hover:bg-rose-100',
+                      pendingUserId === user.id && 'cursor-not-allowed opacity-60',
+                    )}
+                  >
+                    {pendingUserId === user.id
+                      ? 'Saving...'
+                      : user.isBlacklisted
+                        ? 'Unblacklist'
+                        : 'Blacklist'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>

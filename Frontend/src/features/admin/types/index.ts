@@ -47,6 +47,10 @@ export interface AdminUserSummary {
   role: string;
   isActive: boolean;
   emailVerified: boolean;
+  isBlacklisted: boolean;
+  blacklistedReason: string | null;
+  blacklistedAt: string | null;
+  helpTicketCount: number;
   createdAt: string;
   organisationName: string | null;
 }
@@ -73,25 +77,48 @@ export interface AdminAnalyticsHighlight {
 }
 
 export interface TopWorkerAnalytics {
+  id: string;
   name: string;
+  email: string;
   totalJobs: number;
   activeJobs: number;
   completedJobs: number;
+  helpTicketCount: number;
+  isBlacklisted: boolean;
 }
 
 export interface TopCustomerAnalytics {
+  id: string;
   name: string;
+  email: string;
   totalJobs: number;
   activeJobs: number;
   completedJobs: number;
   reservations: number;
+  helpTicketCount: number;
+  isBlacklisted: boolean;
 }
 
 export interface TopOrganisationAnalytics {
+  id: string;
   name: string;
+  email: string;
   reservations: number;
   pickedUpReservations: number;
   quantity: number;
+  helpTicketCount: number;
+  isBlacklisted: boolean;
+}
+
+export interface TicketHeavyUserAnalytics {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  helpTicketCount: number;
+  isBlacklisted: boolean;
+  blacklistedAt: string | null;
+  blacklistedReason?: string | null;
 }
 
 export interface TopProductAnalytics {
@@ -116,5 +143,9 @@ export interface AdminAnalyticsData {
   topCustomers: TopCustomerAnalytics[];
   topOrganisations: TopOrganisationAnalytics[];
   topProducts: TopProductAnalytics[];
+  ticketHeavyCustomers: TicketHeavyUserAnalytics[];
+  ticketHeavyWorkers: TicketHeavyUserAnalytics[];
+  ticketHeavyOrganisations: TicketHeavyUserAnalytics[];
+  blacklistedUsers: TicketHeavyUserAnalytics[];
   highlights: AdminAnalyticsHighlight[];
 }

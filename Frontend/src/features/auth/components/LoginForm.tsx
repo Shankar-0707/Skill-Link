@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { Mail, Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { GoogleAuthButton } from './GoogleAuthButton';
 import { useAuth } from '../../../app/context/useAuth';
 import { getHomeRouteForRole } from '../utils/authHelpers';
+import { setAuthNotice } from '../utils/authNotice';
 import { resolveApiErrorMessage } from '../utils/errorMessage';
 import { cn } from '../../../shared/utils/cn';
 
@@ -50,6 +52,23 @@ export const LoginForm: React.FC = () => {
 
       navigate(destination, { replace: true });
     } catch (error) {
+      const errorCode = axios.isAxiosError(error)
+        ? error.response?.data?.code
+        : undefined;
+
+      if (errorCode === 'ACCOUNT_SUSPENDED') {
+        const errorMessage = resolveApiErrorMessage(
+          error,
+          'Account has been suspended. Please contact linkskillofficial@gmail.com for support.',
+        );
+        setAuthNotice({
+          type: 'suspended',
+          message: errorMessage,
+        });
+        navigate('/account-suspended', { replace: true });
+        return;
+      }
+
       setErrorMessage(
         resolveApiErrorMessage(error, 'Sign in failed. Please try again.'),
       );
@@ -129,9 +148,9 @@ export const LoginForm: React.FC = () => {
       </div>
 
       {errorMessage && (
-        <p className="rounded-xl border border-red-300 bg-red-50 px-3 py-2.5 text-sm font-semibold text-red-700">
-          {errorMessage}
-        </p>
+        <div className="rounded-xl border border-red-300 bg-red-50 px-3 py-3 text-sm text-red-700">
+          <p className="font-semibold">{errorMessage}</p>
+        </div>
       )}
 
       <button

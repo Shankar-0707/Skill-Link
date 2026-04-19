@@ -97,6 +97,18 @@ export const adminApi = {
     return unwrapResponse<AdminUserSummary[]>(response.data);
   },
 
+  blacklistUser: async (userId: string, reason?: string): Promise<AdminUserSummary> => {
+    const response = await api.post(`/admin/users/${userId}/blacklist`, {
+      reason,
+    });
+    return unwrapResponse<AdminUserSummary>(response.data);
+  },
+
+  unblacklistUser: async (userId: string): Promise<AdminUserSummary> => {
+    const response = await api.delete(`/admin/users/${userId}/blacklist`);
+    return unwrapResponse<AdminUserSummary>(response.data);
+  },
+
   getAnalytics: async (): Promise<AdminAnalyticsData> => {
     const response = await api.get('/admin/dashboard/analytics');
     return unwrapResponse<AdminAnalyticsData>(response.data);

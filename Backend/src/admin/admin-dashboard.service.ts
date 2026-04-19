@@ -55,25 +55,48 @@ type AnalyticsBreakdownItem = {
 };
 
 type TopWorkerAnalytics = {
+  id: string;
   name: string;
+  email: string;
   totalJobs: number;
   activeJobs: number;
   completedJobs: number;
+  helpTicketCount: number;
+  isBlacklisted: boolean;
 };
 
 type TopCustomerAnalytics = {
+  id: string;
   name: string;
+  email: string;
   totalJobs: number;
   activeJobs: number;
   completedJobs: number;
   reservations: number;
+  helpTicketCount: number;
+  isBlacklisted: boolean;
 };
 
 type TopOrganisationAnalytics = {
+  id: string;
   name: string;
+  email: string;
   reservations: number;
   pickedUpReservations: number;
   quantity: number;
+  helpTicketCount: number;
+  isBlacklisted: boolean;
+};
+
+type TicketHeavyUserAnalytics = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  helpTicketCount: number;
+  isBlacklisted: boolean;
+  blacklistedAt: Date | null;
+  blacklistedReason?: string | null;
 };
 
 type TopProductAnalytics = {
@@ -104,6 +127,10 @@ type AdminAnalyticsResponse = {
   topCustomers: TopCustomerAnalytics[];
   topOrganisations: TopOrganisationAnalytics[];
   topProducts: TopProductAnalytics[];
+  ticketHeavyCustomers: TicketHeavyUserAnalytics[];
+  ticketHeavyWorkers: TicketHeavyUserAnalytics[];
+  ticketHeavyOrganisations: TicketHeavyUserAnalytics[];
+  blacklistedUsers: TicketHeavyUserAnalytics[];
   highlights: AnalyticsHighlight[];
 };
 
@@ -338,7 +365,7 @@ export class AdminDashboardService {
   }
 
   async getAnalytics(): Promise<AdminAnalyticsResponse> {
-    const [users, jobs, reservations] = await Promise.all([
+    const [users, jobs, reservations, helpTickets] = await Promise.all([
       this.prisma.user.findMany({
         where: {
           deletedAt: null,
@@ -347,9 +374,15 @@ export class AdminDashboardService {
           },
         },
         select: {
+          id: true,
+          name: true,
+          email: true,
           role: true,
           isActive: true,
           emailVerified: true,
+          isBlacklisted: true,
+          blacklistedAt: true,
+          blacklistedReason: true,
           createdAt: true,
         },
       }),
@@ -368,18 +401,23 @@ export class AdminDashboardService {
             select: {
               user: {
                 select: {
+                  id: true,
                   name: true,
                   email: true,
+                  isBlacklisted: true,
                 },
               },
             },
           },
           worker: {
             select: {
+              id: true,
               user: {
                 select: {
+                  id: true,
                   name: true,
                   email: true,
+                  isBlacklisted: true,
                 },
               },
             },
@@ -397,6 +435,13 @@ export class AdminDashboardService {
               organisation: {
                 select: {
                   businessName: true,
+                  user: {
+                    select: {
+                      id: true,
+                      email: true,
+                      isBlacklisted: true,
+                    },
+                  },
                 },
               },
             },
@@ -405,15 +450,35 @@ export class AdminDashboardService {
             select: {
               user: {
                 select: {
+                  id: true,
                   name: true,
                   email: true,
+                  isBlacklisted: true,
                 },
               },
             },
           },
         },
       }),
+      this.prisma.helpTicket.findMany({
+        select: {
+          createdByUserId: true,
+          createdByUser: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              isBlacklisted: true,
+              blacklistedAt: true,
+              blacklistedReason: true,
+            },
+          },
+        },
+      }),
     ]);
+
+    const helpTicketCountByUserId = this.buildHelpTicketCountMap(helpTickets);
 
     const monthlyActivity = this.buildMonthlyActivity(users, jobs, reservations);
 
@@ -493,6 +558,17 @@ export class AdminDashboardService {
       },
     ];
 
+    const topWorkers = this.buildTopWorkers(jobs, helpTicketCountByUserId);
+    const topCustomers = this.buildTopCustomers(
+      jobs,
+      reservations,
+      helpTicketCountByUserId,
+    );
+    const topOrganisations = this.buildTopOrganisations(
+      reservations,
+      helpTicketCountByUserId,
+    );
+
     return {
       monthlyActivity,
       jobsByStatus,
@@ -504,11 +580,25 @@ export class AdminDashboardService {
       userHealth,
       jobCoverage,
       reservationFlow,
-      topWorkers: this.buildTopWorkers(jobs),
-      topCustomers: this.buildTopCustomers(jobs, reservations),
-      topOrganisations: this.buildTopOrganisations(reservations),
+      topWorkers,
+      topCustomers,
+      topOrganisations,
       topProducts: this.buildTopProducts(reservations),
-      highlights: this.buildHighlights(monthlyActivity, jobs, reservations),
+      ticketHeavyCustomers: this.buildTicketHeavyUsers(
+        helpTickets,
+        Role.CUSTOMER,
+      ),
+      ticketHeavyWorkers: this.buildTicketHeavyUsers(helpTickets, Role.WORKER),
+      ticketHeavyOrganisations: this.buildTicketHeavyUsers(
+        helpTickets,
+        Role.ORGANISATION,
+      ),
+      blacklistedUsers: this.buildBlacklistedUsers(users, helpTicketCountByUserId),
+      highlights: this.buildHighlights(
+        monthlyActivity,
+        topWorkers,
+        topOrganisations,
+      ),
     };
   }
 
@@ -579,8 +669,17 @@ export class AdminDashboardService {
   private buildTopWorkers(
     jobs: Array<{
       status: JobStatus;
-      worker: { user: { name: string | null; email: string } } | null;
+      worker: {
+        id: string;
+        user: {
+          id: string;
+          name: string | null;
+          email: string;
+          isBlacklisted: boolean;
+        };
+      } | null;
     }>,
+    helpTicketCountByUserId: Map<string, number>,
   ): TopWorkerAnalytics[] {
     const counts = new Map<string, TopWorkerAnalytics>();
 
@@ -590,11 +689,15 @@ export class AdminDashboardService {
       }
 
       const workerName = job.worker.user.name ?? job.worker.user.email;
-      const existing = counts.get(workerName) ?? {
+      const existing = counts.get(job.worker.user.id) ?? {
+        id: job.worker.user.id,
         name: workerName,
+        email: job.worker.user.email,
         totalJobs: 0,
         activeJobs: 0,
         completedJobs: 0,
+        helpTicketCount: helpTicketCountByUserId.get(job.worker.user.id) ?? 0,
+        isBlacklisted: job.worker.user.isBlacklisted,
       };
 
       existing.totalJobs += 1;
@@ -609,7 +712,7 @@ export class AdminDashboardService {
         existing.completedJobs += 1;
       }
 
-      counts.set(workerName, existing);
+      counts.set(job.worker.user.id, existing);
     });
 
     return Array.from(counts.values())
@@ -618,28 +721,47 @@ export class AdminDashboardService {
         right.activeJobs - left.activeJobs ||
         right.totalJobs - left.totalJobs,
       )
-      .slice(0, 5);
+      .slice(0, 10);
   }
 
   private buildTopCustomers(
     jobs: Array<{
       status: JobStatus;
-      customer: { user: { name: string | null; email: string } };
+      customer: {
+        user: {
+          id: string;
+          name: string | null;
+          email: string;
+          isBlacklisted: boolean;
+        };
+      };
     }>,
     reservations: Array<{
-      customer: { user: { name: string | null; email: string } };
+      customer: {
+        user: {
+          id: string;
+          name: string | null;
+          email: string;
+          isBlacklisted: boolean;
+        };
+      };
     }>,
+    helpTicketCountByUserId: Map<string, number>,
   ): TopCustomerAnalytics[] {
     const counts = new Map<string, TopCustomerAnalytics>();
 
     jobs.forEach((job) => {
       const customerName = job.customer.user.name ?? job.customer.user.email;
-      const existing = counts.get(customerName) ?? {
+      const existing = counts.get(job.customer.user.id) ?? {
+        id: job.customer.user.id,
         name: customerName,
+        email: job.customer.user.email,
         totalJobs: 0,
         activeJobs: 0,
         completedJobs: 0,
         reservations: 0,
+        helpTicketCount: helpTicketCountByUserId.get(job.customer.user.id) ?? 0,
+        isBlacklisted: job.customer.user.isBlacklisted,
       };
 
       existing.totalJobs += 1;
@@ -654,22 +776,27 @@ export class AdminDashboardService {
         existing.completedJobs += 1;
       }
 
-      counts.set(customerName, existing);
+      counts.set(job.customer.user.id, existing);
     });
 
     reservations.forEach((reservation) => {
       const customerName =
         reservation.customer.user.name ?? reservation.customer.user.email;
-      const existing = counts.get(customerName) ?? {
+      const existing = counts.get(reservation.customer.user.id) ?? {
+        id: reservation.customer.user.id,
         name: customerName,
+        email: reservation.customer.user.email,
         totalJobs: 0,
         activeJobs: 0,
         completedJobs: 0,
         reservations: 0,
+        helpTicketCount:
+          helpTicketCountByUserId.get(reservation.customer.user.id) ?? 0,
+        isBlacklisted: reservation.customer.user.isBlacklisted,
       };
 
       existing.reservations += 1;
-      counts.set(customerName, existing);
+      counts.set(reservation.customer.user.id, existing);
     });
 
     return Array.from(counts.values())
@@ -678,25 +805,40 @@ export class AdminDashboardService {
         right.reservations - left.reservations ||
         right.completedJobs - left.completedJobs,
       )
-      .slice(0, 6);
+      .slice(0, 10);
   }
 
   private buildTopOrganisations(
     reservations: Array<{
       quantity: number;
       status: ReservationStatus;
-      product: { organisation: { businessName: string } };
+      product: {
+        organisation: {
+          businessName: string;
+          user: {
+            id: string;
+            email: string;
+            isBlacklisted: boolean;
+          };
+        };
+      };
     }>,
+    helpTicketCountByUserId: Map<string, number>,
   ): TopOrganisationAnalytics[] {
     const counts = new Map<string, TopOrganisationAnalytics>();
 
     reservations.forEach((reservation) => {
       const organisationName = reservation.product.organisation.businessName;
-      const existing = counts.get(organisationName) ?? {
+      const organisationUser = reservation.product.organisation.user;
+      const existing = counts.get(organisationUser.id) ?? {
+        id: organisationUser.id,
         name: organisationName,
+        email: organisationUser.email,
         reservations: 0,
         pickedUpReservations: 0,
         quantity: 0,
+        helpTicketCount: helpTicketCountByUserId.get(organisationUser.id) ?? 0,
+        isBlacklisted: organisationUser.isBlacklisted,
       };
 
       existing.reservations += 1;
@@ -705,7 +847,7 @@ export class AdminDashboardService {
         existing.pickedUpReservations += 1;
       }
 
-      counts.set(organisationName, existing);
+      counts.set(organisationUser.id, existing);
     });
 
     return Array.from(counts.values())
@@ -714,7 +856,7 @@ export class AdminDashboardService {
         right.quantity - left.quantity ||
         right.pickedUpReservations - left.pickedUpReservations,
       )
-      .slice(0, 6);
+      .slice(0, 10);
   }
 
   private buildTopProducts(
@@ -748,22 +890,15 @@ export class AdminDashboardService {
 
   private buildHighlights(
     monthlyActivity: AnalyticsBucket[],
-    jobs: Array<{
-      status: JobStatus;
-      worker: { user: { name: string | null; email: string } } | null;
-    }>,
-    reservations: Array<{
-      quantity: number;
-      status: ReservationStatus;
-      product: { organisation: { businessName: string } };
-    }>,
+    topWorkers: TopWorkerAnalytics[],
+    topOrganisations: TopOrganisationAnalytics[],
   ): AnalyticsHighlight[] {
     const topJobMonth = [...monthlyActivity].sort((left, right) => right.jobs - left.jobs)[0];
     const topReservationMonth = [...monthlyActivity].sort(
       (left, right) => right.reservations - left.reservations,
     )[0];
-    const topWorker = this.buildTopWorkers(jobs)[0];
-    const topOrganisation = this.buildTopOrganisations(reservations)[0];
+    const topWorker = topWorkers[0];
+    const topOrganisation = topOrganisations[0];
 
     return [
       {
@@ -867,5 +1002,97 @@ export class AdminDashboardService {
     }
 
     return '6+ units';
+  }
+
+  private buildHelpTicketCountMap(
+    helpTickets: Array<{ createdByUserId: string }>,
+  ) {
+    return helpTickets.reduce<Map<string, number>>((counts, ticket) => {
+      counts.set(
+        ticket.createdByUserId,
+        (counts.get(ticket.createdByUserId) ?? 0) + 1,
+      );
+      return counts;
+    }, new Map<string, number>());
+  }
+
+  private buildTicketHeavyUsers(
+    helpTickets: Array<{
+      createdByUser: {
+        id: string;
+        name: string | null;
+        email: string;
+        role: Role;
+        isBlacklisted: boolean;
+        blacklistedAt: Date | null;
+        blacklistedReason: string | null;
+      };
+    }>,
+    role: Role,
+  ): TicketHeavyUserAnalytics[] {
+    const counts = new Map<string, TicketHeavyUserAnalytics>();
+
+    helpTickets.forEach((ticket) => {
+      if (ticket.createdByUser.role !== role) {
+        return;
+      }
+
+      const user = ticket.createdByUser;
+      if (user.isBlacklisted) {
+        return;
+      }
+
+      const existing = counts.get(user.id) ?? {
+        id: user.id,
+        name: user.name ?? user.email,
+        email: user.email,
+        role: this.formatRole(user.role),
+        helpTicketCount: 0,
+        isBlacklisted: user.isBlacklisted,
+        blacklistedAt: user.blacklistedAt,
+        blacklistedReason: user.blacklistedReason ?? null,
+      };
+
+      existing.helpTicketCount += 1;
+      counts.set(user.id, existing);
+    });
+
+    return Array.from(counts.values())
+      .sort((left, right) => right.helpTicketCount - left.helpTicketCount)
+      .slice(0, 10);
+  }
+
+  private buildBlacklistedUsers(
+    users: Array<{
+      id: string;
+      name: string | null;
+      email: string;
+      role: Role;
+      isBlacklisted: boolean;
+      blacklistedAt: Date | null;
+      blacklistedReason: string | null;
+    }>,
+    helpTicketCountByUserId: Map<string, number>,
+  ): TicketHeavyUserAnalytics[] {
+    const blacklistedUsers = users
+      .filter((user) => user.isBlacklisted)
+      .map((user) => ({
+        id: user.id,
+        name: user.name ?? user.email,
+        email: user.email,
+        role: this.formatRole(user.role),
+        helpTicketCount: helpTicketCountByUserId.get(user.id) ?? 0,
+        isBlacklisted: true,
+        blacklistedAt: user.blacklistedAt,
+        blacklistedReason: user.blacklistedReason,
+      }));
+
+    return blacklistedUsers.sort((left, right) => {
+      const rightTime = right.blacklistedAt
+        ? new Date(right.blacklistedAt).getTime()
+        : 0;
+      const leftTime = left.blacklistedAt ? new Date(left.blacklistedAt).getTime() : 0;
+      return rightTime - leftTime || right.helpTicketCount - left.helpTicketCount;
+    });
   }
 }

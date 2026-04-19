@@ -11,13 +11,18 @@ import {
   AnalyticsPieChart,
   analyticsPalette,
 } from '@/features/admin/components/analytics/AdminAnalyticsWidgets';
-import type { AdminAnalyticsData, AdminAnalyticsBreakdownItem } from '@/features/admin/types';
+import type {
+  AdminAnalyticsData,
+  AdminAnalyticsBreakdownItem,
+  TicketHeavyUserAnalytics,
+} from '@/features/admin/types';
 import { cn } from '@/shared/utils/cn';
 
 const sections = [
   { id: 'overview', label: 'Overview' },
   { id: 'activity', label: 'Activity' },
   { id: 'individual-activity', label: 'Individual Activity' },
+  { id: 'moderation', label: 'Moderation' },
   { id: 'marketplace', label: 'Marketplace' },
 ] as const;
 
@@ -37,6 +42,7 @@ export const AdminAnalyticsPage = () => {
   const [analytics, setAnalytics] = useState<AdminAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
 
   const sectionParam = searchParams.get('section');
   const activeSection: SectionId = isSectionId(sectionParam) ? sectionParam : 'overview';
@@ -71,6 +77,32 @@ export const AdminAnalyticsPage = () => {
     [analytics],
   );
 
+  const handleBlacklistToggle = async (user: TicketHeavyUserAnalytics) => {
+    if (!analytics) {
+      return;
+    }
+
+    try {
+      setPendingUserId(user.id);
+
+      if (user.isBlacklisted) {
+        await adminApi.unblacklistUser(user.id);
+      } else {
+        await adminApi.blacklistUser(
+            user.id,
+            'Suspended by admin review. User can contact linkskillofficial@gmail.com for support.',
+          );
+      }
+
+      const refreshedAnalytics = await adminApi.getAnalytics();
+      setAnalytics(refreshedAnalytics);
+    } catch {
+      setError('Unable to update blacklist status right now.');
+    } finally {
+      setPendingUserId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="rounded-2xl border border-border bg-background p-12 flex flex-col items-center justify-center">
@@ -80,7 +112,7 @@ export const AdminAnalyticsPage = () => {
     );
   }
 
-  if (error || !analytics) {
+  if (!analytics) {
     return (
       <div className="space-y-6">
         <div className="flex items-end justify-between gap-4">
@@ -290,6 +322,103 @@ export const AdminAnalyticsPage = () => {
     </div>
   );
 
+  const moderationCard = (
+    title: string,
+    description: string,
+    rows: TicketHeavyUserAnalytics[],
+    actionLabel: 'Blacklist' | 'Unblacklist' = 'Blacklist',
+  ) => (
+    <div className="rounded-2xl border border-border bg-background p-5 shadow-sm shadow-slate-950/5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-headline font-bold text-foreground">{title}</h2>
+          <p className="mt-1 text-sm font-body text-muted-foreground">{description}</p>
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-3">
+        {rows.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border px-4 py-6 text-sm font-body text-muted-foreground">
+            No ticket activity yet.
+          </div>
+        ) : (
+          rows.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center justify-between gap-4 rounded-xl border border-border px-4 py-3"
+            >
+              <div>
+                <p className="text-sm font-label font-semibold text-foreground">{user.name}</p>
+                <p className="mt-1 text-xs font-body text-muted-foreground">
+                  {user.email}
+                </p>
+                <p className="mt-1 text-[11px] font-body text-muted-foreground">
+                  {user.role} | {user.helpTicketCount} tickets
+                </p>
+                {user.blacklistedReason && (
+                  <p className="mt-1 text-[11px] font-body text-muted-foreground">
+                    {user.blacklistedReason}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={() => void handleBlacklistToggle(user)}
+                disabled={pendingUserId === user.id}
+                className={cn(
+                  'rounded-lg px-3 py-2 text-xs font-label font-semibold transition-colors',
+                  user.isBlacklisted
+                    ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                    : 'bg-rose-50 text-rose-700 hover:bg-rose-100',
+                  pendingUserId === user.id && 'cursor-not-allowed opacity-60',
+                )}
+              >
+                {pendingUserId === user.id
+                  ? 'Saving...'
+                  : actionLabel}
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
+  const moderation = (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-body text-amber-800">
+        Top complaint lists now show the next 10 non-blacklisted users in each role. When you blacklist someone, they move into the blacklisted section below and the next highest complaint account takes their place automatically.
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {moderationCard(
+          'Customers With Most Tickets',
+          'Top 10 customers with the most complaints right now.',
+          analytics.ticketHeavyCustomers,
+        )}
+        {moderationCard(
+          'Workers With Most Tickets',
+          'Top 10 workers with the heaviest complaint footprint.',
+          analytics.ticketHeavyWorkers,
+        )}
+        <div className="xl:col-span-2">
+          {moderationCard(
+            'Organisations With Most Tickets',
+            'Top 10 organisations creating the most support load.',
+            analytics.ticketHeavyOrganisations,
+          )}
+        </div>
+        <div className="xl:col-span-2">
+          {moderationCard(
+            'Blacklisted Users',
+            'All currently suspended users with quick unblacklist access.',
+            analytics.blacklistedUsers,
+            'Unblacklist',
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   const marketplace = (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
       <AnalyticsChartCard
@@ -366,6 +495,7 @@ export const AdminAnalyticsPage = () => {
     overview,
     activity,
     'individual-activity': individualActivity,
+    moderation,
     marketplace,
   };
 
@@ -405,6 +535,12 @@ export const AdminAnalyticsPage = () => {
           </button>
         ))}
       </div>
+
+      {error && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+          {error}
+        </div>
+      )}
 
       {contentBySection[activeSection]}
     </div>

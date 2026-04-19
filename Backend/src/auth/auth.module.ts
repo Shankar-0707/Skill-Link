@@ -2,16 +2,18 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { SignOptions } from 'jsonwebtoken';
+import { PrismaModule } from '../prisma/prisma.module';
+import { RolesGuard } from '../common/guards/roles.guards';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { MailService } from './mail.service';
 import { GoogleOauthGuard } from './guards/google-oauth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleStrategy } from './strategies/google.strategy';
-import { RolesGuard } from '../common/guards/roles.guards';
 
 @Module({
   imports: [
+    PrismaModule,
     PassportModule.register({ session: false }),
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET ?? 'replace-this-access-secret',
