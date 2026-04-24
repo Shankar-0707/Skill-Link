@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { X, ShoppingBag, AlertCircle, CheckCircle2, Loader2, Minus, Plus } from "lucide-react";
 import type { Product } from "../../types";
 import { customerReservationService } from "../../services/customerReservationService";
+import { useRazorpay } from "../../../../shared/hooks/useRazorpay";
+import { paymentsApi } from "../../../../services/api/payments";
+import { useNavigate } from "react-router-dom";
 
 interface ReserveProductModalProps {
   product: Product;
@@ -18,6 +21,8 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const { openRazorpay } = useRazorpay();
+  const navigate = useNavigate();
 
   const handleIncrement = () => {
     if (quantity < product.stockQuantity) {
@@ -35,18 +40,54 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
     setIsSubmitting(true);
     setError(null);
     try {
-      await customerReservationService.createReservation({
+      const response = await customerReservationService.createReservation({
         productId: product.id,
         quantity
       });
-      setIsSuccess(true);
-      setTimeout(() => {
-        onSuccess?.();
-        onClose();
-      }, 2000);
+
+      // Instead of manual success state and redirect, we open Razorpay
+      const amountInPaise = Math.round(product.price * quantity * 100);
+
+      await openRazorpay({
+        amount: amountInPaise,
+        currency: "INR",
+        name: "Skill-Link",
+        description: `Reservation: ${quantity}x ${product.name}`,
+        prefill: {
+          name: "Verified Customer", // This could be fetched from auth context
+        },
+        handler: async (rzpRes: any) => {
+          console.log("Razorpay success:", rzpRes);
+          try {
+            // Confirm with backend
+            if (!response.providerPaymentId) {
+              throw new Error("Missing Payment ID from server");
+            }
+            const confirmRes = await paymentsApi.confirmPayment(response.providerPaymentId);
+            setIsSuccess(true);
+            setTimeout(() => {
+              onSuccess?.();
+              if (confirmRes.redirectUrl) {
+                navigate(confirmRes.redirectUrl);
+              } else {
+                onClose();
+              }
+            }, 1500);
+          } catch (confirmErr: any) {
+            console.error("Backend confirmation failed:", confirmErr);
+            setError("Payment recorded but server update failed. Please contact support.");
+            setIsSubmitting(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setIsSubmitting(false);
+          }
+        }
+      } as any);
+
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to create reservation. Please try again.");
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -59,9 +100,9 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
             <CheckCircle2 size={48} />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-black text-foreground">Reservation Placed!</h2>
+            <h2 className="text-2xl font-black text-foreground">Order Initiated!</h2>
             <p className="text-muted-foreground font-medium">
-              Your reservation for <span className="text-foreground font-bold">{quantity}x {product.name}</span> has been sent to the shop for confirmation.
+              Redirecting you to secure checkout for <span className="text-foreground font-bold">{quantity}x {product.name}</span>...
             </p>
           </div>
         </div>

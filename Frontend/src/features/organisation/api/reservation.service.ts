@@ -77,10 +77,18 @@ export const reservationApi = {
   },
 
   /**
-   * Mark a reservation as picked up
+   * org: Verify OTP marking it PICKED_UP
    */
-  markPickedUp: async (id: string): Promise<Reservation> => {
-    const response = await api.patch(`/reservations/${id}/pickup`);
+  verifyPickup: async (id: string, payload: { otp: string }): Promise<Reservation> => {
+    const response = await api.patch(`/reservations/${id}/verify-pickup`, payload);
+    return unwrapResponse<Reservation>(response.data);
+  },
+
+  /**
+   * org: Reject a pending reservation
+   */
+  reject: async (id: string, payload: { reason?: string }): Promise<Reservation> => {
+    const response = await api.patch(`/reservations/${id}/reject`, payload);
     return unwrapResponse<Reservation>(response.data);
   },
 };

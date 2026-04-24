@@ -58,3 +58,21 @@ export class ListIncomingReservationsDto {
   @IsUUID()
   productId?: string;
 }
+
+// ─── Org: Verify OTP to confirm pickup ───────────────────────────────────────
+
+export class VerifyPickupDto {
+  @ApiProperty({ example: '4821', description: '4-digit OTP shown to customer after org confirms' })
+  @IsString()
+  otp: string;
+}
+
+// ─── Org: Reject a pending reservation ───────────────────────────────────────
+
+export class RejectReservationDto {
+  @ApiPropertyOptional({ example: 'Out of stock at this time' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+}

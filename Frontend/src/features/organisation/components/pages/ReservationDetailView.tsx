@@ -56,6 +56,37 @@ export const ReservationDetailView: React.FC = () => {
     }
   };
 
+  const handleReject = async () => {
+    if (!id) return;
+    setIsActionLoading(true);
+    try {
+      await reservationApi.reject(id, { reason: 'Merchant unable to fulfill at this time' });
+      const updated = await reservationApi.getOne(id);
+      setReservation(updated);
+    } catch (error) {
+      console.error('Failed to reject:', error);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const [otpValue, setOtpValue] = useState('');
+  
+  const handleVerifyOtp = async () => {
+    if (!id || !otpValue) return;
+    setIsActionLoading(true);
+    try {
+      await reservationApi.verifyPickup(id, { otp: otpValue });
+      const updated = await reservationApi.getOne(id);
+      setReservation(updated);
+    } catch (error: any) {
+      console.error('Failed to verify OTP:', error);
+      alert(error?.response?.data?.message || 'Failed to verify OTP'); // Or toast
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   const getStatusVariant = (status: ReservationStatus) => {
     switch (status) {
       case ReservationStatus.PENDING:   return 'warning';
@@ -235,10 +266,40 @@ export const ReservationDetailView: React.FC = () => {
                   <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
                 <Button 
+                  onClick={handleReject}
+                  disabled={isActionLoading}
                   variant="ghost"
                   className="text-white hover:bg-white/10 font-black text-[10px] uppercase tracking-widest"
                 >
                   Reject Request
+                </Button>
+              </div>
+            </section>
+          )}
+
+          {/* OTP Verification Action Card (only if CONFIRMED) */}
+          {reservation.status === ReservationStatus.CONFIRMED && (
+            <section className="bg-emerald-600 text-white rounded-[2rem] p-8 shadow-xl shadow-emerald-600/20 space-y-6">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] opacity-70">Verify Pickup</h3>
+              <p className="text-sm font-medium leading-relaxed opacity-90">
+                To release the funds from the escrow to your wallet, ask the customer for the 4-digit pickup verification code on their screen and enter it here.
+              </p>
+              <div className="space-y-4">
+                <input 
+                  type="text" 
+                  maxLength={4}
+                  placeholder="• • • •" 
+                  value={otpValue}
+                  onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, ''))}
+                  className="w-full text-center tracking-[1em] font-black text-2xl h-16 rounded-xl text-gray-900 bg-white/90 focus:bg-white focus:outline-none"
+                />
+                <Button 
+                  onClick={handleVerifyOtp}
+                  disabled={isActionLoading || otpValue.length !== 4}
+                  className="w-full bg-white text-emerald-700 hover:bg-white/90 font-black text-xs h-12 rounded-xl group"
+                >
+                  Verify & Release Funds
+                  <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>
             </section>
@@ -252,10 +313,10 @@ export const ReservationDetailView: React.FC = () => {
             
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-secondary/30 flex items-center justify-center text-primary font-black text-xl border border-border/40 shadow-inner">
-                {reservation.customer.user.name.charAt(0).toUpperCase()}
+                {reservation.customer?.user?.name?.charAt(0).toUpperCase() || '?'}
               </div>
               <div>
-                <p className="text-base font-black text-primary tracking-tight">{reservation.customer.user.name}</p>
+                <p className="text-base font-black text-primary tracking-tight">{reservation.customer?.user?.name || 'Unknown Customer'}</p>
                 <p className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Verified Account</p>
               </div>
             </div>

@@ -4,6 +4,8 @@ import { ArrowLeft, IndianRupee, Calendar, Tag, AlignLeft, Type, Loader2, AlertC
 import { CATEGORIES } from '../../shared/constants/categories';
 import { jobService } from '../../features/customer/services/jobService';
 import { Layout } from '../../features/customer/components/layout/Layout';
+import { useRazorpay } from '../../shared/hooks/useRazorpay';
+import { paymentsApi } from '../../services/api/payments';
 
 interface CreateJobPageProps {
   // onNavigate removed to use useNavigate hook
@@ -34,6 +36,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const { openRazorpay } = useRazorpay();
 
   const update = (field: keyof FormState, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -61,7 +64,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
       setLoading(true);
       setApiError(null);
       
-      await jobService.createJob({
+      const job = await jobService.createJob({
         title: form.title,
         description: form.description,
         category: form.category === 'Others' ? form.customCategory : form.category,
@@ -69,10 +72,44 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
         scheduledAt: form.scheduledAt || undefined,
       });
 
-      setSubmitted(true);
-      setTimeout(() => {
-        navigate('/user/home');
-      }, 1500);
+      if (job.checkoutUrl && form.budget) {
+        setSubmitted(true);
+        const amountInPaise = Math.round(Number(form.budget) * 100);
+        
+        await openRazorpay({
+          amount: amountInPaise,
+          currency: "INR",
+          name: "Skill-Link",
+          description: `Job Escrow: ${form.title}`,
+          handler: async (rzpRes: any) => {
+            console.log("Job Razorpay success:", rzpRes);
+            try {
+              if (!job.providerPaymentId) {
+                throw new Error("Missing Payment ID from server");
+              }
+              const confirmRes = await paymentsApi.confirmPayment(job.providerPaymentId);
+              if (confirmRes.redirectUrl) {
+                navigate(confirmRes.redirectUrl);
+              } else {
+                navigate('/user/my-jobs');
+              }
+            } catch (confirmErr: any) {
+              console.error("Backend confirmation failed:", confirmErr);
+              setApiError("Payment successful but failed to update status. Please check My Jobs later.");
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              setLoading(false);
+            }
+          }
+        } as any);
+      } else {
+        setSubmitted(true);
+        setTimeout(() => {
+          navigate('/user/my-jobs');
+        }, 1500);
+      }
     } catch (err: any) {
       console.error('Failed to post job:', err);
       setApiError(err.response?.data?.message || 'Failed to post job. Please try again.');
@@ -88,7 +125,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
           <span className="text-2xl text-green-600">✓</span>
         </div>
         <h2 className="font-headline font-bold text-xl text-foreground mb-2">Job Posted!</h2>
-        <p className="text-muted-foreground font-body text-sm">Redirecting to your dashboard...</p>
+        <p className="text-muted-foreground font-body text-sm">Redirecting you to the next step...</p>
       </div>
     );
   }
