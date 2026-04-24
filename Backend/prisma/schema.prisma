@@ -104,6 +104,10 @@ model User {
   profileImage String?
 
   isActive Boolean @default(true)
+  isBlacklisted Boolean @default(false)
+  blacklistedReason String?
+  blacklistedAt DateTime?
+  blacklistedByUserId String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

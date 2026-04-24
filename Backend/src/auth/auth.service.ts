@@ -96,6 +96,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
+    this.assertNotBlacklisted(user);
+
     if (!user.passwordHash) {
       throw new UnauthorizedException(
         'This account uses Google sign-in. Please continue with Google.',
@@ -141,6 +143,8 @@ export class AuthService {
     if (!tokenRecord.user.isActive || tokenRecord.user.deletedAt) {
       throw new UnauthorizedException('User account is inactive.');
     }
+
+    this.assertNotBlacklisted(tokenRecord.user);
 
     await this.prisma.refreshToken.update({
       where: { id: tokenRecord.id },
@@ -285,6 +289,7 @@ export class AuthService {
         if (!existingByGoogleId.isActive || existingByGoogleId.deletedAt) {
           throw new UnauthorizedException('User account is inactive.');
         }
+        this.assertNotBlacklisted(existingByGoogleId);
         return existingByGoogleId;
       }
 
@@ -297,6 +302,7 @@ export class AuthService {
         if (!existingByEmail.isActive || existingByEmail.deletedAt) {
           throw new UnauthorizedException('User account is inactive.');
         }
+        this.assertNotBlacklisted(existingByEmail);
 
         await tx.user.update({
           where: { id: existingByEmail.id },
@@ -507,7 +513,19 @@ export class AuthService {
       throw new NotFoundException('User not found.');
     }
 
+    this.assertNotBlacklisted(user);
+
     return user;
+  }
+
+  private assertNotBlacklisted(user: UserWithProfiles) {
+    if (user.isBlacklisted) {
+      throw new UnauthorizedException({
+        message:
+          'Account has been suspended. Please contact linkskillofficial@gmail.com for support.',
+        code: 'ACCOUNT_SUSPENDED',
+      });
+    }
   }
 
   private async buildAuthResponse(user: UserWithProfiles) {
@@ -738,6 +756,9 @@ export class AuthService {
       emailVerified: user.emailVerified,
       profileImage: user.profileImage,
       isActive: user.isActive,
+      isBlacklisted: user.isBlacklisted,
+      blacklistedReason: user.blacklistedReason,
+      blacklistedAt: user.blacklistedAt,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       customer: user.customer,

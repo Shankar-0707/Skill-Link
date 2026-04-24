@@ -17,7 +17,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard, Roles } from '../common';
 import { AdminDashboardService } from './admin-dashboard.service';
 
-@ApiTags('Admin — Dashboard')
+@ApiTags('Admin - Dashboard')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
@@ -46,10 +46,19 @@ export class AdminDashboardController {
     return this.adminDashboardService.getRecentReservations();
   }
 
-  // ─── Escrow Control Panel ──────────────────────────────────────────
+  @Get('analytics')
+  @ApiOperation({
+    summary: 'Get aggregated admin analytics for charts and leaderboards',
+  })
+  @ApiOkResponse({ description: 'Admin analytics data' })
+  getAnalytics() {
+    return this.adminDashboardService.getAnalytics();
+  }
 
   @Get('escrows')
-  @ApiOperation({ summary: 'List all escrows (HELD, RELEASED, REFUNDED) for admin oversight' })
+  @ApiOperation({
+    summary: 'List all escrows (HELD, RELEASED, REFUNDED) for admin oversight',
+  })
   @ApiOkResponse({ description: 'Array of escrows with transaction context' })
   getEscrows() {
     return this.adminDashboardService.getEscrows();
