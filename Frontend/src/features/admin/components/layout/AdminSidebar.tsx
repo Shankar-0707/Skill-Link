@@ -11,6 +11,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Zap,
+  Gavel,
+  Wallet
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/app/context/useAuth";
@@ -146,6 +148,20 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label="KYC Approvals" 
           href="/admin/kyc" 
           isActive={location.pathname.startsWith("/admin/kyc")}
+          isCollapsed={isCollapsed}
+        />
+        <SidebarItem 
+          icon={Gavel} 
+          label="Escrow Control" 
+          href="/admin/escrows" 
+          isActive={location.pathname === "/admin/escrows"}
+          isCollapsed={isCollapsed}
+        />
+        <SidebarItem 
+          icon={Wallet} 
+          label="Platform Wallet" 
+          href="/admin/wallet" 
+          isActive={location.pathname === "/admin/wallet"}
           isCollapsed={isCollapsed}
         />
         </div>

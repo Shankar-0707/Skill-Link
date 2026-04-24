@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { JobStatus, ReservationStatus, Role } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { JobStatus, ReservationStatus, Role, EscrowStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EscrowService } from '../escrow/escrow.service';
 
 type DashboardMetric = {
   count: number;
@@ -136,7 +137,10 @@ type AdminAnalyticsResponse = {
 
 @Injectable()
 export class AdminDashboardService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly escrowService: EscrowService,
+  ) {}
 
   async getDashboardMetrics(): Promise<DashboardMetricsResponse> {
     const now = new Date();
@@ -1094,5 +1098,87 @@ export class AdminDashboardService {
       const leftTime = left.blacklistedAt ? new Date(left.blacklistedAt).getTime() : 0;
       return rightTime - leftTime || right.helpTicketCount - left.helpTicketCount;
     });
+  }
+  // ─── Escrow Control Panel ─────────────────────────────────────────────────
+
+  /**
+   * Returns all escrows for admin oversight (HELD, RELEASED, REFUNDED).
+   */
+  async getEscrows() {
+    const escrows = await this.prisma.escrow.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        payment: {
+          select: { id: true, status: true, amount: true, type: true },
+        },
+        reservation: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                organisation: { select: { businessName: true } },
+              },
+            },
+            customer: {
+              include: { user: { select: { id: true, name: true, email: true } } },
+            },
+          },
+        },
+        job: {
+          select: {
+            id: true,
+            title: true,
+            budget: true,
+            customer: { include: { user: { select: { id: true, name: true, email: true } } } },
+            worker: { include: { user: { select: { id: true, name: true, email: true } } } },
+          },
+        },
+      },
+    });
+
+    return escrows.map((escrow) => ({
+      id: escrow.id,
+      amount: escrow.amount,
+      status: escrow.status,
+      createdAt: escrow.createdAt,
+      releasedAt: escrow.releasedAt,
+      type: escrow.reservationId ? 'RESERVATION' : 'JOB',
+      paymentStatus: escrow.payment?.status ?? null,
+      // Reservation info
+      productName: escrow.reservation?.product?.name ?? null,
+      organisationName: escrow.reservation?.product?.organisation?.businessName ?? null,
+      customerName: escrow.reservation?.customer?.user?.name ?? escrow.job?.customer?.user?.name ?? null,
+      customerEmail: escrow.reservation?.customer?.user?.email ?? escrow.job?.customer?.user?.email ?? null,
+      // Job info
+      jobTitle: escrow.job?.title ?? null,
+      workerName: escrow.job?.worker?.user?.name ?? null,
+      workerEmail: escrow.job?.worker?.user?.email ?? null,
+    }));
+  }
+
+  /**
+   * Admin manually releases a HELD escrow → payee wallet credited.
+   */
+  async adminReleaseEscrow(escrowId: string) {
+    const escrow = await this.prisma.escrow.findUnique({
+      where: { id: escrowId },
+    });
+    if (!escrow) throw new NotFoundException(`Escrow ${escrowId} not found`);
+
+    await this.escrowService.releaseEscrow(escrowId);
+    return { message: `Escrow ${escrowId} released. Payee wallet credited.` };
+  }
+
+  /**
+   * Admin manually refunds a HELD escrow → customer wallet credited.
+   */
+  async adminRefundEscrow(escrowId: string) {
+    const escrow = await this.prisma.escrow.findUnique({
+      where: { id: escrowId },
+    });
+    if (!escrow) throw new NotFoundException(`Escrow ${escrowId} not found`);
+
+    await this.escrowService.refundEscrow(escrowId);
+    return { message: `Escrow ${escrowId} refunded. Customer wallet credited.` };
   }
 }

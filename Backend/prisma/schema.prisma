@@ -55,6 +55,11 @@ enum EscrowStatus {
   REFUNDED
 }
 
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
+}
+
 enum DocumentType {
   AADHAAR
   PAN
@@ -112,6 +117,7 @@ model User {
   worker       Worker?
   organisation Organisation?
 
+  wallet                  Wallet?
   payments                Payment[]
   refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
@@ -266,7 +272,8 @@ model Job {
 
   scheduledAt DateTime?
 
-  escrow Escrow?
+  payment     Payment?
+  escrow      Escrow?
   helpTickets HelpTicket[]
 
   createdAt DateTime  @default(now())
@@ -340,7 +347,12 @@ model Reservation {
 
   expiresAt DateTime?
 
-  escrow Escrow?
+  /// 4-digit OTP generated when org confirms. Customer shows this to the org on pickup.
+  pickupOtp          String?
+  pickupOtpExpiresAt DateTime?
+
+  payment     Payment?
+  escrow      Escrow?
   helpTickets HelpTicket[]
 
   createdAt DateTime @default(now())
@@ -365,15 +377,34 @@ model Payment {
 
   status PaymentStatus @default(INITIATED)
 
+  /// Internal mock gateway payment ID (e.g. mock_pay_uuid)
+  providerPaymentId String? @unique
+
+  /// URL for the mock checkout page
+  checkoutUrl String?
+
+  /// Legacy field kept for compatibility
   providerReference String?
 
   idempotencyKey String @unique
+
+  /// Link to the reservation this payment is for
+  reservationId String? @unique
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+
+  /// Link to the job this payment is for
+  jobId String? @unique
+  job   Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  /// Back-reference to the escrow this payment funded
+  escrow Escrow?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
+  @@index([providerPaymentId])
 }
 
 //// ESCROW
@@ -387,6 +418,10 @@ model Escrow {
   job         Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
+  /// The payment that funded this escrow
+  paymentId String? @unique
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
   amount Float
 
   status EscrowStatus @default(HELD)
@@ -398,6 +433,45 @@ model Escrow {
 
   @@index([jobId])
   @@index([reservationId])
+  @@index([status])
+}
+
+//// VIRTUAL WALLET
+
+model Wallet {
+  id     String @id @default(uuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Current balance in INR (rupees). Never goes negative.
+  balance Float @default(0)
+
+  transactions WalletTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WalletTransaction {
+  id String @id @default(uuid())
+
+  walletId String
+  wallet   Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  type   WalletTransactionType
+  amount Float
+
+  /// Human-readable description, e.g. "Reservation payout #abc"
+  note String?
+
+  /// Which escrow triggered this transaction
+  escrowId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([walletId])
+  @@index([escrowId])
 }
 
 //// WORKER DOCUMENTS

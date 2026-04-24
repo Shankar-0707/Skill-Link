@@ -18,6 +18,7 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   images?: ProductImage[];
+  imageUrl?: string;
   category: string;
   organisation?: {
     businessName: string;

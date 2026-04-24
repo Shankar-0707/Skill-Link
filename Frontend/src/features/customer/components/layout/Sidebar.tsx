@@ -5,8 +5,7 @@ import {
   Package,
   Calendar,
   ShoppingBag,
-  // Users,
-  // BarChart2,
+  Wallet,
   Settings,
   HelpCircle,
   Zap,
@@ -23,9 +22,8 @@ const NAV_ITEMS = [
   { id: 'my-jobs',        label: 'My Jobs',           icon: Briefcase,   path: '/user/my-jobs' },
   { id: 'products',       label: 'Products',          icon: Package,     path: '/user/products' },
   { id: 'reservations',   label: 'My Reservations',   icon: ShoppingBag, path: '/user/products/reservations' },
+  { id: 'wallet',         label: 'My Wallet',         icon: Wallet,      path: '/user/wallet' },
   { id: 'schedule',       label: 'Schedule',          icon: Calendar,    path: '/user/schedule' },
-  // { id: 'staff',       label: 'Staff',             icon: Users,       path: '/user/staff' },
-  // { id: 'analytics',   label: 'Analytics',         icon: BarChart2,   path: '/user/analytics' },
 ];
 
 export const Sidebar: React.FC = () => {

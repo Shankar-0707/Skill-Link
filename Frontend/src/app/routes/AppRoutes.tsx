@@ -23,7 +23,7 @@ import { ProductsPage } from "../../pages/customer/ProductsPage";
 import { MyReservationsPage } from "../../pages/customer/MyReservationsPage";
 import { CustomerHelpCenterPage } from "../../pages/customer/HelpCenterPage";
 import { CustomerHelpTicketPage } from "../../pages/customer/HelpTicketPage";
-// import { WorkerHomePage } from "../../pages/WorkerHomePage";
+import { MyWalletPage } from "../../pages/customer/MyWalletPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicOnlyRoute } from "./PublicOnlyRoute";
 import { RoleHomeRedirect } from "./RoleHomeRedirect";
@@ -36,6 +36,7 @@ import { WorkerJobDetailPage as WorkerJobDetail } from "@/pages/worker/JobDetail
 import { WorkerSettingsPage as WorkerSettings } from "@/pages/worker/Settings";
 import { WorkerHelpCenterPage } from "@/pages/worker/HelpCenterPage";
 import { WorkerHelpTicketPage } from "@/pages/worker/HelpTicketPage";
+import { WorkerWalletPage } from "@/pages/worker/WorkerWalletPage";
 import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
 import OrganisationLayout from "@/pages/organisation/OrganisationLayout";
 import OrganisationPage from "@/pages/organisation/OrganisationPage";
@@ -48,7 +49,7 @@ import PendingReservationsPage from "@/pages/organisation/PendingReservationsPag
 import OrganisationHelpCenterPage from "@/pages/organisation/HelpCenterPage";
 import OrganisationHelpTicketPage from "@/pages/organisation/HelpTicketPage";
 import ReservationDetailPage from "@/pages/organisation/ReservationDetailPage";
-// import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
+import OrganisationWalletPage from "@/pages/organisation/OrganisationWalletPage";
 import { AdminLayout } from "@/features/admin/components/layout/AdminLayout";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { AdminJobsPage } from "@/pages/admin/AdminJobsPage";
@@ -58,6 +59,8 @@ import { KycManagementPage } from "@/pages/admin/KycManagementPage";
 import { AdminHelpCenterPage } from "@/pages/admin/AdminHelpCenterPage";
 import { AdminHelpTicketPage } from "@/pages/admin/AdminHelpTicketPage";
 import { AdminAnalyticsPage } from "@/pages/admin/AdminAnalyticsPage";
+import { AdminEscrowControlPage } from "@/pages/admin/AdminEscrowControlPage";
+import { AdminWalletPage } from "@/pages/admin/AdminWalletPage";
 
 const SuspendedNavigationHandler: React.FC = () => {
   const navigate = useNavigate();
@@ -108,6 +111,7 @@ export const AppRoutes: React.FC = () => {
             <Route path="/user/worker/:id" element={<WorkerProfilePage />} />
             <Route path="/user/products" element={<ProductsPage />} />
             <Route path="/user/products/reservations" element={<MyReservationsPage />} />
+            <Route path="/user/wallet" element={<MyWalletPage />} />
             <Route path="/user/help" element={<CustomerHelpCenterPage />} />
             <Route path="/user/help/ticket" element={<CustomerHelpTicketPage />} />
             <Route path="/user/help/legacy" element={<HelpPage />} />
@@ -122,6 +126,7 @@ export const AppRoutes: React.FC = () => {
             <Route path="/worker/job/:id" element={<WorkerJobDetail />} />
             <Route path="/worker/earnings" element={<ComingSoonPage />} />
             <Route path="/worker/schedule" element={<ComingSoonPage />} />
+            <Route path="/worker/wallet" element={<WorkerWalletPage />} />
             <Route path="/worker/help" element={<WorkerHelpCenterPage />} />
             <Route path="/worker/help/ticket" element={<WorkerHelpTicketPage />} />
             <Route path="/worker/settings" element={<WorkerSettings />} />
@@ -138,7 +143,7 @@ export const AppRoutes: React.FC = () => {
               <Route path="/organisation/products/:id/explore" element={<ProductExplorePage />} />
               <Route path="/organisation/help" element={<OrganisationHelpCenterPage />} />
               <Route path="/organisation/help/ticket" element={<OrganisationHelpTicketPage />} />
-              
+              <Route path="/organisation/wallet" element={<OrganisationWalletPage />} />
               <Route path="/organisation/reservations/all" element={<AllReservationsPage />} />
               <Route path="/organisation/reservations/pending" element={<PendingReservationsPage />} />
               <Route path="/organisation/reservations/:id" element={<ReservationDetailPage />} />
@@ -153,8 +158,10 @@ export const AppRoutes: React.FC = () => {
               <Route path="/admin/users" element={<AdminUsersPage />} />
               <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
               <Route path="/admin/kyc" element={<KycManagementPage />} />
+              <Route path="/admin/escrows" element={<AdminEscrowControlPage />} />
               <Route path="/admin/help" element={<AdminHelpCenterPage />} />
               <Route path="/admin/help/:ticketId" element={<AdminHelpTicketPage />} />
+              <Route path="/admin/wallet" element={<AdminWalletPage />} />
               <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             </Route>
           </Route>
