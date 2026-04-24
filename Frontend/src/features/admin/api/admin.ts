@@ -116,7 +116,7 @@ export const adminApi = {
 
   getHeldEscrows: async () => {
     const response = await api.get('/admin/escrows');
-    return unwrapResponse<any[]>(response.data);
+    return unwrapResponse<Record<string, unknown>[]>(response.data);
   },
 
   releaseEscrow: async (id: string) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Filter, Search } from 'lucide-react';
 import { reservationApi } from '@/features/organisation/api/reservation.service';
 import type { Reservation } from '@/features/organisation/types/reservation.types';
@@ -16,7 +16,7 @@ export const AllReservationsView: React.FC = () => {
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
-  const fetchReservations = async () => {
+  const fetchReservations = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = filter === 'ALL' ? {} : { status: filter };
@@ -27,11 +27,11 @@ export const AllReservationsView: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filter]);
 
   useEffect(() => {
     fetchReservations();
-  }, [filter]);
+  }, [fetchReservations]);
 
   const handleConfirm = async (id: string) => {
     setIsActionLoading(true);
@@ -102,7 +102,7 @@ export const AllReservationsView: React.FC = () => {
             <Filter className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <select 
               value={filter}
-              onChange={(e) => setFilter(e.target.value as any)}
+              onChange={(e) => setFilter(e.target.value as ReservationStatus | 'ALL')}
               className="w-full sm:w-44 pl-9 pr-6 py-2 bg-white border border-border/60 rounded-xl text-xs font-black uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none shadow-sm cursor-pointer"
             >
               <option value="ALL">All Statuses</option>

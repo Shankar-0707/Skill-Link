@@ -79,9 +79,10 @@ export const ReservationDetailView: React.FC = () => {
       await reservationApi.verifyPickup(id, { otp: otpValue });
       const updated = await reservationApi.getOne(id);
       setReservation(updated);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to verify OTP:', error);
-      alert(error?.response?.data?.message || 'Failed to verify OTP'); // Or toast
+      const err = error as { response?: { data?: { message?: string } } };
+      alert(err?.response?.data?.message || 'Failed to verify OTP'); // Or toast
     } finally {
       setIsActionLoading(false);
     }

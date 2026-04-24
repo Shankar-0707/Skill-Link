@@ -36,8 +36,9 @@ export const ProductExplore: React.FC = () => {
         if (data.images && data.images.length > 0) {
           setActiveImage(data.images[0].imageUrl);
         }
-      } catch (err: any) {
-        setError(err?.response?.data?.message || "Failed to load product details.");
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { message?: string } } };
+        setError(error?.response?.data?.message || "Failed to load product details.");
       } finally {
         setIsLoading(false);
       }

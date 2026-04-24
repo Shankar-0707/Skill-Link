@@ -64,6 +64,7 @@ export const SeeAllProductsView = () => {
       const result = await productsApi.getMyProducts(cleanParams);
 
       let items: Product[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res = result as any;
       if (Array.isArray(res)) {
         items = res;
@@ -106,9 +107,10 @@ export const SeeAllProductsView = () => {
       await productsApi.remove(deleteTarget.id);
       setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
       setDeleteTarget(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
       setDeleteError(
-        err?.response?.data?.message || "Failed to delete product. Try again."
+        error?.response?.data?.message || "Failed to delete product. Try again."
       );
     } finally {
       setIsDeleting(false);

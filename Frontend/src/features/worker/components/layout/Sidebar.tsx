@@ -13,9 +13,7 @@ import {
 
 import { useAuth } from '../../../../app/context/useAuth';
 
-interface WorkerSidebarProps {
-  // Add any needed props here if any remain
-}
+
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/worker/dashboard' },
@@ -24,7 +22,7 @@ const NAV_ITEMS = [
   { id: 'wallet', label: 'My Wallet', icon: Wallet, path: '/worker/wallet' },
 ];
 
-export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
+export const WorkerSidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();

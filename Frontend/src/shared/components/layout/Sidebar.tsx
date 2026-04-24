@@ -17,7 +17,7 @@ import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/components/ui/button';
 
 interface NavItem {
-  icon: any;
+  icon: React.ElementType;
   label: string;
   path: string;
   subItems?: { label: string; path: string }[];

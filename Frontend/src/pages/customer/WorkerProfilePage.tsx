@@ -31,9 +31,10 @@ export const WorkerProfilePage: React.FC = () => {
         const data = await workerService.getWorkerById(id);
         setWorker(data);
         setError(null);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to fetch worker:', err);
-        setError(err.response?.data?.message || 'Failed to load worker profile.');
+        const error = err as { response?: { data?: { message?: string } } };
+        setError(error.response?.data?.message || 'Failed to load worker profile.');
       } finally {
         setLoading(false);
       }

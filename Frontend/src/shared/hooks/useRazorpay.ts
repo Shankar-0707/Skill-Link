@@ -6,7 +6,7 @@ interface RazorpayOptions {
   name: string;
   description: string;
   order_id?: string;
-  handler: (response: any) => void;
+  handler: (response: unknown) => void;
   prefill?: {
     name?: string;
     email?: string;
@@ -44,6 +44,7 @@ export const useRazorpay = () => {
       },
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rzp = new (window as any).Razorpay(rzpOptions);
     rzp.open();
   }, [loadScript]);

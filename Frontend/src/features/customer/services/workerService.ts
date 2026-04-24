@@ -21,7 +21,7 @@ export const workerService = {
     const response = await api.get<ApiResponse<Worker>>("/workers/profile/me");
     return response.data.data;
   },
-  updateMe: async (data: any): Promise<Worker> => {
+  updateMe: async (data: Record<string, unknown>): Promise<Worker> => {
     const response = await api.patch<ApiResponse<Worker>>("/workers/profile/me", data);
     return response.data.data;
   },

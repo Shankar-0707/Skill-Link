@@ -17,9 +17,10 @@ export const TestTokenRefresh: React.FC = () => {
       const email = userData?.user?.email || userData?.email || 'Unknown';
       
       setResult(`✅ Success! Token refresh worked. Email: ${email}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Test error:', error);
-      setResult(`❌ Error: ${error.response?.data?.message || error.message}`);
+      const err = error as { response?: { data?: { message?: string } }, message?: string };
+      setResult(`❌ Error: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
     }

@@ -13,8 +13,21 @@ import {
 } from 'lucide-react';
 import { cn } from '../../shared/utils/cn';
 
+interface EscrowItem {
+  id: string;
+  status: string;
+  jobTitle?: string;
+  productName?: string;
+  createdAt: string;
+  customerName?: string;
+  workerName?: string;
+  organisationName?: string;
+  amount?: number;
+  [key: string]: unknown;
+}
+
 export const AdminEscrowControlPage: React.FC = () => {
-  const [escrows, setEscrows] = useState<any[]>([]);
+  const [escrows, setEscrows] = useState<EscrowItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'history'>('pending');
@@ -23,7 +36,7 @@ export const AdminEscrowControlPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await adminApi.getHeldEscrows();
-      setEscrows(data);
+      setEscrows(data as EscrowItem[]);
     } catch (err) {
       console.error('Failed to fetch escrows', err);
     } finally {

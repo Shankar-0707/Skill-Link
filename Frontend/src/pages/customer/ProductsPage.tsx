@@ -27,6 +27,7 @@ export const ProductsPage: React.FC = () => {
       const result = await productService.browseProducts(cleanParams);
       
       let items: Product[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res = result as any;
       if (Array.isArray(res)) {
         items = res;

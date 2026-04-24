@@ -42,7 +42,7 @@ export const HelpPage: React.FC = () => {
                 <button
                   key={id}
                   onClick={() => {
-                    setActiveSection(id as any);
+                    setActiveSection(id as 'faq' | 'complaint' | 'contact');
                     setSubmitted(false);
                   }}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-label font-medium transition-all

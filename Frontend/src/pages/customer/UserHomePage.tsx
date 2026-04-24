@@ -36,8 +36,9 @@ export const UserHomePage: React.FC = () => {
         
         setWorkers(workersData);
         
-        let items: Product[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res = productsRes as any;
+        let items: Product[] = [];
         if (Array.isArray(res)) {
           items = res;
         } else if (res && typeof res === 'object') {

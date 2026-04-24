@@ -56,6 +56,7 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
         prefill: {
           name: "Verified Customer", // This could be fetched from auth context
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handler: async (rzpRes: any) => {
           console.log("Razorpay success:", rzpRes);
           try {
@@ -73,7 +74,7 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
                 onClose();
               }
             }, 1500);
-          } catch (confirmErr: any) {
+          } catch (confirmErr: unknown) {
             console.error("Backend confirmation failed:", confirmErr);
             setError("Payment recorded but server update failed. Please contact support.");
             setIsSubmitting(false);
@@ -84,10 +85,12 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
             setIsSubmitting(false);
           }
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to create reservation. Please try again.");
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error?.response?.data?.message || "Failed to create reservation. Please try again.");
       setIsSubmitting(false);
     }
   };
