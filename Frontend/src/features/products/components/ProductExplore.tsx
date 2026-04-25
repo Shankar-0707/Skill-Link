@@ -147,7 +147,7 @@ export const ProductExplore: React.FC = () => {
               {product.name}
             </h1>
             <div className="flex items-center gap-4">
-              <span className="text-4xl font-black text-primary">₹{product.price.toLocaleString()}</span>
+              <span className="text-4xl font-black text-primary">₹{(product.price * 1.05).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
               <div className="h-6 w-px bg-border/50" />
               <div className="flex items-center gap-1.5 px-3 py-1 bg-secondary rounded-lg">
                 <Box size={14} className="text-primary" />

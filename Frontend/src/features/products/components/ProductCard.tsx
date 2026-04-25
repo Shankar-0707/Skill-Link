@@ -72,7 +72,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onEdit, onDel
             {product.name}
           </h3>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black text-foreground/90">₹{product.price.toLocaleString()}</span>
+            <span className="text-[10px] font-black text-foreground/90">₹{(product.price * 1.05).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             <span className="text-[8px] font-bold text-muted-foreground/60 uppercase">•</span>
             <span className={cn(
               "text-[8px] font-black uppercase tracking-tighter",

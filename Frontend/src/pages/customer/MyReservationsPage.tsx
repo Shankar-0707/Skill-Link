@@ -294,23 +294,22 @@ export const MyReservationsPage: React.FC = () => {
                   <p className="text-sm font-black text-foreground">{res.quantity} units</p>
                 </div>
                 <div>
-                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Price / Unit</p>
-                  <p className="text-sm font-black text-foreground">₹{(res.product?.price || 0).toLocaleString()}</p>
+                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Unit Price</p>
+                  <p className="text-sm font-black text-foreground">₹{((res.product?.price || 0) * 1.05).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
                 </div>
               </div>
 
               {/* Right Section: Total & Actions */}
               <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 shrink-0 transition-all">
                 <div className="text-left md:text-right">
-                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Total Paid</p>
+                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Total Amount</p>
                   <p className="text-xl font-black text-primary tracking-tight">
                     ₹{(
                       res.escrow?.amount ||
                       res.payment?.amount ||
                       (res.quantity * (res.product?.price || 0) * 1.05)
-                    ).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    ).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </p>
-                  <p className="text-[8px] text-violet-500 font-bold mt-0.5">incl. 5% service fee</p>
                 </div>
 
                 <div className="flex items-center gap-2">

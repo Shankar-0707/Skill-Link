@@ -228,23 +228,15 @@ export const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = (
                 <span className="text-muted-foreground">Quantity</span>
                 <span className="font-bold">× {reservation.quantity}</span>
               </div>
-              <div className="flex justify-between items-center pt-2 border-t border-border text-sm font-medium">
-                <span className="text-muted-foreground">Customer Paid</span>
-                <span className="font-bold">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm font-medium">
-                <span className="text-violet-600 font-bold">Platform Fee (5%)</span>
-                <span className="font-bold text-violet-600">₹{platformFee.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
               <div className="flex justify-between items-center pt-2 border-t border-border text-base font-bold">
-                <span className="text-emerald-600">Your Payout</span>
-                <span className="text-xl font-black text-emerald-600">₹{baseAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                <span className="text-emerald-600 uppercase tracking-wider text-[10px] font-black">Net Earnings</span>
+                <span className="text-xl font-black text-emerald-600">₹{baseAmount.toLocaleString('en-IN', { minimumFractionDigits: 0 })}</span>
               </div>
               {reservation.escrow && (
                 <div className="flex justify-between items-center text-sm font-medium pt-1">
-                  <span className="text-muted-foreground">Escrow</span>
+                  <span className="text-muted-foreground">Payment Status</span>
                   <Badge variant={reservation.escrow.status === 'HELD' ? 'info' : 'success'} className="font-bold text-xs">
-                    {reservation.escrow.status}
+                    {reservation.escrow.status === 'HELD' ? 'SECURED' : reservation.escrow.status}
                   </Badge>
                 </div>
               )}

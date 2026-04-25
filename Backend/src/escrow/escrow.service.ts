@@ -141,7 +141,7 @@ export class EscrowService {
         await this.walletService.creditWallet(
           adminUser.id,
           feeAmount,
-          `Platform Fee (5%) — ${noteType} Escrow #${escrowId.substring(0, 8)}`,
+          `Service Commission — ${noteType} Escrow #${escrowId.substring(0, 8)}`,
           escrowId,
           client,
         );

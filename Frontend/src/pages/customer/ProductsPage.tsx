@@ -143,7 +143,7 @@ export const ProductsPage: React.FC = () => {
                 <div className="pt-6 border-t border-border/50 flex items-center justify-between">
                   <div className="flex flex-col">
                     <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Price</span>
-                    <span className="text-2xl font-black text-foreground">₹{product.price.toLocaleString()}</span>
+                    <span className="text-2xl font-black text-foreground">₹{(product.price * 1.05).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                   </div>
                   <button 
                     onClick={() => setSelectedProduct(product)}

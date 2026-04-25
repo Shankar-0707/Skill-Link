@@ -187,16 +187,8 @@ export const ReservationDetailView: React.FC = () => {
                   <p className="text-xl font-black text-primary">{reservation.quantity} Units</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Customer Paid</p>
-                  <p className="text-xl font-black text-primary">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[9px] font-black text-violet-600 uppercase tracking-widest">Platform Fee (5%)</p>
-                  <p className="text-xl font-black text-violet-600">₹{platformFee.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Your Payout</p>
-                  <p className="text-xl font-black text-emerald-600">₹{baseAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Earnings (Payout)</p>
+                  <p className="text-xl font-black text-emerald-600">₹{baseAmount.toLocaleString('en-IN', { minimumFractionDigits: 0 })}</p>
                 </div>
               </div>
 

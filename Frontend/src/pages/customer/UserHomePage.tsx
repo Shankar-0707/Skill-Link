@@ -226,7 +226,7 @@ export const UserHomePage: React.FC = () => {
                 <p className="text-xs font-body text-muted-foreground mb-3">{product.organisation?.businessName || 'Local Shop'}</p>
                 <div className="flex items-center justify-between">
                   <span className="font-headline font-bold text-sm text-foreground">
-                    ₹{product.price.toLocaleString()}
+                    ₹{(product.price * 1.05).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </span>
                   <button className="w-8 h-8 border border-border rounded-lg flex items-center justify-center hover:bg-foreground hover:text-background hover:border-foreground transition-all">
                     <span className="text-sm">🛒</span>

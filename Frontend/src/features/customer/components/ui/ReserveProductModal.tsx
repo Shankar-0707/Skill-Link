@@ -45,7 +45,7 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
         quantity
       });
 
-      // Use the server-calculated totalAmount (which includes the 5% platform fee)
+      // Use the server-calculated totalAmount (which includes the service commission)
       const serverTotal = response.totalAmount ?? (product.price * quantity * 1.05);
       const amountInPaise = Math.round(serverTotal * 100);
 
@@ -53,7 +53,7 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
         amount: amountInPaise,
         currency: "INR",
         name: "Skill-Link",
-        description: `Reservation: ${quantity}x ${product.name} (incl. 5% service fee)`,
+        description: `Reservation: ${quantity}x ${product.name}`,
         prefill: {
           name: "Verified Customer", // This could be fetched from auth context
         },
@@ -156,7 +156,7 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
             <div className="flex flex-col justify-center">
               <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">{product.organisation?.businessName || "Local Shop"}</p>
               <h3 className="text-lg font-bold text-foreground line-clamp-1">{product.name}</h3>
-              <p className="text-xl font-black text-foreground mt-2">₹{product.price.toLocaleString()}</p>
+              <p className="text-xl font-black text-foreground mt-2">₹{(product.price * 1.05).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
             </div>
           </div>
 
@@ -188,20 +188,10 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
               </div>
               <div className="flex-1 text-right">
                 {/* Fee breakdown */}
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground font-medium">
-                    <span>Base ({quantity}x ₹{product.price.toLocaleString()})</span>
-                    <span>₹{(product.price * quantity).toLocaleString()}</span>
+                  <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Price</p>
+                    <p className="text-2xl font-black text-primary tracking-tighter">₹{(product.price * quantity * 1.05).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
                   </div>
-                  <div className="flex items-center justify-between text-[10px] text-violet-600 font-bold">
-                    <span>Platform fee (5%)</span>
-                    <span>+₹{(product.price * quantity * 0.05).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex items-center justify-between border-t border-slate-200 pt-1">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">You Pay</p>
-                    <p className="text-2xl font-black text-primary tracking-tighter">₹{(product.price * quantity * 1.05).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

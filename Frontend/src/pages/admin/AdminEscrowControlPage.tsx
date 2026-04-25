@@ -74,7 +74,7 @@ export const AdminEscrowControlPage: React.FC = () => {
   const totalFeeHeld = pendingEscrows.reduce((s, e) => s + (e.platformFee ?? 0), 0);
 
   const handleRelease = async (id: string) => {
-    if (!window.confirm('Release funds? Org receives the base amount. 5% platform fee is retained in admin wallet.')) return;
+    if (!window.confirm('Release funds? Payee receives their payout and platform revenue is processed.')) return;
     setActionLoading(id);
     try {
       await adminApi.releaseEscrow(id);
@@ -115,7 +115,7 @@ export const AdminEscrowControlPage: React.FC = () => {
             Escrow Control
           </h1>
           <p className="text-muted-foreground font-medium max-w-2xl leading-relaxed text-xs">
-            Monitor held payments, platform fee income, and release or refund escrow funds.
+            Monitor held payments, service revenue, and release or refund escrow funds.
           </p>
         </div>
         <button
@@ -131,7 +131,7 @@ export const AdminEscrowControlPage: React.FC = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Total Held', value: fmt(totalHeld), icon: Lock, color: 'amber' },
-          { label: 'Fee Pending', value: fmt(totalFeeHeld), icon: Percent, color: 'violet' },
+          { label: 'Revenue Pending', value: fmt(totalFeeHeld), icon: Percent, color: 'violet' },
           { label: 'Escrows Active', value: pendingEscrows.length.toString(), icon: Clock, color: 'blue' },
           { label: 'Platform Wallet', value: walletLoading ? '…' : fmt(adminWallet?.balance ?? 0), icon: Wallet, color: 'emerald' },
         ].map(stat => (
@@ -172,7 +172,7 @@ export const AdminEscrowControlPage: React.FC = () => {
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl px-5 py-3 border border-white/10">
               <p className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1 flex items-center gap-1"><Banknote size={9} /> Fee Rate</p>
-              <p className="text-2xl font-black tracking-tighter">5%</p>
+              <p className="text-2xl font-black tracking-tighter">Standard</p>
             </div>
           </div>
         </div>
@@ -361,7 +361,7 @@ export const AdminEscrowControlPage: React.FC = () => {
                         <p className="text-base font-black text-emerald-700 tracking-tighter">{fmt(baseAmount)}</p>
                       </div>
                       <div className="p-3 rounded-xl bg-violet-50 border border-violet-100 text-center">
-                        <p className="text-[8px] font-black text-violet-600/70 uppercase tracking-widest mb-1">Platform Fee (5%)</p>
+                        <p className="text-[8px] font-black text-violet-600/70 uppercase tracking-widest mb-1">Service Commission</p>
                         <p className="text-base font-black text-violet-700 tracking-tighter">{fmt(fee)}</p>
                       </div>
                     </div>
@@ -388,7 +388,7 @@ export const AdminEscrowControlPage: React.FC = () => {
                           Refund
                         </button>
                         <p className="text-[8px] text-center text-muted-foreground/40 font-medium leading-tight">
-                          Release sends {fmt(baseAmount)} to payee + {fmt(fee)} to admin
+                          Release sends {fmt(baseAmount)} to payee + commission to admin
                         </p>
                       </>
                     ) : (
@@ -414,7 +414,7 @@ export const AdminEscrowControlPage: React.FC = () => {
         </div>
         <p className="text-muted-foreground leading-relaxed text-[11px] font-medium max-w-4xl">
           <span className="text-primary font-black uppercase mr-2">Protocol:</span>
-          When released, the org/worker receives the base amount and the 5% platform service fee is credited to the admin wallet. All actions are permanent and immutably logged for compliance.
+          When released, the payee receives their payout and the service commission is credited to the platform wallet. All actions are permanent and immutably logged for compliance.
         </p>
       </div>
     </div>

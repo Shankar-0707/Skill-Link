@@ -32,7 +32,7 @@ export const AdminWalletPage: React.FC = () => {
   const fmt = (n: number) =>
     `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  const feeTransactions = wallet?.transactions.filter(t => t.note?.includes('Platform Fee')) ?? [];
+  const feeTransactions = wallet?.transactions.filter(t => t.note?.includes('Service Commission')) ?? [];
 
   return (
     <div className="py-8 px-4 max-w-5xl mx-auto space-y-8">
@@ -44,9 +44,7 @@ export const AdminWalletPage: React.FC = () => {
         <h1 className="font-headline font-bold text-3xl text-foreground tracking-tight">
           Admin Wallet
         </h1>
-        <p className="text-muted-foreground font-medium mt-1 text-sm leading-relaxed max-w-2xl">
-          Track platform service fee income from every completed escrow. All 5% charges are credited here on OTP verification.
-        </p>
+          Track service revenue from completed transactions. Platform commissions are credited here upon verification.
       </div>
 
       {/* Stats */}
@@ -68,7 +66,7 @@ export const AdminWalletPage: React.FC = () => {
                 <TrendingUp size={18} />
               </div>
               <div>
-                <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest">Total Fee Income</p>
+                <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest">Total Service Revenue</p>
                 <p className="text-2xl font-black text-primary tracking-tighter">{fmt(wallet.totalFeeIncome)}</p>
               </div>
             </div>
@@ -78,7 +76,7 @@ export const AdminWalletPage: React.FC = () => {
               </div>
               <div>
                 <p className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-widest">Platform Rate</p>
-                <p className="text-2xl font-black text-primary tracking-tighter">5% per txn</p>
+                <p className="text-2xl font-black text-primary tracking-tighter">Standard Tier</p>
               </div>
             </div>
           </div>
@@ -87,7 +85,7 @@ export const AdminWalletPage: React.FC = () => {
           {feeTransactions.length > 0 && (
             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                <p className="text-sm font-black text-primary uppercase tracking-widest">Platform Fee Transactions</p>
+                <p className="text-sm font-black text-primary uppercase tracking-widest">Service Commission Transactions</p>
                 <span className="text-[9px] font-black bg-violet-100 text-violet-700 px-2 py-1 rounded-full">{feeTransactions.length} transactions</span>
               </div>
               <div className="divide-y divide-slate-50">
