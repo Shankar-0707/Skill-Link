@@ -32,6 +32,6 @@ import { GoogleStrategy } from './strategies/google.strategy';
     GoogleStrategy,
     RolesGuard,
   ],
-  exports: [AuthService, JwtAuthGuard, JwtModule, RolesGuard],
+  exports: [AuthService, MailService, JwtAuthGuard, JwtModule, RolesGuard],
 })
 export class AuthModule {}
