@@ -27,6 +27,8 @@ export class PaymentsService {
   async createPaymentOrder(data: {
     userId: string;
     amount: number;
+    originalAmount?: number;
+    platformFee?: number;
     type: string;
     reservationId?: string;
     jobId?: string;
@@ -51,7 +53,7 @@ export class PaymentsService {
     });
 
     this.logger.log(
-      `Payment order created: ${providerPaymentId} for ₹${data.amount} [${data.type}]`,
+      `Payment order created: ${providerPaymentId} for ₹${data.amount} (base: ₹${data.originalAmount ?? data.amount}) [${data.type}]`,
     );
 
     return {
@@ -59,6 +61,8 @@ export class PaymentsService {
       providerPaymentId,
       checkoutUrl,
       amount: payment.amount,
+      originalAmount: data.originalAmount ?? data.amount,
+      platformFee: data.platformFee ?? 0,
     };
   }
 
@@ -142,10 +146,15 @@ export class PaymentsService {
           });
         } else {
           // Normal case — create fresh escrow
+          // Derive fee split: 5% of net = payment.amount / 1.05 * 0.05
+          const originalAmount = Math.round((payment.amount / 1.05) * 100) / 100;
+          const platformFee = Math.round((payment.amount - originalAmount) * 100) / 100;
           const escrow = await tx.escrow.create({
             data: {
               reservationId: payment.reservationId,
               amount: payment.amount,
+              originalAmount,
+              platformFee,
               status: EscrowStatus.HELD,
               paymentId: payment.id,
             },

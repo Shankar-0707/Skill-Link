@@ -45,7 +45,9 @@ export const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = (
     }
   };
 
-  const totalAmount = reservation.product.price * reservation.quantity;
+  const baseAmount = reservation.product.price * reservation.quantity;
+  const platformFee = reservation.platformFee ?? (baseAmount * 0.05);
+  const totalAmount = reservation.totalAmount ?? (baseAmount + platformFee);
   const productImages = reservation.product.images ?? [];
 
   return (
@@ -226,9 +228,17 @@ export const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = (
                 <span className="text-muted-foreground">Quantity</span>
                 <span className="font-bold">× {reservation.quantity}</span>
               </div>
+              <div className="flex justify-between items-center pt-2 border-t border-border text-sm font-medium">
+                <span className="text-muted-foreground">Customer Paid</span>
+                <span className="font-bold">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm font-medium">
+                <span className="text-violet-600 font-bold">Platform Fee (5%)</span>
+                <span className="font-bold text-violet-600">₹{platformFee.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+              </div>
               <div className="flex justify-between items-center pt-2 border-t border-border text-base font-bold">
-                <span>Total</span>
-                <span className="text-xl font-black text-foreground">₹{totalAmount.toLocaleString()}</span>
+                <span className="text-emerald-600">Your Payout</span>
+                <span className="text-xl font-black text-emerald-600">₹{baseAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
               </div>
               {reservation.escrow && (
                 <div className="flex justify-between items-center text-sm font-medium pt-1">

@@ -304,8 +304,13 @@ export const MyReservationsPage: React.FC = () => {
                 <div className="text-left md:text-right">
                   <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Total Paid</p>
                   <p className="text-xl font-black text-primary tracking-tight">
-                    ₹{(res.quantity * (res.product?.price || 0)).toLocaleString()}
+                    ₹{(
+                      res.escrow?.amount ||
+                      res.payment?.amount ||
+                      (res.quantity * (res.product?.price || 0) * 1.05)
+                    ).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
+                  <p className="text-[8px] text-violet-500 font-bold mt-0.5">incl. 5% service fee</p>
                 </div>
 
                 <div className="flex items-center gap-2">

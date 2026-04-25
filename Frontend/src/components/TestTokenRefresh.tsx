@@ -23,7 +23,7 @@ export const TestTokenRefresh: React.FC = () => {
       setResult(`❌ Error: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
-    }
+    }    
   };
 
   return (

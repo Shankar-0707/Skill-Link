@@ -121,7 +121,9 @@ export const ReservationDetailView: React.FC = () => {
     );
   }
 
-  const totalAmount = reservation.product.price * reservation.quantity;
+  const baseAmount = reservation.product.price * reservation.quantity;
+  const platformFee = reservation.platformFee ?? (baseAmount * 0.05);
+  const totalAmount = reservation.totalAmount ?? (baseAmount + platformFee);
   const productImages = reservation.product.images ?? [];
 
   return (
@@ -185,8 +187,16 @@ export const ReservationDetailView: React.FC = () => {
                   <p className="text-xl font-black text-primary">{reservation.quantity} Units</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Total Valuation</p>
-                  <p className="text-xl font-black text-primary">₹{totalAmount.toLocaleString()}</p>
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Customer Paid</p>
+                  <p className="text-xl font-black text-primary">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[9px] font-black text-violet-600 uppercase tracking-widest">Platform Fee (5%)</p>
+                  <p className="text-xl font-black text-violet-600">₹{platformFee.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Your Payout</p>
+                  <p className="text-xl font-black text-emerald-600">₹{baseAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
 

@@ -125,17 +125,23 @@ export class ReservationsService {
         },
       });
 
-      // Create a payment order (mock gateway) and get the checkout URL
-      const totalAmount = product.price * dto.quantity;
+      // Create a payment order with 5% platform service fee
+      const originalAmount = product.price * dto.quantity;
+      const platformFeeRate = 0.05;
+      const platformFee = Math.round(originalAmount * platformFeeRate * 100) / 100;
+      const totalAmount = originalAmount + platformFee; // Customer pays this
+
       const paymentOrder = await this.paymentsService.createPaymentOrder({
         userId,
-        amount: totalAmount,
+        amount: totalAmount,          // customer is charged totalAmount (original + 5%)
+        originalAmount,               // base amount for org payout
+        platformFee,                  // 5% for admin
         type: 'RESERVATION',
         reservationId: reservation.id,
       }, tx);
 
       this.logger.log(
-        `Reservation ${reservation.id} created. Payment link: ${paymentOrder.checkoutUrl}`,
+        `Reservation ${reservation.id} created. Base: ₹${originalAmount}, Fee: ₹${platformFee}, Total: ₹${totalAmount}. Payment link: ${paymentOrder.checkoutUrl}`,
       );
 
       // Return reservation + checkout URL so frontend can redirect
@@ -143,6 +149,8 @@ export class ReservationsService {
         ...reservation,
         checkoutUrl: paymentOrder.checkoutUrl,
         providerPaymentId: paymentOrder.providerPaymentId,
+        originalAmount,
+        platformFee,
         totalAmount,
       };
     });

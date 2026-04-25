@@ -47,7 +47,9 @@ export interface Reservation {
   pickupOtpExpiresAt?: string;
   checkoutUrl?: string; // returning from BE creation
   providerPaymentId?: string;
-  totalAmount?: number;
+  totalAmount?: number;       // customer total (incl. 5% fee)
+  originalAmount?: number;    // base amount (org payout)
+  platformFee?: number;       // 5% admin fee
   payment?: {
     id: string;
     amount: number;

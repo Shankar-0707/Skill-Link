@@ -45,14 +45,15 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
         quantity
       });
 
-      // Instead of manual success state and redirect, we open Razorpay
-      const amountInPaise = Math.round(product.price * quantity * 100);
+      // Use the server-calculated totalAmount (which includes the 5% platform fee)
+      const serverTotal = response.totalAmount ?? (product.price * quantity * 1.05);
+      const amountInPaise = Math.round(serverTotal * 100);
 
       await openRazorpay({
         amount: amountInPaise,
         currency: "INR",
         name: "Skill-Link",
-        description: `Reservation: ${quantity}x ${product.name}`,
+        description: `Reservation: ${quantity}x ${product.name} (incl. 5% service fee)`,
         prefill: {
           name: "Verified Customer", // This could be fetched from auth context
         },
@@ -186,8 +187,21 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
                 </button>
               </div>
               <div className="flex-1 text-right">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Amount</p>
-                <p className="text-3xl font-black text-primary tracking-tighter">₹{(product.price * quantity).toLocaleString()}</p>
+                {/* Fee breakdown */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[10px] text-muted-foreground font-medium">
+                    <span>Base ({quantity}x ₹{product.price.toLocaleString()})</span>
+                    <span>₹{(product.price * quantity).toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-violet-600 font-bold">
+                    <span>Platform fee (5%)</span>
+                    <span>+₹{(product.price * quantity * 0.05).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-slate-200 pt-1">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">You Pay</p>
+                    <p className="text-2xl font-black text-primary tracking-tighter">₹{(product.price * quantity * 1.05).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

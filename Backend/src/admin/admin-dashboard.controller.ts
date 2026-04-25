@@ -64,6 +64,16 @@ export class AdminDashboardController {
     return this.adminDashboardService.getEscrows();
   }
 
+  @Get('wallet')
+  @ApiOperation({
+    summary: 'Get admin platform wallet (fee income & balance)',
+    description: 'Returns the admin\'s virtual wallet balance, total platform fees collected, and recent transactions.',
+  })
+  @ApiOkResponse({ description: 'Admin wallet data' })
+  getAdminWallet() {
+    return this.adminDashboardService.getAdminWallet();
+  }
+
   @Post('escrows/:id/release')
   @ApiOperation({
     summary: 'Admin releases a HELD escrow',

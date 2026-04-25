@@ -1139,6 +1139,8 @@ export class AdminDashboardService {
     return escrows.map((escrow) => ({
       id: escrow.id,
       amount: escrow.amount,
+      originalAmount: escrow.originalAmount,
+      platformFee: escrow.platformFee,
       status: escrow.status,
       createdAt: escrow.createdAt,
       releasedAt: escrow.releasedAt,
@@ -1157,6 +1159,41 @@ export class AdminDashboardService {
   }
 
   /**
+   * Returns the admin's virtual wallet (platform fee income).
+   */
+  async getAdminWallet() {
+    const adminUser = await this.prisma.user.findFirst({
+      where: { role: 'ADMIN' },
+      select: { id: true, name: true, email: true },
+    });
+    if (!adminUser) return { balance: 0, transactions: [] };
+
+    const wallet = await this.prisma.wallet.upsert({
+      where: { userId: adminUser.id },
+      create: { userId: adminUser.id, balance: 0 },
+      update: {},
+      include: {
+        transactions: {
+          orderBy: { createdAt: 'desc' },
+          take: 100,
+        },
+      },
+    });
+
+    // Also compute total platform fees collected (sum of all CREDIT transactions with 'Platform Fee' note)
+    const totalFeeIncome = wallet.transactions
+      .filter(t => t.type === 'CREDIT' && t.note?.includes('Platform Fee'))
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    return {
+      adminEmail: adminUser.email,
+      balance: wallet.balance,
+      totalFeeIncome: Math.round(totalFeeIncome * 100) / 100,
+      transactions: wallet.transactions,
+    };
+  }
+
+  /**
    * Admin manually releases a HELD escrow → payee wallet credited.
    */
   async adminReleaseEscrow(escrowId: string) {
@@ -1166,7 +1203,7 @@ export class AdminDashboardService {
     if (!escrow) throw new NotFoundException(`Escrow ${escrowId} not found`);
 
     await this.escrowService.releaseEscrow(escrowId);
-    return { message: `Escrow ${escrowId} released. Payee wallet credited.` };
+    return { message: `Escrow ${escrowId} released. Payee wallet credited. Platform fee retained.` };
   }
 
   /**

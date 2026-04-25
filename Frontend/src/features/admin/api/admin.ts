@@ -7,6 +7,27 @@ import type {
   UserMetrics,
 } from '../types';
 
+interface EscrowItemRaw {
+  id: string;
+  status: string;
+  amount: number;
+  originalAmount: number;
+  platformFee: number;
+  jobTitle?: string;
+  productName?: string;
+  createdAt: string;
+  releasedAt?: string | null;
+  customerName?: string;
+  customerEmail?: string;
+  workerName?: string;
+  workerEmail?: string;
+  organisationName?: string;
+  type: string;
+  paymentStatus?: string | null;
+}
+
+export type { EscrowItemRaw };
+
 type ApiEnvelope<T> = {
   success: boolean;
   statusCode: number;
@@ -114,9 +135,9 @@ export const adminApi = {
     return unwrapResponse<AdminAnalyticsData>(response.data);
   },
 
-  getHeldEscrows: async () => {
+  getHeldEscrows: async (): Promise<EscrowItemRaw[]> => {
     const response = await api.get('/admin/escrows');
-    return unwrapResponse<Record<string, unknown>[]>(response.data);
+    return unwrapResponse<EscrowItemRaw[]>(response.data);
   },
 
   releaseEscrow: async (id: string) => {
@@ -127,5 +148,22 @@ export const adminApi = {
   refundEscrow: async (id: string) => {
     const response = await api.post(`/admin/escrows/${id}/refund`);
     return response.data;
+  },
+
+  getAdminWallet: async () => {
+    const response = await api.get('/admin/wallet');
+    return unwrapResponse<{
+      adminEmail: string;
+      balance: number;
+      totalFeeIncome: number;
+      transactions: Array<{
+        id: string;
+        type: string;
+        amount: number;
+        note: string | null;
+        escrowId: string | null;
+        createdAt: string;
+      }>;
+    }>(response.data);
   },
 };

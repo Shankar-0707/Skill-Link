@@ -4,7 +4,7 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { EscrowStatus, Prisma } from '@prisma/client';
+import { EscrowStatus, Prisma, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from '../payments/wallet.service';
 
@@ -98,7 +98,7 @@ export class EscrowService {
       },
     });
 
-    // Determine payee and credit their wallet
+    // Determine payee and credit their wallet (only originalAmount — NOT the full amount)
     let payeeUserId: string | null = null;
     let payeeLabel = '';
 
@@ -110,22 +110,47 @@ export class EscrowService {
       payeeLabel = `Worker (Job #${escrow.jobId?.substring(0, 8)})`;
     }
 
+    const payoutAmount = escrow.originalAmount > 0 ? escrow.originalAmount : escrow.amount;
+    const feeAmount = escrow.platformFee ?? 0;
+    const noteType = escrow.reservationId ? 'Reservation' : 'Job';
+
     if (payeeUserId) {
-      const noteType = escrow.reservationId ? 'Reservation' : 'Job';
       await this.walletService.creditWallet(
         payeeUserId,
-        escrow.amount,
+        payoutAmount,
         `${noteType} payout — Escrow #${escrowId.substring(0, 8)} (${payeeLabel})`,
         escrowId,
         client,
       );
       this.logger.log(
-        `Escrow ${escrowId} RELEASED. ₹${escrow.amount} credited to ${payeeUserId} (${payeeLabel}).`,
+        `Escrow ${escrowId} RELEASED. ₹${payoutAmount} credited to ${payeeUserId} (${payeeLabel}).`,
       );
     } else {
       this.logger.warn(
         `Escrow ${escrowId} released but no payee found to credit wallet!`,
       );
+    }
+
+    // Credit 5% platform fee to the admin wallet
+    if (feeAmount > 0) {
+      const adminUser = await client.user.findFirst({
+        where: { role: Role.ADMIN },
+        select: { id: true },
+      });
+      if (adminUser) {
+        await this.walletService.creditWallet(
+          adminUser.id,
+          feeAmount,
+          `Platform Fee (5%) — ${noteType} Escrow #${escrowId.substring(0, 8)}`,
+          escrowId,
+          client,
+        );
+        this.logger.log(
+          `Platform fee ₹${feeAmount} credited to admin wallet (user: ${adminUser.id}).`,
+        );
+      } else {
+        this.logger.warn('No admin user found to credit platform fee!');
+      }
     }
 
     return updated;
