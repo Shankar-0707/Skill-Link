@@ -12,6 +12,7 @@ import { AdminModule } from './admin/admin.module';
 import { StorageModule } from './storage/storage.module';
 import { OrganisationsModule } from './organisations/organisations.module';
 import { PaymentsModule } from './payments/payments.module';
+import { PingModule } from './ping/ping.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
 import { ReservationsModule } from './reservations/reservations.module';
@@ -42,6 +43,7 @@ import { WorkersModule } from './workers/workers.module';
     JobsModule,
     ReservationsModule,
     PaymentsModule,
+    PingModule,
     EscrowModule,
     HelpModule,
     KycModule,
