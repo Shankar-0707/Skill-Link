@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -55,8 +56,15 @@ export class WorkersService {
     });
   }
 
-  async updateProfileByUserId(userId: string, data: any) {
-    const { name, profileImage, ...workerData } = data;
+  async updateProfileByUserId(userId: string, data: Record<string, unknown>) {
+    const {
+      name: nameValue,
+      profileImage: profileImageValue,
+      ...workerData
+    } = data;
+    const name = typeof nameValue === 'string' ? nameValue : undefined;
+    const profileImage =
+      typeof profileImageValue === 'string' ? profileImageValue : undefined;
 
     // Update User record if name or profileImage is provided
     if (name || profileImage) {
@@ -70,9 +78,11 @@ export class WorkersService {
     }
 
     // Update Worker record
+    const workerUpdateData = workerData as Prisma.WorkerUpdateInput;
+
     return this.prisma.worker.update({
       where: { userId },
-      data: workerData,
+      data: workerUpdateData,
       include: {
         user: {
           select: {

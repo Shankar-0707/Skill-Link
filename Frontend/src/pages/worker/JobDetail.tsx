@@ -68,7 +68,7 @@ export const WorkerJobDetailPage: React.FC = () => {
       const updated = await jobService.startJob(id);
       setJob(updated);
       showToast('Job started! The customer has been notified.');
-    } catch (err) {
+    } catch {
       showToast('Failed to start job. Please try again.');
     } finally {
       setActionLoading(false);
@@ -82,7 +82,7 @@ export const WorkerJobDetailPage: React.FC = () => {
       const updated = await jobService.completeJob(id);
       setJob(updated);
       showToast('Job marked complete. Awaiting customer confirmation.');
-    } catch (err) {
+    } catch {
       showToast('Failed to mark job complete.');
     } finally {
       setActionLoading(false);

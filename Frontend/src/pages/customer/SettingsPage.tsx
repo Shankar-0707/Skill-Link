@@ -51,7 +51,7 @@ export const SettingsPage: React.FC = () => {
       setResetError(null);
       await authApi.forgotPassword(user.email);
       setPasswordResetSent(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to send password reset:', err);
       setResetError('Failed to send reset link. Please try again.');
     } finally {
@@ -82,9 +82,10 @@ export const SettingsPage: React.FC = () => {
       setNewPassword('');
       setConfirmPassword('');
       alert('Password updated successfully!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to reset password:', err);
-      setResetError(err?.response?.data?.message || 'Failed to reset password. Please check your token.');
+      const error = err as { response?: { data?: { message?: string } } };
+      setResetError(error?.response?.data?.message || 'Failed to reset password. Please check your token.');
     } finally {
       setIsResettingPassword(false);
     }
@@ -110,7 +111,7 @@ export const SettingsPage: React.FC = () => {
               ].map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
-                  onClick={() => setActiveSection(id as any)}
+                  onClick={() => setActiveSection(id as 'profile' | 'security' | 'notifications' | 'appearance')}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-label font-medium transition-all
                     ${activeSection === id
                       ? 'bg-foreground text-background shadow-md'

@@ -219,11 +219,7 @@ export class AdminHelpService {
     return this.getTicketById(ticketId);
   }
 
-  async reject(
-    ticketId: string,
-    adminUserId: string,
-    rejectionReason: string,
-  ) {
+  async reject(ticketId: string, adminUserId: string, rejectionReason: string) {
     const ticket = await this.prisma.helpTicket.findUnique({
       where: { id: ticketId },
       select: {

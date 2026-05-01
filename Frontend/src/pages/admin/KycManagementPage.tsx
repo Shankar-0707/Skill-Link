@@ -239,12 +239,12 @@ export const KycManagementPage: React.FC = () => {
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const params: any =
+      const params: Record<string, unknown> =
         filterStatus === 'ALL'
           ? { all: true }
           : { status: filterStatus };
       const data = await adminKycService.listRequests(params);
-      const items = (data as any).items ?? data;
+      const items = (data as unknown as Record<string, unknown>).items ?? data;
       setRequests(Array.isArray(items) ? items : []);
     } catch {
       showToast('Failed to load KYC requests.', false);

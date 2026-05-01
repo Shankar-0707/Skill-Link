@@ -422,7 +422,14 @@ model Escrow {
   paymentId String? @unique
   payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
 
+  /// Total amount charged to customer (originalAmount + platformFee)
   amount Float
+
+  /// Pre-fee amount that goes to the org/worker on release
+  originalAmount Float @default(0)
+
+  /// 5% platform service charge — credited to admin wallet on release
+  platformFee Float @default(0)
 
   status EscrowStatus @default(HELD)
 

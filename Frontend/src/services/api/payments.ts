@@ -20,6 +20,7 @@ export interface CheckoutDetails {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function unwrapResponse<T>(response: any): T {
   if (response && response.success && 'data' in response) {
     return response.data;
@@ -45,6 +46,7 @@ export const paymentsApi = {
 
   getMyWallet: async () => {
     const response = await api.get('/payments/wallet');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return unwrapResponse<any>(response.data);
   },
 };

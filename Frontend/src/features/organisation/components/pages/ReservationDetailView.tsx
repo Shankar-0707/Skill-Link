@@ -79,9 +79,10 @@ export const ReservationDetailView: React.FC = () => {
       await reservationApi.verifyPickup(id, { otp: otpValue });
       const updated = await reservationApi.getOne(id);
       setReservation(updated);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to verify OTP:', error);
-      alert(error?.response?.data?.message || 'Failed to verify OTP'); // Or toast
+      const err = error as { response?: { data?: { message?: string } } };
+      alert(err?.response?.data?.message || 'Failed to verify OTP'); // Or toast
     } finally {
       setIsActionLoading(false);
     }
@@ -120,7 +121,6 @@ export const ReservationDetailView: React.FC = () => {
     );
   }
 
-  const totalAmount = reservation.product.price * reservation.quantity;
   const productImages = reservation.product.images ?? [];
 
   return (
@@ -184,8 +184,8 @@ export const ReservationDetailView: React.FC = () => {
                   <p className="text-xl font-black text-primary">{reservation.quantity} Units</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Total Valuation</p>
-                  <p className="text-xl font-black text-primary">₹{totalAmount.toLocaleString()}</p>
+                  <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Earnings (Payout)</p>
+                  <p className="text-xl font-black text-emerald-600">₹{baseAmount.toLocaleString('en-IN', { minimumFractionDigits: 0 })}</p>
                 </div>
               </div>
 

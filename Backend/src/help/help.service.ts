@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, Role } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -143,15 +147,18 @@ export class HelpService {
     const jobId = dto.jobId ?? null;
     const reservationId = dto.reservationId ?? null;
     const workerId = dto.workerId ?? user.worker?.id ?? null;
-    const organisationId =
-      dto.organisationId ?? user.organisation?.id ?? null;
+    const organisationId = dto.organisationId ?? user.organisation?.id ?? null;
 
     await Promise.all([
-      jobId ? this.assertJobAccess(jobId, userId, user.role) : Promise.resolve(),
+      jobId
+        ? this.assertJobAccess(jobId, userId, user.role)
+        : Promise.resolve(),
       reservationId
         ? this.assertReservationAccess(reservationId, userId, user.role)
         : Promise.resolve(),
-      workerId ? this.assertWorkerAccess(workerId, userId, user.role) : Promise.resolve(),
+      workerId
+        ? this.assertWorkerAccess(workerId, userId, user.role)
+        : Promise.resolve(),
       organisationId
         ? this.assertOrganisationAccess(organisationId, userId, user.role)
         : Promise.resolve(),
@@ -215,7 +222,8 @@ export class HelpService {
     }
 
     const isCustomerOwner = reservation.customer.userId === userId;
-    const isOrganisationOwner = reservation.product.organisation.userId === userId;
+    const isOrganisationOwner =
+      reservation.product.organisation.userId === userId;
 
     if (role === Role.CUSTOMER && !isCustomerOwner) {
       throw new ForbiddenException('You can only attach your own reservation');
@@ -262,7 +270,11 @@ export class HelpService {
     }
   }
 
-  private async assertWorkerAccess(workerId: string, userId: string, role: Role) {
+  private async assertWorkerAccess(
+    workerId: string,
+    userId: string,
+    role: Role,
+  ) {
     const worker = await this.prisma.worker.findUnique({
       where: { id: workerId },
       select: { id: true, userId: true },
@@ -273,7 +285,9 @@ export class HelpService {
     }
 
     if (role === Role.WORKER && worker.userId !== userId) {
-      throw new ForbiddenException('You can only attach your own worker profile');
+      throw new ForbiddenException(
+        'You can only attach your own worker profile',
+      );
     }
   }
 

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   NotFoundException,
@@ -46,9 +48,36 @@ const mockReservation = {
   escrow: { id: 'escrow-uuid-1', amount: 1000, status: EscrowStatus.HELD },
 };
 
+type TransactionClient = {
+  product?: {
+    findUnique?: jest.Mock;
+    update?: jest.Mock;
+  };
+  reservation?: {
+    create?: jest.Mock;
+    update?: jest.Mock;
+  };
+};
+
+type TransactionCallback<T> = (tx: TransactionClient) => Promise<T>;
+
 // ─── Prisma mock ──────────────────────────────────────────────────────────────
 
-const mockPrisma = {
+type MockPrisma = {
+  customer: { findFirst: jest.Mock };
+  product: { findUnique: jest.Mock; update: jest.Mock };
+  reservation: {
+    findUnique: jest.Mock;
+    create: jest.Mock;
+    update: jest.Mock;
+    findMany: jest.Mock;
+    count: jest.Mock;
+  };
+  organisation: { findFirst: jest.Mock };
+  $transaction: jest.Mock;
+};
+
+const mockPrisma: MockPrisma = {
   customer: { findFirst: jest.fn() },
   product: { findUnique: jest.fn(), update: jest.fn() },
   reservation: {
@@ -93,8 +122,8 @@ describe('ReservationsService', () => {
       mockPrisma.customer.findFirst.mockResolvedValue(mockCustomer);
 
       mockPrisma.$transaction.mockImplementation(
-        (cb: (tx: unknown) => Promise<unknown>) => {
-          const tx = {
+        (cb: TransactionCallback<unknown>) => {
+          const tx: TransactionClient = {
             product: {
               findUnique: jest.fn().mockResolvedValue(mockProduct),
               update: jest.fn(),
@@ -103,25 +132,26 @@ describe('ReservationsService', () => {
               create: jest.fn().mockResolvedValue(mockReservation),
             },
           };
-          return cb(tx).then((result) => {
-            expect(
-              (
-                tx as {
-                  product: { update: jest.Mock };
-                }
-              ).product.update,
-            ).toHaveBeenCalledWith(
-              expect.objectContaining({
-                data: { stockQuantity: { decrement: 2 } },
-              }),
-            );
-            return result;
-          });
+          return (cb as (tx: TransactionClient) => Promise<unknown>)(tx).then(
+            (result) => {
+              expect(
+                (tx.product as { update: jest.Mock }).update,
+              ).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  data: { stockQuantity: { decrement: 2 } },
+                }),
+              );
+              return result;
+            },
+          );
         },
       );
 
       const dto = { productId: 'prod-uuid-1', quantity: 2 };
-      const result = await service.create('user-uuid-cust', dto);
+      const result = (await service.create(
+        'user-uuid-cust',
+        dto,
+      )) as typeof mockReservation;
 
       expect(result).toEqual(mockReservation);
       expect(mockEscrowService.createEscrow).toHaveBeenCalledWith(
@@ -134,8 +164,8 @@ describe('ReservationsService', () => {
       mockPrisma.customer.findFirst.mockResolvedValue(mockCustomer);
 
       mockPrisma.$transaction.mockImplementation(
-        (cb: (tx: unknown) => Promise<unknown>) => {
-          const tx = {
+        (cb: TransactionCallback<unknown>) => {
+          const tx: TransactionClient = {
             product: {
               findUnique: jest
                 .fn()
@@ -143,7 +173,7 @@ describe('ReservationsService', () => {
             },
             reservation: { create: jest.fn() },
           };
-          return cb(tx);
+          return (cb as (tx: TransactionClient) => Promise<unknown>)(tx);
         },
       );
 
@@ -201,8 +231,8 @@ describe('ReservationsService', () => {
       mockPrisma.reservation.findUnique.mockResolvedValue(confirmedReservation);
 
       mockPrisma.$transaction.mockImplementation(
-        (cb: (tx: unknown) => Promise<unknown>) => {
-          const tx = {
+        (cb: (tx: TransactionClient) => Promise<unknown>) => {
+          const tx: TransactionClient = {
             reservation: {
               update: jest.fn().mockResolvedValue({
                 ...confirmedReservation,
@@ -215,7 +245,10 @@ describe('ReservationsService', () => {
         },
       );
 
-      const result = await service.markPickedUp('res-uuid-1', 'user-uuid-cust');
+      const result = (await service.markPickedUp(
+        'res-uuid-1',
+        'user-uuid-cust',
+      )) as typeof mockReservation;
 
       expect(result.status).toBe(ReservationStatus.PICKED_UP);
       expect(mockEscrowService.releaseEscrow).toHaveBeenCalledWith(
@@ -240,8 +273,8 @@ describe('ReservationsService', () => {
       mockPrisma.reservation.findUnique.mockResolvedValue(mockReservation);
 
       mockPrisma.$transaction.mockImplementation(
-        (cb: (tx: unknown) => Promise<unknown>) => {
-          const tx = {
+        (cb: (tx: TransactionClient) => Promise<unknown>) => {
+          const tx: TransactionClient = {
             reservation: {
               update: jest.fn().mockResolvedValue({
                 ...mockReservation,
@@ -251,13 +284,9 @@ describe('ReservationsService', () => {
             },
             product: { update: jest.fn() },
           };
-          return cb(tx).then((result) => {
+          return cb(tx).then((result: unknown) => {
             expect(
-              (
-                tx as {
-                  product: { update: jest.Mock };
-                }
-              ).product.update,
+              (tx.product as { update: jest.Mock }).update,
             ).toHaveBeenCalledWith(
               expect.objectContaining({
                 data: { stockQuantity: { increment: 2 } },
@@ -273,7 +302,11 @@ describe('ReservationsService', () => {
         role: 'CUSTOMER',
         email: 'c@test.com',
       };
-      const result = await service.cancel('res-uuid-1', actor, {});
+      const result = (await service.cancel(
+        'res-uuid-1',
+        actor,
+        {},
+      )) as typeof mockReservation;
 
       expect(result.status).toBe(ReservationStatus.CANCELLED);
       expect(mockEscrowService.refundEscrow).toHaveBeenCalledWith(

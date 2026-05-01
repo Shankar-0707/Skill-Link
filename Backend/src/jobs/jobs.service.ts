@@ -88,12 +88,15 @@ export class JobsService {
 
       // If a budget is set, create a payment order so customer can pay via mock checkout
       if (dto.budget && dto.budget > 0) {
-        const paymentOrder = await this.paymentsService.createPaymentOrder({
-          userId,
-          amount: dto.budget,
-          type: 'JOB',
-          jobId: job.id,
-        }, tx);
+        const paymentOrder = await this.paymentsService.createPaymentOrder(
+          {
+            userId,
+            amount: dto.budget,
+            type: 'JOB',
+            jobId: job.id,
+          },
+          tx,
+        );
 
         return {
           ...job,

@@ -6,6 +6,25 @@ interface ViewProfileProps {
   organisation: Organisation;
 }
 
+const InfoItem = ({ icon: Icon, label, value, badge }: { icon: React.ElementType, label: string, value?: string | null, badge?: string }) => (
+  <div className="flex items-start gap-4 p-5 rounded-2xl bg-secondary/10 border border-transparent hover:border-border transition-all">
+    <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-border/50 shrink-0 mt-0.5">
+      <Icon size={22} />
+    </div>
+    <div className="flex flex-col flex-1">
+      <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
+          {badge && (
+              <span className="text-[8px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                  {badge}
+              </span>
+          )}
+      </div>
+      <span className="text-foreground font-bold text-lg mt-0.5 leading-tight">{value || "Not provided"}</span>
+    </div>
+  </div>
+);
+
 export const ViewProfile: React.FC<ViewProfileProps> = ({ organisation }) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
@@ -14,25 +33,6 @@ export const ViewProfile: React.FC<ViewProfileProps> = ({ organisation }) => {
       day: 'numeric'
     });
   };
-
-  const InfoItem = ({ icon: Icon, label, value, badge }: { icon: any, label: string, value?: string | null, badge?: string }) => (
-    <div className="flex items-start gap-4 p-5 rounded-2xl bg-secondary/10 border border-transparent hover:border-border transition-all">
-      <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-border/50 shrink-0 mt-0.5">
-        <Icon size={22} />
-      </div>
-      <div className="flex flex-col flex-1">
-        <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
-            {badge && (
-                <span className="text-[8px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-tighter">
-                    {badge}
-                </span>
-            )}
-        </div>
-        <span className="text-foreground font-bold text-lg mt-0.5 leading-tight">{value || "Not provided"}</span>
-      </div>
-    </div>
-  );
 
   return (
     <div className="bg-white rounded-[2.5rem] border border-border shadow-sm p-8 md:p-10 space-y-10 animate-in fade-in duration-500 min-h-[500px]">

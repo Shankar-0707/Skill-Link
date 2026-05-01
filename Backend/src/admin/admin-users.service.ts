@@ -90,7 +90,9 @@ export class AdminUsersService {
     reason?: string,
   ) {
     if (targetUserId === adminUserId) {
-      throw new BadRequestException('Admin accounts cannot blacklist themselves.');
+      throw new BadRequestException(
+        'Admin accounts cannot blacklist themselves.',
+      );
     }
 
     const user = await this.prisma.user.findUnique({

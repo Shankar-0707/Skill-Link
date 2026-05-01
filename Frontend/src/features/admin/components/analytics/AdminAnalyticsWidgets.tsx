@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { cn } from '@/shared/utils/cn';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const analyticsPalette = [
   '#0f172a',
   '#2563eb',

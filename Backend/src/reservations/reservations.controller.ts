@@ -55,7 +55,8 @@ export class ReservationsController {
       'Atomically: checks stock, decrements it, creates the reservation, and returns a mock checkout URL for payment.',
   })
   @ApiCreatedResponse({
-    description: 'Reservation created. Response includes checkoutUrl to redirect customer for payment.',
+    description:
+      'Reservation created. Response includes checkoutUrl to redirect customer for payment.',
   })
   @ApiConflictResponse({ description: 'Insufficient stock' })
   @ApiBadRequestResponse({ description: 'Product unavailable' })
@@ -69,7 +70,9 @@ export class ReservationsController {
   @Get('my')
   @UseGuards(RolesGuard)
   @Roles(Role.CUSTOMER)
-  @ApiOperation({ summary: "List the authenticated customer's own reservations" })
+  @ApiOperation({
+    summary: "List the authenticated customer's own reservations",
+  })
   @ApiOkResponse({ description: 'Paginated reservation list' })
   findMy(
     @common.CurrentUser() user: common.JwtPayload,
@@ -81,7 +84,10 @@ export class ReservationsController {
   @Get('my/:id')
   @UseGuards(RolesGuard)
   @Roles(Role.CUSTOMER)
-  @ApiOperation({ summary: 'Get a single reservation detail (customer view — includes OTP when CONFIRMED)' })
+  @ApiOperation({
+    summary:
+      'Get a single reservation detail (customer view — includes OTP when CONFIRMED)',
+  })
   @ApiNotFoundResponse({ description: 'Reservation not found' })
   findMyById(
     @Param('id', ParseUUIDPipe) id: string,
@@ -130,7 +136,9 @@ export class ReservationsController {
     description:
       'Org rejects a PENDING reservation. Restores stock and refunds escrow to customer virtual wallet.',
   })
-  @ApiOkResponse({ description: 'Reservation rejected, stock restored, escrow refunded' })
+  @ApiOkResponse({
+    description: 'Reservation rejected, stock restored, escrow refunded',
+  })
   reject(
     @Param('id', ParseUUIDPipe) id: string,
     @common.CurrentUser() user: common.JwtPayload,
@@ -148,7 +156,9 @@ export class ReservationsController {
     description:
       'Org enters the 4-digit OTP provided by the customer. On success: CONFIRMED → PICKED_UP and escrow released to org virtual wallet.',
   })
-  @ApiOkResponse({ description: 'Pickup verified, escrow released to org wallet' })
+  @ApiOkResponse({
+    description: 'Pickup verified, escrow released to org wallet',
+  })
   @ApiBadRequestResponse({ description: 'Invalid or expired OTP' })
   verifyPickup(
     @Param('id', ParseUUIDPipe) id: string,
@@ -167,7 +177,10 @@ export class ReservationsController {
     description:
       'Either customer or org can cancel. Restores stock and refunds escrow to customer virtual wallet.',
   })
-  @ApiOkResponse({ description: 'Reservation cancelled, stock restored, escrow refunded to wallet' })
+  @ApiOkResponse({
+    description:
+      'Reservation cancelled, stock restored, escrow refunded to wallet',
+  })
   cancel(
     @Param('id', ParseUUIDPipe) id: string,
     @common.CurrentUser() user: common.JwtPayload,
@@ -180,7 +193,10 @@ export class ReservationsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a single reservation by ID' })
-  @ApiOkResponse({ description: 'Reservation detail with product, customer, escrow, and payment info' })
+  @ApiOkResponse({
+    description:
+      'Reservation detail with product, customer, escrow, and payment info',
+  })
   @ApiNotFoundResponse({ description: 'Reservation not found' })
   @ApiForbiddenResponse({ description: 'Access denied to this reservation' })
   findOne(

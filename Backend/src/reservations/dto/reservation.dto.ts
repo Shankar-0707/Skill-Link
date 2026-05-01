@@ -62,7 +62,10 @@ export class ListIncomingReservationsDto {
 // ─── Org: Verify OTP to confirm pickup ───────────────────────────────────────
 
 export class VerifyPickupDto {
-  @ApiProperty({ example: '4821', description: '4-digit OTP shown to customer after org confirms' })
+  @ApiProperty({
+    example: '4821',
+    description: '4-digit OTP shown to customer after org confirms',
+  })
   @IsString()
   otp: string;
 }
