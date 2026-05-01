@@ -30,7 +30,8 @@ export class PaymentsController {
   @Get('checkout/:providerPaymentId')
   @ApiOperation({
     summary: 'Get payment details for the mock checkout page',
-    description: 'Returns amount, product/job info for display on checkout screen.',
+    description:
+      'Returns amount, product/job info for display on checkout screen.',
   })
   @ApiNotFoundResponse({ description: 'Payment not found' })
   @ApiBadRequestResponse({ description: 'Payment already processed' })
@@ -54,7 +55,8 @@ export class PaymentsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Report a failed payment',
-    description: 'Called by the frontend if the Razorpay checkout fails or is cancelled.',
+    description:
+      'Called by the frontend if the Razorpay checkout fails or is cancelled.',
   })
   reportFailure(@Param('providerPaymentId') providerPaymentId: string) {
     return this.paymentsService.handlePaymentFailure(providerPaymentId);
@@ -68,7 +70,9 @@ export class PaymentsController {
   @ApiOperation({
     summary: 'Get logged-in user wallet balance and transaction history',
   })
-  @ApiOkResponse({ description: 'Wallet with balance and last 50 transactions' })
+  @ApiOkResponse({
+    description: 'Wallet with balance and last 50 transactions',
+  })
   getMyWallet(@CurrentUser() user: JwtPayload) {
     return this.paymentsService.getMyWallet(user.sub);
   }

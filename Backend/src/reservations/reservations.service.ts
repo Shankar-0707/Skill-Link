@@ -128,17 +128,21 @@ export class ReservationsService {
       // Create a payment order with 5% platform service fee
       const originalAmount = product.price * dto.quantity;
       const platformFeeRate = 0.05;
-      const platformFee = Math.round(originalAmount * platformFeeRate * 100) / 100;
+      const platformFee =
+        Math.round(originalAmount * platformFeeRate * 100) / 100;
       const totalAmount = originalAmount + platformFee; // Customer pays this
 
-      const paymentOrder = await this.paymentsService.createPaymentOrder({
-        userId,
-        amount: totalAmount,          // customer is charged totalAmount (original + 5%)
-        originalAmount,               // base amount for org payout
-        platformFee,                  // 5% for admin
-        type: 'RESERVATION',
-        reservationId: reservation.id,
-      }, tx);
+      const paymentOrder = await this.paymentsService.createPaymentOrder(
+        {
+          userId,
+          amount: totalAmount, // customer is charged totalAmount (original + 5%)
+          originalAmount, // base amount for org payout
+          platformFee, // 5% for admin
+          type: 'RESERVATION',
+          reservationId: reservation.id,
+        },
+        tx,
+      );
 
       this.logger.log(
         `Reservation ${reservation.id} created. Base: ₹${originalAmount}, Fee: ₹${platformFee}, Total: ₹${totalAmount}. Payment link: ${paymentOrder.checkoutUrl}`,
@@ -188,7 +192,14 @@ export class ReservationsService {
             },
           },
           escrow: { select: { id: true, amount: true, status: true } },
-          payment: { select: { id: true, status: true, checkoutUrl: true, providerPaymentId: true } },
+          payment: {
+            select: {
+              id: true,
+              status: true,
+              checkoutUrl: true,
+              providerPaymentId: true,
+            },
+          },
         },
       }),
       this.prisma.reservation.count({ where }),
@@ -303,12 +314,20 @@ export class ReservationsService {
         },
         customer: {
           include: {
-            user: { select: { id: true, name: true, email: true, phone: true } },
+            user: {
+              select: { id: true, name: true, email: true, phone: true },
+            },
           },
         },
         escrow: true,
         payment: {
-          select: { id: true, status: true, amount: true, checkoutUrl: true, providerPaymentId: true },
+          select: {
+            id: true,
+            status: true,
+            amount: true,
+            checkoutUrl: true,
+            providerPaymentId: true,
+          },
         },
       },
     });
@@ -419,10 +438,15 @@ export class ReservationsService {
     }
 
     if (reservation.pickupOtp !== dto.otp) {
-      throw new BadRequestException('Invalid OTP. Please ask the customer to check their app.');
+      throw new BadRequestException(
+        'Invalid OTP. Please ask the customer to check their app.',
+      );
     }
 
-    if (reservation.pickupOtpExpiresAt && reservation.pickupOtpExpiresAt < new Date()) {
+    if (
+      reservation.pickupOtpExpiresAt &&
+      reservation.pickupOtpExpiresAt < new Date()
+    ) {
       throw new BadRequestException(
         'OTP has expired. Please cancel and re-confirm this reservation.',
       );

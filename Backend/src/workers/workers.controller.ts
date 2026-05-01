@@ -20,7 +20,7 @@ export class WorkersController {
   @Roles('WORKER')
   async updateMe(
     @CurrentUser('sub') userId: string,
-    @Body() data: any,
+    @Body() data: Record<string, unknown>,
   ) {
     return this.workersService.updateProfileByUserId(userId, data);
   }

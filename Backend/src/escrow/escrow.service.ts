@@ -30,7 +30,12 @@ export class EscrowService {
    * Called inside a transaction from ReservationService or JobService.
    */
   async createEscrow(
-    data: { jobId?: string; reservationId?: string; amount: number; paymentId?: string },
+    data: {
+      jobId?: string;
+      reservationId?: string;
+      amount: number;
+      paymentId?: string;
+    },
     tx?: Prisma.TransactionClient,
   ) {
     const client = tx ?? this.prisma;
@@ -110,7 +115,8 @@ export class EscrowService {
       payeeLabel = `Worker (Job #${escrow.jobId?.substring(0, 8)})`;
     }
 
-    const payoutAmount = escrow.originalAmount > 0 ? escrow.originalAmount : escrow.amount;
+    const payoutAmount =
+      escrow.originalAmount > 0 ? escrow.originalAmount : escrow.amount;
     const feeAmount = escrow.platformFee ?? 0;
     const noteType = escrow.reservationId ? 'Reservation' : 'Job';
 

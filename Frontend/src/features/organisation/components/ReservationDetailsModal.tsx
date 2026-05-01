@@ -45,9 +45,6 @@ export const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = (
     }
   };
 
-  const baseAmount = reservation.product.price * reservation.quantity;
-  const platformFee = reservation.platformFee ?? (baseAmount * 0.05);
-  const totalAmount = reservation.totalAmount ?? (baseAmount + platformFee);
   const productImages = reservation.product.images ?? [];
 
   return (

@@ -8,7 +8,11 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrganisationsService } from '../organisations/organisations.service';
-import { paginate, PaginationDto, parsePaginationInts } from '../common/dto/pagination.dto';
+import {
+  paginate,
+  PaginationDto,
+  parsePaginationInts,
+} from '../common/dto/pagination.dto';
 import {
   CreateProductDto,
   UpdateProductDto,

@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 
 // Extend global process.env types with custom environment variables
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
     interface ProcessEnv {
       // Email Configuration
@@ -73,9 +74,6 @@ export class MailService {
   async sendEmailVerification(input: VerificationMailInput) {
     const subject = 'Verify your Skill-Link email';
     const greeting = input.name ? `Hi ${input.name},` : 'Hi,';
-    const verificationLink = input.verificationUrl
-      ? `<a href="${input.verificationUrl}">Verify your email</a>`
-      : `<strong>${input.token}</strong>`;
     const plainVerificationLink = input.verificationUrl
       ? `Verification link: ${input.verificationUrl}`
       : `Verification token: ${input.token}`;

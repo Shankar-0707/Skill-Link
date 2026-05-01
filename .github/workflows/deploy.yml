@@ -1,0 +1,33 @@
+name: Deployment Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    # This job only runs if you have connected Vercel or want manual control
+    # For now, we provide the structure.
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: Frontend
+
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deployment
+        # You need to add RENDER_DEPLOY_HOOK to GitHub Secrets.
+        # Find it in Render Dashboard > Your Service > Settings > Deploy Hook.
+        run: curl -f -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}

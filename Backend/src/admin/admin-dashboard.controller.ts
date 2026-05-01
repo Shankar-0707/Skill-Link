@@ -67,7 +67,8 @@ export class AdminDashboardController {
   @Get('wallet')
   @ApiOperation({
     summary: 'Get admin platform wallet (fee income & balance)',
-    description: 'Returns the admin\'s virtual wallet balance, total platform fees collected, and recent transactions.',
+    description:
+      "Returns the admin's virtual wallet balance, total platform fees collected, and recent transactions.",
   })
   @ApiOkResponse({ description: 'Admin wallet data' })
   getAdminWallet() {

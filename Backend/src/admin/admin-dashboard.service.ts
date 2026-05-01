@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { JobStatus, ReservationStatus, Role, EscrowStatus } from '@prisma/client';
+import { JobStatus, ReservationStatus, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EscrowService } from '../escrow/escrow.service';
 
@@ -145,7 +145,11 @@ export class AdminDashboardService {
   async getDashboardMetrics(): Promise<DashboardMetricsResponse> {
     const now = new Date();
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const previousMonthStart = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1,
+    );
 
     const activeUsersWhere = {
       deletedAt: null,
@@ -248,7 +252,10 @@ export class AdminDashboardService {
       },
       customers: {
         count: totalCustomers,
-        trend: this.calculateGrowth(newCustomersThisMonth, newCustomersLastMonth),
+        trend: this.calculateGrowth(
+          newCustomersThisMonth,
+          newCustomersLastMonth,
+        ),
       },
       workers: {
         count: totalWorkers,
@@ -484,7 +491,11 @@ export class AdminDashboardService {
 
     const helpTicketCountByUserId = this.buildHelpTicketCountMap(helpTickets);
 
-    const monthlyActivity = this.buildMonthlyActivity(users, jobs, reservations);
+    const monthlyActivity = this.buildMonthlyActivity(
+      users,
+      jobs,
+      reservations,
+    );
 
     const jobsByStatus = this.toBreakdown(
       this.countBy(jobs, (job) => this.formatStatus(job.status)),
@@ -510,8 +521,14 @@ export class AdminDashboardService {
       this.countBy(users, (user) => this.formatRole(user.role)),
     );
     const userHealth = [
-      { label: 'Active accounts', value: users.filter((user) => user.isActive).length },
-      { label: 'Inactive accounts', value: users.filter((user) => !user.isActive).length },
+      {
+        label: 'Active accounts',
+        value: users.filter((user) => user.isActive).length,
+      },
+      {
+        label: 'Inactive accounts',
+        value: users.filter((user) => !user.isActive).length,
+      },
       {
         label: 'Email verified',
         value: users.filter((user) => user.emailVerified).length,
@@ -542,15 +559,21 @@ export class AdminDashboardService {
     const reservationFlow = [
       {
         label: 'Pending',
-        value: reservations.filter((reservation) => reservation.status === ReservationStatus.PENDING).length,
+        value: reservations.filter(
+          (reservation) => reservation.status === ReservationStatus.PENDING,
+        ).length,
       },
       {
         label: 'Confirmed',
-        value: reservations.filter((reservation) => reservation.status === ReservationStatus.CONFIRMED).length,
+        value: reservations.filter(
+          (reservation) => reservation.status === ReservationStatus.CONFIRMED,
+        ).length,
       },
       {
         label: 'Picked up',
-        value: reservations.filter((reservation) => reservation.status === ReservationStatus.PICKED_UP).length,
+        value: reservations.filter(
+          (reservation) => reservation.status === ReservationStatus.PICKED_UP,
+        ).length,
       },
       {
         label: 'Cancelled or expired',
@@ -597,7 +620,10 @@ export class AdminDashboardService {
         helpTickets,
         Role.ORGANISATION,
       ),
-      blacklistedUsers: this.buildBlacklistedUsers(users, helpTicketCountByUserId),
+      blacklistedUsers: this.buildBlacklistedUsers(
+        users,
+        helpTicketCountByUserId,
+      ),
       highlights: this.buildHighlights(
         monthlyActivity,
         topWorkers,
@@ -606,13 +632,19 @@ export class AdminDashboardService {
     };
   }
 
-  private calculateGrowth(currentMonthCount: number, previousMonthCount: number) {
+  private calculateGrowth(
+    currentMonthCount: number,
+    previousMonthCount: number,
+  ) {
     if (previousMonthCount === 0) {
       return currentMonthCount > 0 ? 100 : 0;
     }
 
     return Number(
-      (((currentMonthCount - previousMonthCount) / previousMonthCount) * 100).toFixed(1),
+      (
+        ((currentMonthCount - previousMonthCount) / previousMonthCount) *
+        100
+      ).toFixed(1),
     );
   }
 
@@ -623,7 +655,11 @@ export class AdminDashboardService {
   ): AnalyticsBucket[] {
     const now = new Date();
     const buckets = Array.from({ length: 6 }, (_, index) => {
-      const bucketDate = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1);
+      const bucketDate = new Date(
+        now.getFullYear(),
+        now.getMonth() - (5 - index),
+        1,
+      );
       return {
         label: bucketDate.toLocaleString('en-IN', { month: 'short' }),
         key: `${bucketDate.getFullYear()}-${bucketDate.getMonth()}`,
@@ -720,10 +756,11 @@ export class AdminDashboardService {
     });
 
     return Array.from(counts.values())
-      .sort((left, right) =>
-        right.completedJobs - left.completedJobs ||
-        right.activeJobs - left.activeJobs ||
-        right.totalJobs - left.totalJobs,
+      .sort(
+        (left, right) =>
+          right.completedJobs - left.completedJobs ||
+          right.activeJobs - left.activeJobs ||
+          right.totalJobs - left.totalJobs,
       )
       .slice(0, 10);
   }
@@ -804,10 +841,11 @@ export class AdminDashboardService {
     });
 
     return Array.from(counts.values())
-      .sort((left, right) =>
-        right.totalJobs - left.totalJobs ||
-        right.reservations - left.reservations ||
-        right.completedJobs - left.completedJobs,
+      .sort(
+        (left, right) =>
+          right.totalJobs - left.totalJobs ||
+          right.reservations - left.reservations ||
+          right.completedJobs - left.completedJobs,
       )
       .slice(0, 10);
   }
@@ -855,10 +893,11 @@ export class AdminDashboardService {
     });
 
     return Array.from(counts.values())
-      .sort((left, right) =>
-        right.reservations - left.reservations ||
-        right.quantity - left.quantity ||
-        right.pickedUpReservations - left.pickedUpReservations,
+      .sort(
+        (left, right) =>
+          right.reservations - left.reservations ||
+          right.quantity - left.quantity ||
+          right.pickedUpReservations - left.pickedUpReservations,
       )
       .slice(0, 10);
   }
@@ -886,8 +925,10 @@ export class AdminDashboardService {
     });
 
     return Array.from(counts.values())
-      .sort((left, right) =>
-        right.reservations - left.reservations || right.quantity - left.quantity,
+      .sort(
+        (left, right) =>
+          right.reservations - left.reservations ||
+          right.quantity - left.quantity,
       )
       .slice(0, 6);
   }
@@ -897,7 +938,9 @@ export class AdminDashboardService {
     topWorkers: TopWorkerAnalytics[],
     topOrganisations: TopOrganisationAnalytics[],
   ): AnalyticsHighlight[] {
-    const topJobMonth = [...monthlyActivity].sort((left, right) => right.jobs - left.jobs)[0];
+    const topJobMonth = [...monthlyActivity].sort(
+      (left, right) => right.jobs - left.jobs,
+    )[0];
     const topReservationMonth = [...monthlyActivity].sort(
       (left, right) => right.reservations - left.reservations,
     )[0];
@@ -908,7 +951,9 @@ export class AdminDashboardService {
       {
         label: 'Busiest jobs month',
         value: topJobMonth ? topJobMonth.label : 'N/A',
-        detail: topJobMonth ? `${topJobMonth.jobs} jobs created` : 'No job data yet',
+        detail: topJobMonth
+          ? `${topJobMonth.jobs} jobs created`
+          : 'No job data yet',
       },
       {
         label: 'Peak reservations month',
@@ -1095,8 +1140,12 @@ export class AdminDashboardService {
       const rightTime = right.blacklistedAt
         ? new Date(right.blacklistedAt).getTime()
         : 0;
-      const leftTime = left.blacklistedAt ? new Date(left.blacklistedAt).getTime() : 0;
-      return rightTime - leftTime || right.helpTicketCount - left.helpTicketCount;
+      const leftTime = left.blacklistedAt
+        ? new Date(left.blacklistedAt).getTime()
+        : 0;
+      return (
+        rightTime - leftTime || right.helpTicketCount - left.helpTicketCount
+      );
     });
   }
   // ─── Escrow Control Panel ─────────────────────────────────────────────────
@@ -1120,7 +1169,9 @@ export class AdminDashboardService {
               },
             },
             customer: {
-              include: { user: { select: { id: true, name: true, email: true } } },
+              include: {
+                user: { select: { id: true, name: true, email: true } },
+              },
             },
           },
         },
@@ -1129,8 +1180,16 @@ export class AdminDashboardService {
             id: true,
             title: true,
             budget: true,
-            customer: { include: { user: { select: { id: true, name: true, email: true } } } },
-            worker: { include: { user: { select: { id: true, name: true, email: true } } } },
+            customer: {
+              include: {
+                user: { select: { id: true, name: true, email: true } },
+              },
+            },
+            worker: {
+              include: {
+                user: { select: { id: true, name: true, email: true } },
+              },
+            },
           },
         },
       },
@@ -1148,9 +1207,16 @@ export class AdminDashboardService {
       paymentStatus: escrow.payment?.status ?? null,
       // Reservation info
       productName: escrow.reservation?.product?.name ?? null,
-      organisationName: escrow.reservation?.product?.organisation?.businessName ?? null,
-      customerName: escrow.reservation?.customer?.user?.name ?? escrow.job?.customer?.user?.name ?? null,
-      customerEmail: escrow.reservation?.customer?.user?.email ?? escrow.job?.customer?.user?.email ?? null,
+      organisationName:
+        escrow.reservation?.product?.organisation?.businessName ?? null,
+      customerName:
+        escrow.reservation?.customer?.user?.name ??
+        escrow.job?.customer?.user?.name ??
+        null,
+      customerEmail:
+        escrow.reservation?.customer?.user?.email ??
+        escrow.job?.customer?.user?.email ??
+        null,
       // Job info
       jobTitle: escrow.job?.title ?? null,
       workerName: escrow.job?.worker?.user?.name ?? null,
@@ -1182,7 +1248,7 @@ export class AdminDashboardService {
 
     // Also compute total platform fees collected (sum of all CREDIT transactions with 'Platform Fee' note)
     const totalFeeIncome = wallet.transactions
-      .filter(t => t.type === 'CREDIT' && t.note?.includes('Platform Fee'))
+      .filter((t) => t.type === 'CREDIT' && t.note?.includes('Platform Fee'))
       .reduce((sum, t) => sum + t.amount, 0);
 
     return {
@@ -1203,7 +1269,9 @@ export class AdminDashboardService {
     if (!escrow) throw new NotFoundException(`Escrow ${escrowId} not found`);
 
     await this.escrowService.releaseEscrow(escrowId);
-    return { message: `Escrow ${escrowId} released. Payee wallet credited. Platform fee retained.` };
+    return {
+      message: `Escrow ${escrowId} released. Payee wallet credited. Platform fee retained.`,
+    };
   }
 
   /**
@@ -1216,6 +1284,8 @@ export class AdminDashboardService {
     if (!escrow) throw new NotFoundException(`Escrow ${escrowId} not found`);
 
     await this.escrowService.refundEscrow(escrowId);
-    return { message: `Escrow ${escrowId} refunded. Customer wallet credited.` };
+    return {
+      message: `Escrow ${escrowId} refunded. Customer wallet credited.`,
+    };
   }
 }
