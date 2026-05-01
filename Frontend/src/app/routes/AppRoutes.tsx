@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { LandingPage } from "../../pages/landing/LandingPage";
-import { AboutPage } from "../../pages/landing/AboutPage";
 import { LoginPage } from "../../pages/auth/LoginPage";
 import { RegisterPage } from "../../pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "../../pages/auth/ForgotPasswordPage";
@@ -67,13 +66,13 @@ const SuspendedNavigationHandler: React.FC = () => {
 
   useEffect(() => {
     const handleSuspended = () => {
-      navigate('/account-suspended', { replace: true });
+      navigate("/account-suspended", { replace: true });
     };
 
-    window.addEventListener('auth:suspended', handleSuspended);
+    window.addEventListener("auth:suspended", handleSuspended);
 
     return () => {
-      window.removeEventListener('auth:suspended', handleSuspended);
+      window.removeEventListener("auth:suspended", handleSuspended);
     };
   }, [navigate]);
 
@@ -110,10 +109,16 @@ export const AppRoutes: React.FC = () => {
             <Route path="/user/job-detail/:id" element={<JobDetailPage />} />
             <Route path="/user/worker/:id" element={<WorkerProfilePage />} />
             <Route path="/user/products" element={<ProductsPage />} />
-            <Route path="/user/products/reservations" element={<MyReservationsPage />} />
+            <Route
+              path="/user/products/reservations"
+              element={<MyReservationsPage />}
+            />
             <Route path="/user/wallet" element={<MyWalletPage />} />
             <Route path="/user/help" element={<CustomerHelpCenterPage />} />
-            <Route path="/user/help/ticket" element={<CustomerHelpTicketPage />} />
+            <Route
+              path="/user/help/ticket"
+              element={<CustomerHelpTicketPage />}
+            />
             <Route path="/user/help/legacy" element={<HelpPage />} />
             <Route path="/user/schedule" element={<ComingSoonPage />} />
             <Route path="/user/settings" element={<CustomerSettingsPage />} />
@@ -128,25 +133,68 @@ export const AppRoutes: React.FC = () => {
             <Route path="/worker/schedule" element={<ComingSoonPage />} />
             <Route path="/worker/wallet" element={<WorkerWalletPage />} />
             <Route path="/worker/help" element={<WorkerHelpCenterPage />} />
-            <Route path="/worker/help/ticket" element={<WorkerHelpTicketPage />} />
+            <Route
+              path="/worker/help/ticket"
+              element={<WorkerHelpTicketPage />}
+            />
             <Route path="/worker/settings" element={<WorkerSettings />} />
-            <Route path="/worker" element={<Navigate to="/worker/dashboard" replace />} />
+            <Route
+              path="/worker"
+              element={<Navigate to="/worker/dashboard" replace />}
+            />
           </Route>
 
           <Route element={<RoleRoute allowedRole="ORGANISATION" />}>
             <Route element={<OrganisationLayout />}>
-              <Route path="/organisation" index element={<OrganisationPage />} />
-              <Route path="/organisation/settings" element={<OrganisationSettingsPage />} />
-              <Route path="/organisation/products/see_all" element={<SeeAllProductsPage />} />
-              <Route path="/organisation/products/create" element={<CreateProductPage />} />
-              <Route path="/organisation/products/edit/:id" element={<EditProductPage />} />
-              <Route path="/organisation/products/:id/explore" element={<ProductExplorePage />} />
-              <Route path="/organisation/help" element={<OrganisationHelpCenterPage />} />
-              <Route path="/organisation/help/ticket" element={<OrganisationHelpTicketPage />} />
-              <Route path="/organisation/wallet" element={<OrganisationWalletPage />} />
-              <Route path="/organisation/reservations/all" element={<AllReservationsPage />} />
-              <Route path="/organisation/reservations/pending" element={<PendingReservationsPage />} />
-              <Route path="/organisation/reservations/:id" element={<ReservationDetailPage />} />
+              <Route
+                path="/organisation"
+                index
+                element={<OrganisationPage />}
+              />
+              <Route
+                path="/organisation/settings"
+                element={<OrganisationSettingsPage />}
+              />
+              <Route
+                path="/organisation/products/see_all"
+                element={<SeeAllProductsPage />}
+              />
+              <Route
+                path="/organisation/products/create"
+                element={<CreateProductPage />}
+              />
+              <Route
+                path="/organisation/products/edit/:id"
+                element={<EditProductPage />}
+              />
+              <Route
+                path="/organisation/products/:id/explore"
+                element={<ProductExplorePage />}
+              />
+              <Route
+                path="/organisation/help"
+                element={<OrganisationHelpCenterPage />}
+              />
+              <Route
+                path="/organisation/help/ticket"
+                element={<OrganisationHelpTicketPage />}
+              />
+              <Route
+                path="/organisation/wallet"
+                element={<OrganisationWalletPage />}
+              />
+              <Route
+                path="/organisation/reservations/all"
+                element={<AllReservationsPage />}
+              />
+              <Route
+                path="/organisation/reservations/pending"
+                element={<PendingReservationsPage />}
+              />
+              <Route
+                path="/organisation/reservations/:id"
+                element={<ReservationDetailPage />}
+              />
             </Route>
           </Route>
 
@@ -154,22 +202,34 @@ export const AppRoutes: React.FC = () => {
             <Route element={<AdminLayout />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/jobs" element={<AdminJobsPage />} />
-              <Route path="/admin/reservations" element={<AdminReservationsPage />} />
+              <Route
+                path="/admin/reservations"
+                element={<AdminReservationsPage />}
+              />
               <Route path="/admin/users" element={<AdminUsersPage />} />
               <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
               <Route path="/admin/kyc" element={<KycManagementPage />} />
-              <Route path="/admin/escrows" element={<AdminEscrowControlPage />} />
+              <Route
+                path="/admin/escrows"
+                element={<AdminEscrowControlPage />}
+              />
               <Route path="/admin/help" element={<AdminHelpCenterPage />} />
-              <Route path="/admin/help/:ticketId" element={<AdminHelpTicketPage />} />
+              <Route
+                path="/admin/help/:ticketId"
+                element={<AdminHelpTicketPage />}
+              />
               <Route path="/admin/wallet" element={<AdminWalletPage />} />
-              <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+              <Route
+                path="/admin"
+                element={<Navigate to="/admin/dashboard" replace />}
+              />
             </Route>
           </Route>
         </Route>
 
         <Route path="/preview" element={<ThemePreview />} />
         <Route path="/" element={<LandingPage />} />
-        <Route path="/about" element={<AboutPage />} />
+        <Route path="/about" element={<Navigate to="/#about" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </>
