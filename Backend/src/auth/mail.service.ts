@@ -9,6 +9,7 @@ declare global {
       MAIL_MODE?: 'resend' | 'log';
       RESEND_API_KEY?: string;
       MAIL_FROM?: string;
+      CONTACT_INBOX_EMAIL?: string;
 
       // Email URLs & Expiration
       VERIFY_EMAIL_URL?: string;
@@ -56,6 +57,12 @@ type ResetMailInput = {
   token: string;
   resetUrl?: string;
   expiresInMinutes: number;
+};
+
+type ContactInquiryMailInput = {
+  fullName: string;
+  email: string;
+  message: string;
 };
 
 @Injectable()
@@ -124,6 +131,40 @@ export class MailService {
           <p>Or paste this link in your browser:</p>
           <p style="word-break:break-all;color:#4f46e5;">${input.resetUrl ?? input.token}</p>
           <p style="color:#6b7280;font-size:13px;">If you did not request a password reset, please ignore this email. Your password will not change.</p>
+        `,
+      }),
+    });
+  }
+
+  async sendContactInquiry(input: ContactInquiryMailInput) {
+    const inboxEmail =
+      process.env.CONTACT_INBOX_EMAIL ?? 'linkskillofficial@gmail.com';
+    const submittedAt = new Date().toISOString();
+
+    await this.sendMail({
+      to: inboxEmail,
+      subject: `New Skill-Link contact inquiry from ${input.fullName}`,
+      text: [
+        'A new contact inquiry was submitted on the Skill-Link landing page.',
+        '',
+        `Name: ${input.fullName}`,
+        `Email: ${input.email}`,
+        `Submitted At (UTC): ${submittedAt}`,
+        '',
+        'Message:',
+        input.message,
+      ].join('\n'),
+      html: this.buildHtmlEmail({
+        greeting: 'Hi Team,',
+        bodyHtml: `
+          <p>A new contact inquiry was submitted on the Skill-Link landing page.</p>
+          <p><strong>Name:</strong> ${this.escapeHtml(input.fullName)}</p>
+          <p><strong>Email:</strong> ${this.escapeHtml(input.email)}</p>
+          <p><strong>Submitted At (UTC):</strong> ${submittedAt}</p>
+          <p style="margin:20px 0 8px;"><strong>Message:</strong></p>
+          <div style="padding:14px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;white-space:pre-wrap;">${this.escapeHtml(
+            input.message,
+          )}</div>
         `,
       }),
     });
@@ -243,5 +284,14 @@ export class MailService {
   </table>
 </body>
 </html>`.trim();
+  }
+
+  private escapeHtml(value: string) {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 }
