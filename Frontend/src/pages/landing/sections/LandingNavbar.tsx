@@ -27,13 +27,20 @@ export const LandingNavbar: React.FC = () => {
               Home
               <span className="absolute -bottom-1 left-0 h-0.5 bg-slate-900 transition-all group-hover:w-full w-full"></span>
             </a>
-            <a
-              href="#about"
+            <Link
+              to="/company/about"
               className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-all duration-300 relative group"
             >
               About
               <span className="absolute -bottom-1 left-0 h-0.5 bg-slate-900 transition-all group-hover:w-full w-0"></span>
-            </a>
+            </Link>
+            <Link
+              to="/developers"
+              className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-all duration-300 relative group"
+            >
+              Developers
+              <span className="absolute -bottom-1 left-0 h-0.5 bg-slate-900 transition-all group-hover:w-full w-0"></span>
+            </Link>
             <a
               href="#contact"
               className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-all duration-300 relative group"

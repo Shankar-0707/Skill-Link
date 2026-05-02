@@ -9,6 +9,7 @@ import { AboutSkillLinkPage } from "../../pages/company/AboutSkillLink";
 import { CareersPage } from "../../pages/company/Careers";
 import { PrivacyPolicyPage } from "../../pages/legal/PrivacyPolicy";
 import { RefundPolicyPage } from "../../pages/legal/RefundPolicy";
+import { AboutDevelopers } from "../../pages/company/AboutDevelopers";
 import { LoginPage } from "../../pages/auth/LoginPage";
 import { RegisterPage } from "../../pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "../../pages/auth/ForgotPasswordPage";
@@ -104,6 +105,7 @@ export const AppRoutes: React.FC = () => {
           element={<SafetyStandardsPage />}
         />
         <Route path="/company/about" element={<AboutSkillLinkPage />} />
+        <Route path="/developers" element={<AboutDevelopers />} />
         <Route path="/company/careers" element={<CareersPage />} />
         <Route path="/legal/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/legal/refund-policy" element={<RefundPolicyPage />} />
