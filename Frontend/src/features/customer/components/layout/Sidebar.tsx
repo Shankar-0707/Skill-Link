@@ -57,7 +57,7 @@ export const Sidebar: React.FC = () => {
   const activePage = getActiveTab();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[200px] bg-background border-r border-border flex flex-col z-20">
+    <aside className="fixed left-0 top-0 z-20 hidden h-screen w-[200px] flex-col border-r border-border bg-background md:flex">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-border">
         <div className="flex items-center gap-2.5">

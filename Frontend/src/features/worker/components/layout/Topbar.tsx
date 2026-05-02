@@ -26,8 +26,8 @@ export const WorkerTopbar: React.FC<WorkerTopbarProps> = ({
   };
 
   return (
-  <header className="fixed top-0 left-[200px] right-0 h-[64px] bg-white border-b border-gray-100 z-10 flex items-center px-6">
-    <div className="ml-auto flex items-center gap-3">
+  <header className="fixed left-0 right-0 top-0 z-10 flex h-[64px] items-center border-b border-gray-100 bg-white px-4 md:left-[200px] md:px-6">
+    <div className="ml-auto flex items-center gap-2 md:gap-3">
 
       <div className="relative">
       <button
@@ -45,7 +45,7 @@ export const WorkerTopbar: React.FC<WorkerTopbarProps> = ({
       </button>
 
       {showNotifications && (
-        <div className="absolute right-0 top-11 w-80 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+        <div className="absolute right-0 top-11 w-[calc(100vw-2rem)] max-w-80 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
           <div className="px-4 py-3 border-b border-gray-100">
             <p className="text-sm font-semibold text-gray-900">Job requests</p>
             <p className="text-xs text-gray-400">New matching jobs appear here in real time.</p>
@@ -105,7 +105,7 @@ export const WorkerTopbar: React.FC<WorkerTopbarProps> = ({
       </div>
 
       <div className="flex items-center gap-2.5 pl-2 border-l border-gray-100">
-        <div className="text-right">
+        <div className="hidden text-right sm:block">
           <p className="text-sm font-semibold text-gray-900 leading-tight">{workerName}</p>
           <p className="text-[11px] text-gray-400">Service Worker</p>
         </div>

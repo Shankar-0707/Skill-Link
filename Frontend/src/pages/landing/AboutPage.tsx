@@ -67,7 +67,7 @@ export const AboutPage: React.FC = () => {
             <p className="mb-5 text-xs font-bold uppercase tracking-[0.32em] text-slate-500">
               About Skill-Link
             </p>
-            <h1 className="max-w-4xl font-headline text-5xl font-extrabold leading-[0.92] tracking-[-0.055em] text-slate-950 sm:text-7xl lg:text-[5.4rem]">
+            <h1 className="max-w-4xl font-headline text-4xl font-extrabold leading-[1] tracking-[-0.055em] text-slate-950 sm:text-7xl lg:text-[5.4rem]">
               A cleaner standard for how skilled work gets discovered.
             </h1>
             <div className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -143,7 +143,7 @@ export const AboutPage: React.FC = () => {
           </div>
 
           <div className="grid gap-6">
-            <div className="rounded-[2rem] border border-slate-200/70 bg-white/75 p-8 shadow-[0_24px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+            <div className="rounded-[2rem] border border-slate-200/70 bg-white/75 p-5 shadow-[0_24px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:p-8">
               <p className="text-base leading-8 text-slate-600">
                 There is no shortage of places where people can browse talent. The harder problem is knowing who to trust, how work will be coordinated, and whether the experience will hold together when it actually matters. Skill-Link is being designed around that harder problem.
               </p>
@@ -199,7 +199,7 @@ export const AboutPage: React.FC = () => {
         </section>
 
         <section className="grid gap-8 py-16 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-[2.25rem] border border-white/80 bg-[#0f172a] p-8 text-white shadow-[0_30px_90px_rgba(15,23,42,0.12)] lg:p-10">
+          <div className="rounded-[2.25rem] border border-white/80 bg-[#0f172a] p-5 text-white shadow-[0_30px_90px_rgba(15,23,42,0.12)] sm:p-8 lg:p-10">
             <p className="text-xs font-bold uppercase tracking-[0.32em] text-slate-400">Principles</p>
             <h2 className="mt-4 max-w-xl font-headline text-4xl font-extrabold leading-tight tracking-[-0.045em]">
               The product should feel restrained, capable, and dependable.
@@ -221,14 +221,14 @@ export const AboutPage: React.FC = () => {
           </div>
 
           <div className="flex flex-col justify-between gap-6">
-            <div className="rounded-[2rem] border border-slate-200/70 bg-white/80 p-8 shadow-[0_24px_60px_rgba(15,23,42,0.06)]">
+            <div className="rounded-[2rem] border border-slate-200/70 bg-white/80 p-5 shadow-[0_24px_60px_rgba(15,23,42,0.06)] sm:p-8">
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-slate-400">Trust Layer</p>
               <p className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-slate-950">
                 Confidence should show up in the product before it is ever promised in the copy.
               </p>
             </div>
 
-            <div className="rounded-[2rem] border border-slate-200/70 bg-white/80 p-8 shadow-[0_24px_60px_rgba(15,23,42,0.06)]">
+            <div className="rounded-[2rem] border border-slate-200/70 bg-white/80 p-5 shadow-[0_24px_60px_rgba(15,23,42,0.06)] sm:p-8">
               <div className="flex items-center gap-3">
                 <BadgeCheck className="h-5 w-5 text-slate-900" />
                 <p className="text-sm font-bold uppercase tracking-[0.24em] text-slate-500">What That Means</p>
@@ -249,7 +249,7 @@ export const AboutPage: React.FC = () => {
               </ul>
             </div>
 
-            <div id="contact" className="rounded-[2rem] border border-slate-200/70 bg-[#e9eef5] p-8 shadow-[0_24px_60px_rgba(15,23,42,0.05)]">
+            <div id="contact" className="rounded-[2rem] border border-slate-200/70 bg-[#e9eef5] p-5 shadow-[0_24px_60px_rgba(15,23,42,0.05)] sm:p-8">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.32em] text-slate-500">Next Step</p>

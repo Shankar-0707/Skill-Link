@@ -112,13 +112,13 @@ export const SettingsView = () => {
                 />
               )}
               {activeSection === "security" && (
-                <div className="bg-white rounded-[2.5rem] border border-border shadow-sm p-8 md:p-10 space-y-8 min-h-[500px]">
+                <div className="min-h-[500px] space-y-8 rounded-[2rem] border border-border bg-white p-5 shadow-sm sm:rounded-[2.5rem] sm:p-8 md:p-10">
                   <div>
                     <h2 className="text-2xl font-bold tracking-tight text-foreground">Password & Security</h2>
                     <p className="text-muted-foreground mt-1 font-medium">Manage your access credentials and protect your business data.</p>
                   </div>
 
-                  <div className="p-5 bg-green-50/50 border border-green-100 rounded-2xl flex items-center gap-4 transition-all hover:bg-green-50">
+                  <div className="flex flex-col gap-4 rounded-2xl border border-green-100 bg-green-50/50 p-5 transition-all hover:bg-green-50 sm:flex-row sm:items-center">
                     <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-green-100 flex items-center justify-center text-green-600">
                       <Shield size={24} />
                     </div>
@@ -126,11 +126,11 @@ export const SettingsView = () => {
                       <p className="text-sm font-bold text-foreground">Multi-Factor Authentication</p>
                       <p className="text-xs text-muted-foreground font-medium">Standard security is active. Consider adding 2FA for extra safety.</p>
                     </div>
-                    <button className="px-4 py-2 bg-white border border-green-200 text-green-700 text-xs font-bold rounded-lg hover:bg-green-600 hover:text-white transition-all shadow-sm">Enable</button>
+                    <button className="rounded-lg border border-green-200 bg-white px-4 py-2 text-xs font-bold text-green-700 shadow-sm transition-all hover:bg-green-600 hover:text-white sm:ml-auto">Enable</button>
                   </div>
 
                   <div className="space-y-4">
-                    <button className="w-full flex items-center justify-between p-5 bg-secondary/20 border border-border/50 rounded-2xl hover:border-primary/50 hover:bg-secondary/40 transition-all group">
+                    <button className="group flex w-full flex-col gap-4 rounded-2xl border border-border/50 bg-secondary/20 p-5 transition-all hover:border-primary/50 hover:bg-secondary/40 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors border border-border/50">
                           <Lock size={18} />
@@ -143,7 +143,7 @@ export const SettingsView = () => {
                       <ChevronRight size={18} className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
                     </button>
 
-                    <button className="w-full flex items-center justify-between p-5 bg-red-50/20 border border-red-50 rounded-2xl hover:bg-red-50 hover:border-red-200 transition-all group">
+                    <button className="group flex w-full flex-col gap-4 rounded-2xl border border-red-50 bg-red-50/20 p-5 transition-all hover:border-red-200 hover:bg-red-50 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-red-400 border border-red-100">
                           <AlertCircle size={18} />

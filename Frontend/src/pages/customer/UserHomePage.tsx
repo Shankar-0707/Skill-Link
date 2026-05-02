@@ -203,7 +203,7 @@ export const UserHomePage: React.FC = () => {
         <SectionHeader
           title="Popular at Local Shops"
         />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {products
             .filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery))
             .map(product => (

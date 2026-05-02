@@ -345,13 +345,13 @@ export const KycManagementPage: React.FC = () => {
             placeholder="Search by name or email..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#001F3F]/40 w-72"
+            className="w-full rounded-xl border border-gray-200 py-2.5 pl-9 pr-4 text-sm focus:border-[#001F3F]/40 focus:outline-none sm:w-72"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-gray-300 mb-3" />
@@ -366,7 +366,8 @@ export const KycManagementPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px]">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/50">
                 <th className="text-left px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Worker</th>
@@ -426,6 +427,7 @@ export const KycManagementPage: React.FC = () => {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
