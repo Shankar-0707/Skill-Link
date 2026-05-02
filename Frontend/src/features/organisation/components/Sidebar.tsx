@@ -67,7 +67,7 @@ export const Sidebar: React.FC = () => {
     setIsLoggingOut(true);
     try {
       await logout();
-      navigate("/login", { replace: true });
+      window.location.href = "/login";
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {

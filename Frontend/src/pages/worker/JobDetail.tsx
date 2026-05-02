@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, IndianRupee, Calendar, Shield, Loader2, AlertCircle } from 'lucide-react';
-import type { Job } from '../../features/customer/types';
+import type { ChatRoom, Job, JobContract, JobOffer } from '../../features/customer/types';
 import { jobService } from '../../features/customer/services/jobService';
 import { StatusBadge, ProgressStep, Toast } from '../../features/worker/components/ui';
 import { WorkerLayout } from '../../features/worker/components/layout/Layout';
+import { useAuth } from '../../app/context/useAuth';
+import { JobChatPanel } from '../../features/customer/components/JobChatPanel';
+import { JobContractDocument } from '../../features/customer/components/JobContractDocument';
 
 const getSteps = (job: Job) => [
   {
@@ -32,8 +35,12 @@ const getSteps = (job: Job) => [
 export const WorkerJobDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   
   const [job, setJob]               = useState<Job | null>(null);
+  const [myOffer, setMyOffer]       = useState<JobOffer | null>(null);
+  const [myContract, setMyContract] = useState<JobContract | null>(null);
+  const [chatRoom, setChatRoom]     = useState<ChatRoom | null>(null);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -44,6 +51,16 @@ export const WorkerJobDetailPage: React.FC = () => {
       setLoading(true);
       const data = await jobService.getJobById(jobId);
       setJob(data);
+      const workerId = user?.worker?.id;
+      const offer = data.offers?.find(item => item.workerId === workerId) || null;
+      const contract = data.contracts?.find(item => item.workerId === workerId) || null;
+      setMyOffer(offer);
+      setMyContract(contract);
+
+      if (offer?.status === 'ACCEPTED') {
+        const rooms = await jobService.getChatRooms(jobId);
+        setChatRoom(rooms[0] || null);
+      }
     } catch (err) {
       console.error('Failed to fetch job details:', err);
       setError('Could not find this job or you do not have access.');
@@ -54,7 +71,7 @@ export const WorkerJobDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (id) fetchJob(id);
-  }, [id]);
+  }, [id, user?.worker?.id]);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -84,6 +101,66 @@ export const WorkerJobDetailPage: React.FC = () => {
       showToast('Job marked complete. Awaiting customer confirmation.');
     } catch {
       showToast('Failed to mark job complete.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleAcceptOffer = async () => {
+    if (!id) return;
+    try {
+      setActionLoading(true);
+      await jobService.acceptJobOffer(id);
+      await fetchJob(id);
+      showToast('Accepted. You can now chat with the customer.');
+    } catch (err) {
+      showToast('Failed to accept this job request.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectOffer = async () => {
+    if (!id) return;
+    try {
+      setActionLoading(true);
+      await jobService.rejectJobOffer(id);
+      showToast('Job request rejected.');
+      navigate('/worker/available-jobs');
+    } catch (err) {
+      showToast('Failed to reject this job request.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleAcceptContract = async () => {
+    if (!myContract) return;
+    try {
+      setActionLoading(true);
+      await jobService.acceptContract(myContract.id);
+      if (id) {
+        await fetchJob(id);
+      }
+      showToast('Contract accepted. This job is now assigned to you.');
+    } catch (err) {
+      showToast('Failed to accept contract.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectContract = async () => {
+    if (!myContract) return;
+    try {
+      setActionLoading(true);
+      await jobService.rejectContract(myContract.id);
+      if (id) {
+        await fetchJob(id);
+      }
+      showToast('Contract rejected.');
+    } catch (err) {
+      showToast('Failed to reject contract.');
     } finally {
       setActionLoading(false);
     }
@@ -231,6 +308,24 @@ export const WorkerJobDetailPage: React.FC = () => {
           </div>
         )}
 
+        {myOffer?.status === 'ACCEPTED' && chatRoom && job.status === 'POSTED' && (
+          <div className="mb-6">
+            <JobChatPanel chatRoomId={chatRoom.id} title="Chat with customer" />
+          </div>
+        )}
+
+        {myContract && (
+          <div className="mb-6">
+            <JobContractDocument
+              contract={myContract}
+              jobTitle={job.title}
+              customerName={chatRoom?.customer?.user.name}
+              workerName={user?.name}
+              issuedAt={myContract.sentAt}
+            />
+          </div>
+        )}
+
         {/* ── Progress timeline ── */}
         <div className="p-5 bg-white border border-gray-200 rounded-xl mb-6 shadow-sm">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Job Progress</p>
@@ -244,12 +339,54 @@ export const WorkerJobDetailPage: React.FC = () => {
         {/* ── Action buttons ── */}
         <div className="sticky bottom-6">
           {isPosted && (
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-center shadow-sm">
-              <p className="text-sm font-semibold text-blue-700">This job is open</p>
-              <p className="text-xs text-blue-500 mt-1">
-                The customer needs to assign you before you can begin.
-              </p>
-            </div>
+            <>
+              {!myOffer || myOffer.status === 'PENDING' ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handleRejectOffer}
+                    disabled={actionLoading}
+                    className="py-4 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 transition-all shadow-sm disabled:opacity-70"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    onClick={handleAcceptOffer}
+                    disabled={actionLoading}
+                    className="py-4 bg-gray-900 text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all shadow-lg active:scale-[0.98] disabled:opacity-70 flex items-center justify-center"
+                  >
+                    {actionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Accept & Chat'}
+                  </button>
+                </div>
+              ) : myOffer.status === 'ACCEPTED' && myContract?.status === 'SENT' ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handleRejectContract}
+                    disabled={actionLoading}
+                    className="py-4 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 transition-all shadow-sm disabled:opacity-70"
+                  >
+                    Reject Contract
+                  </button>
+                  <button
+                    onClick={handleAcceptContract}
+                    disabled={actionLoading}
+                    className="py-4 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 transition-all shadow-lg active:scale-[0.98] disabled:opacity-70 flex items-center justify-center"
+                  >
+                    {actionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Accept Contract'}
+                  </button>
+                </div>
+              ) : myOffer.status === 'ACCEPTED' ? (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-center shadow-sm">
+                  <p className="text-sm font-semibold text-blue-700">Request accepted</p>
+                  <p className="text-xs text-blue-500 mt-1">
+                    Chat with the customer and wait for the contract.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center shadow-sm">
+                  <p className="text-sm font-semibold text-gray-700">You rejected this request</p>
+                </div>
+              )}
+            </>
           )}
 
           {isAssigned && (

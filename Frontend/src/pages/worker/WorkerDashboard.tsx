@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { workerService } from '../../features/customer/services/workerService';
 import { jobService } from '../../features/customer/services/jobService';
-import type { Worker, Job } from '../../features/customer/types';
+import type { Worker, Job, JobOffer } from '../../features/customer/types';
 import { StatCard, SectionHeader, KycBanner, SkillsBanner } from '../../features/worker/components/ui';
 import { DashboardJobRow } from '../../features/worker/components/jobs/JobsCard';
 import { WorkerLayout } from '../../features/worker/components/layout/Layout';
@@ -18,6 +18,7 @@ export const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Worker | null>(null);
   const [assignments, setAssignments] = useState<Job[]>([]);
+  const [offers, setOffers] = useState<JobOffer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,12 +26,14 @@ export const WorkerDashboardPage: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [profileData, assignmentsData] = await Promise.all([
+        const [profileData, assignmentsData, offerData] = await Promise.all([
           workerService.getMe(),
           jobService.getMyAssignments(),
+          jobService.getMyJobOffers(),
         ]);
         setProfile(profileData);
         setAssignments(assignmentsData);
+        setOffers(offerData);
         setError(null);
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
@@ -75,6 +78,7 @@ export const WorkerDashboardPage: React.FC = () => {
   }
 
   const activeJobs    = assignments.filter(j => ['ASSIGNED', 'IN_PROGRESS'].includes(j.status));
+  const acceptedOffers = offers.filter(offer => offer.status === 'ACCEPTED');
   const completedJobs = assignments.filter(j => j.status === 'COMPLETED');
   const totalEarned   = assignments
     .filter(j => j.status === 'COMPLETED' && j.escrow?.status === 'RELEASED')
@@ -128,6 +132,31 @@ export const WorkerDashboardPage: React.FC = () => {
       </div>
 
       {/* ── Active Jobs ── */}
+      {acceptedOffers.length > 0 && (
+        <div className="mb-8">
+          <SectionHeader title="Negotiations" />
+          <div className="flex flex-col gap-3">
+            {acceptedOffers.map((offer) => (
+              <button
+                key={offer.id}
+                onClick={() => offer.job?.id && navigate(`/worker/job/${offer.job.id}`)}
+                className="p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-gray-300 hover:shadow-sm transition-all"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-sm text-gray-900">{offer.job?.title || 'Accepted job request'}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Chat with the customer and review any contract sent to you.</p>
+                  </div>
+                  <span className="text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-3 py-1">
+                    Open Chat
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mb-8">
         <SectionHeader
           title="Active Jobs"

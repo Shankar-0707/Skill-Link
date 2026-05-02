@@ -34,6 +34,20 @@ enum JobStatus {
   CANCELLED
 }
 
+enum JobOfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum JobContractStatus {
+  SENT
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
 enum ReservationStatus {
   PENDING
   CONFIRMED
@@ -124,6 +138,7 @@ model User {
   passwordResetTokens     PasswordResetToken[]
   submittedHelpTickets    HelpTicket[] @relation("HelpTicketCreatedBy")
   reviewedHelpTickets     HelpTicket[] @relation("HelpTicketReviewedBy")
+  sentChatMessages         ChatMessage[]
 
   @@index([role])
 }
@@ -183,6 +198,8 @@ model Customer {
 
   jobs         Job[]
   reservations Reservation[]
+  chatRooms    ChatRoom[]
+  jobContracts JobContract[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -212,6 +229,9 @@ model Worker {
   kycStatus KycStatus @default(NOT_STARTED)
 
   jobs Job[]
+  jobOffers    JobOffer[]
+  chatRooms    ChatRoom[]
+  jobContracts JobContract[]
 
   documents   WorkerDocument[]
   kycRequests KycRequest[]
@@ -275,11 +295,111 @@ model Job {
   payment     Payment?
   escrow      Escrow?
   helpTickets HelpTicket[]
+  offers      JobOffer[]
+  chatRooms   ChatRoom[]
+  contracts   JobContract[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
+  @@index([customerId])
+  @@index([workerId])
+  @@index([status])
+}
+
+model JobOffer {
+  id String @id @default(uuid())
+
+  jobId    String
+  workerId String
+
+  job    Job    @relation(fields: [jobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  status JobOfferStatus @default(PENDING)
+
+  respondedAt DateTime?
+
+  chatRoom ChatRoom?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([jobId, workerId])
+  @@index([workerId])
+  @@index([status])
+}
+
+model ChatRoom {
+  id String @id @default(uuid())
+
+  jobId      String
+  customerId String
+  workerId   String
+  jobOfferId String? @unique
+
+  job      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  worker   Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  jobOffer JobOffer? @relation(fields: [jobOfferId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  messages ChatMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([jobId, workerId])
+  @@index([customerId])
+  @@index([workerId])
+}
+
+model ChatMessage {
+  id String @id @default(uuid())
+
+  chatRoomId   String
+  senderUserId String
+
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sender   User     @relation(fields: [senderUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  message String
+  readAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([chatRoomId])
+  @@index([senderUserId])
+}
+
+model JobContract {
+  id String @id @default(uuid())
+
+  jobId      String
+  customerId String
+  workerId   String
+
+  job      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  worker   Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  cost        Float
+  timing      String
+  scheduledAt DateTime
+  scope       String
+  notes       String?
+  template    String
+
+  status JobContractStatus @default(SENT)
+
+  sentAt     DateTime  @default(now())
+  acceptedAt DateTime?
+  rejectedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([jobId, workerId])
   @@index([customerId])
   @@index([workerId])
   @@index([status])
