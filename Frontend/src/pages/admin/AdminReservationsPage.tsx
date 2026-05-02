@@ -58,7 +58,7 @@ export const AdminReservationsPage = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-headline font-bold text-3xl text-foreground leading-tight">
             Reservations
@@ -98,7 +98,8 @@ export const AdminReservationsPage = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-background rounded-xl border border-border overflow-hidden">
+        <div className="overflow-x-auto rounded-xl border border-border bg-background">
+          <div className="min-w-[860px]">
           <div className="grid grid-cols-[1.4fr_1fr_1fr_0.8fr_0.8fr_0.9fr] gap-4 px-6 py-4 border-b border-border text-[11px] font-label uppercase tracking-wider text-muted-foreground">
             <span>Product</span>
             <span>Organisation</span>
@@ -143,6 +144,7 @@ export const AdminReservationsPage = () => {
                 </p>
               </div>
             ))}
+          </div>
           </div>
         </div>
       )}

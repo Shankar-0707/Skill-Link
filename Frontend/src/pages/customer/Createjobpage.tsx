@@ -254,7 +254,7 @@ export const CreateJobPage: React.FC = () => {
         </div>
 
         {/* Budget + Scheduled Date — two columns */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-label font-medium text-foreground mb-1.5">
               <span className="flex items-center gap-1.5"><IndianRupee className="w-3.5 h-3.5" /> Budget</span>

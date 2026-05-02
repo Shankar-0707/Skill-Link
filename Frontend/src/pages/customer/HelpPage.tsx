@@ -30,10 +30,10 @@ export const HelpPage: React.FC = () => {
           <p className="text-muted-foreground font-body mt-1">Get help with your account, jobs, or submit a complaint.</p>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col gap-6 md:flex-row md:gap-8">
           {/* Sidebar Nav */}
-          <div className="w-64 flex-shrink-0">
-            <nav className="flex flex-col gap-1">
+          <div className="w-full flex-shrink-0 md:w-64">
+            <nav className="flex gap-2 overflow-x-auto rounded-2xl border border-border bg-surface-container/30 p-1 md:flex-col md:overflow-visible md:border-0 md:bg-transparent md:p-0">
               {[
                 { id: 'faq', label: 'FAQs', icon: HelpCircle },
                 { id: 'complaint', label: 'Submit Complaint', icon: MessageSquareWarning },
@@ -45,7 +45,7 @@ export const HelpPage: React.FC = () => {
                     setActiveSection(id as 'faq' | 'complaint' | 'contact');
                     setSubmitted(false);
                   }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-label font-medium transition-all
+                  className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-label font-medium transition-all md:w-full
                     ${activeSection === id
                       ? 'bg-foreground text-background shadow-md'
                       : 'text-muted-foreground hover:bg-surface-container hover:text-foreground'
@@ -59,7 +59,7 @@ export const HelpPage: React.FC = () => {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 bg-background border border-border rounded-2xl p-8 min-h-[500px] shadow-sm">
+          <div className="min-h-[500px] flex-1 rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-8">
             
             {/* FAQ Section */}
             {activeSection === 'faq' && (
@@ -147,11 +147,11 @@ export const HelpPage: React.FC = () => {
                       />
                     </div>
 
-                    <div className="pt-2 flex justify-end">
+                    <div className="flex justify-end pt-2">
                       <button
                         type="submit"
                         disabled={isSubmitting || !message.trim()}
-                        className="px-6 py-3 bg-foreground text-background text-sm font-label font-semibold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-foreground px-6 py-3 text-sm font-label font-semibold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                       >
                         {isSubmitting ? (
                           <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" />
@@ -176,7 +176,7 @@ export const HelpPage: React.FC = () => {
                   <p className="text-sm text-muted-foreground font-body">Direct ways to reach our support team.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="p-5 border border-border rounded-2xl bg-surface-container/50 space-y-3">
                     <div className="w-10 h-10 bg-foreground text-background rounded-lg flex items-center justify-center">
                       <PhoneCall className="w-5 h-5" />

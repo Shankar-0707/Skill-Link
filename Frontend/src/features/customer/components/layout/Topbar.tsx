@@ -30,10 +30,10 @@ export const Topbar: React.FC<TopbarProps> = ({ user, activeTab, onTabChange }) 
   };
 
   return (
-    <header className="fixed top-0 left-[200px] right-0 h-[64px] bg-background border-b border-border z-10 flex items-center px-6 gap-6">
+    <header className="fixed left-0 right-0 top-0 z-10 flex h-[64px] items-center gap-3 border-b border-border bg-background px-4 md:left-[200px] md:gap-6 md:px-6">
       {/* Search - Only visible on Home Page */}
       {isHomePage ? (
-        <div className="flex-1 max-w-md relative">
+        <div className="relative flex-1 md:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
@@ -48,7 +48,7 @@ export const Topbar: React.FC<TopbarProps> = ({ user, activeTab, onTabChange }) 
       )}
 
       {/* Tabs */}
-      <nav className="flex items-center gap-6">
+      <nav className="hidden items-center gap-6 sm:flex">
         {TABS.map(tab => (
           <button
             key={tab}
@@ -65,7 +65,7 @@ export const Topbar: React.FC<TopbarProps> = ({ user, activeTab, onTabChange }) 
       </nav>
 
       {/* Right icons */}
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-2 md:gap-3">
         <button className="relative w-9 h-9 rounded-lg flex items-center justify-center hover:bg-surface-container transition-colors">
           <Bell className="w-4.5 h-4.5 text-muted-foreground" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
@@ -76,7 +76,7 @@ export const Topbar: React.FC<TopbarProps> = ({ user, activeTab, onTabChange }) 
 
         {/* User */}
         <div className="flex items-center gap-2.5 pl-2 border-l border-border">
-          <div className="text-right">
+          <div className="hidden text-right sm:block">
             <p className="text-sm font-label font-semibold text-foreground leading-tight">{user.name}</p>
             <p className="text-[11px] text-muted-foreground font-body">{user.memberTier ?? 'Member'}</p>
           </div>

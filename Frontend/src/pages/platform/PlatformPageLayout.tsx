@@ -71,7 +71,7 @@ export const PlatformPageLayout: React.FC<PlatformPageLayoutProps> = ({
             <p className="text-xs font-bold uppercase tracking-[0.28em] text-slate-500">
               {eyebrow}
             </p>
-            <h1 className="mt-5 max-w-4xl font-headline text-5xl font-extrabold leading-[0.98] tracking-[-0.04em] text-slate-950 sm:text-6xl lg:text-7xl">
+            <h1 className="mt-5 max-w-4xl font-headline text-4xl font-extrabold leading-[1] tracking-[-0.04em] text-slate-950 sm:text-6xl lg:text-7xl">
               {title}
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">

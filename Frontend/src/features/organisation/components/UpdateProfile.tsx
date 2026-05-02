@@ -49,14 +49,14 @@ export const UpdateProfile: React.FC<UpdateProfileProps> = ({ organisation, onUp
   };
 
   return (
-    <div className="bg-white rounded-[2.5rem] border border-border shadow-sm p-8 md:p-10 animate-in slide-in-from-bottom-5 duration-500 min-h-[500px]">
+    <div className="min-h-[500px] rounded-[2rem] border border-border bg-white p-5 shadow-sm animate-in slide-in-from-bottom-5 duration-500 sm:rounded-[2.5rem] sm:p-8 md:p-10">
       <div className="mb-10 pb-6 border-b border-border/30">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">Edit Account Details</h2>
         <p className="text-muted-foreground mt-1 font-medium">Keep your organisation information accurate and detailed.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
           <div className="space-y-2.5">
             <label htmlFor="businessName" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">
               Business Legal Name
@@ -128,11 +128,11 @@ export const UpdateProfile: React.FC<UpdateProfileProps> = ({ organisation, onUp
             </div>
         )}
 
-        <div className="pt-6 flex justify-end">
+        <div className="flex justify-end pt-6">
           <Button
             type="submit"
             disabled={isSubmitting || showSuccess}
-            className="rounded-2xl px-10 py-7 h-auto font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20 gap-3 transition-all enabled:hover:scale-[1.02] enabled:active:scale-95 disabled:opacity-70"
+            className="h-auto w-full gap-3 rounded-2xl px-10 py-5 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 transition-all enabled:hover:scale-[1.02] enabled:active:scale-95 disabled:opacity-70 sm:w-auto sm:py-7"
           >
             {isSubmitting ? (
               <>

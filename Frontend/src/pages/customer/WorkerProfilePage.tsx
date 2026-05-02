@@ -80,8 +80,8 @@ export const WorkerProfilePage: React.FC = () => {
         </button>
 
         {/* Profile Hero */}
-        <div className="bg-background border border-border rounded-2xl p-6 mb-5">
-          <div className="flex items-start gap-5">
+        <div className="mb-5 rounded-2xl border border-border bg-background p-5 sm:p-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
             <div className="relative flex-shrink-0">
               <img
                 src={worker.user.profileImage ?? `https://i.pravatar.cc/80?u=${worker.id}`}
@@ -93,8 +93,8 @@ export const WorkerProfilePage: React.FC = () => {
                   ${worker.isAvailable ? 'bg-green-500' : 'bg-muted-foreground'}`}
               />
             </div>
-            <div className="flex-1">
-              <div className="flex items-start justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h1 className="font-headline font-bold text-xl text-foreground">{worker.user.name ?? 'Worker'}</h1>
                   <p className="text-sm font-body text-muted-foreground">{worker.skills.slice(0, 2).join(' & ')} Specialist</p>
@@ -109,7 +109,7 @@ export const WorkerProfilePage: React.FC = () => {
               </div>
 
               {/* Stats row */}
-              <div className="flex items-center gap-5 mt-3">
+              <div className="mt-3 flex flex-wrap items-center gap-3 sm:gap-5">
                 <div className="flex items-center gap-1">
                   <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                   <span className="font-label font-semibold text-sm text-foreground">{worker.ratingAvg.toFixed(1)}</span>
@@ -131,7 +131,7 @@ export const WorkerProfilePage: React.FC = () => {
 
           {/* KYC Badge */}
           {worker.kycStatus === 'VERIFIED' && (
-            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
               <CheckCircle className="w-4 h-4 text-green-600" />
               <span className="text-xs font-label font-semibold text-green-700">KYC Verified</span>
               <span className="text-xs text-muted-foreground">— Identity confirmed by SkillLink</span>
@@ -161,7 +161,7 @@ export const WorkerProfilePage: React.FC = () => {
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             { icon: Star,        label: 'Avg Rating',  value: `${worker.ratingAvg.toFixed(1)} / 5` },
             { icon: Briefcase,   label: 'Jobs Done',   value: `${worker.ratingCount}+`             },

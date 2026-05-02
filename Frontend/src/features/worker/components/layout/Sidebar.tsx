@@ -39,7 +39,7 @@ export const WorkerSidebar: React.FC = () => {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[200px] bg-white border-r border-gray-100 flex flex-col z-20">
+    <aside className="fixed left-0 top-0 z-20 hidden h-screen w-[200px] flex-col border-r border-gray-100 bg-white md:flex">
       <div className="px-5 py-5 border-b border-gray-100">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">

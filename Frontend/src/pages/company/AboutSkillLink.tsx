@@ -61,7 +61,7 @@ export const AboutSkillLinkPage: React.FC = () => {
             <p className="text-xs font-bold uppercase tracking-[0.28em] text-slate-500">
               Company / About Skill-Link
             </p>
-            <h1 className="mt-5 font-headline text-5xl font-extrabold leading-[0.98] tracking-[-0.04em] text-slate-950 sm:text-6xl lg:text-7xl">
+            <h1 className="mt-5 font-headline text-4xl font-extrabold leading-[1] tracking-[-0.04em] text-slate-950 sm:text-6xl lg:text-7xl">
               Building the trust layer for local service work.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">

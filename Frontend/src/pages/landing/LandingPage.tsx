@@ -197,7 +197,7 @@ export const LandingPage: React.FC = () => {
 
       <LandingNavbar />
 
-      <main className="relative z-10 mx-auto w-full max-w-340 flex-1 px-6 pb-20 pt-32 sm:px-10 lg:px-16 lg:pt-36">
+      <main className="relative z-10 mx-auto w-full max-w-340 flex-1 px-4 pb-16 pt-28 sm:px-10 sm:pb-20 lg:px-16 lg:pt-36">
         <section id="home" className="scroll-mt-36">
           <LandingHero />
         </section>
@@ -211,7 +211,7 @@ export const LandingPage: React.FC = () => {
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-slate-500">
                 About Skill-Link
               </p>
-              <h2 className="mt-4 font-headline text-4xl font-extrabold leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
+              <h2 className="mt-4 font-headline text-3xl font-extrabold leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
                 Built to make hiring skilled workers calm, clear, and reliable.
               </h2>
               <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
@@ -295,11 +295,11 @@ export const LandingPage: React.FC = () => {
           className="scroll-mt-36 border-t border-slate-200/80 pt-20"
         >
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="rounded-4xl border border-slate-200/70 bg-white/80 p-8 shadow-[0_24px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl lg:p-10">
+            <div className="rounded-4xl border border-slate-200/70 bg-white/80 p-5 shadow-[0_24px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:p-8 lg:p-10">
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-slate-500">
                 Contact Us
               </p>
-              <h2 className="mt-4 font-headline text-4xl font-extrabold leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
+              <h2 className="mt-4 font-headline text-3xl font-extrabold leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
                 Let us help you get started.
               </h2>
               <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
@@ -422,7 +422,7 @@ export const LandingPage: React.FC = () => {
       </main>
 
       <footer className="relative z-10 mt-auto shrink-0 border-t border-slate-200/80 bg-white/65 backdrop-blur-md">
-        <div className="mx-auto grid max-w-340 gap-10 px-6 py-14 sm:px-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-16">
+        <div className="mx-auto grid max-w-340 gap-10 px-4 py-12 sm:px-10 sm:py-14 lg:grid-cols-[0.9fr_1.1fr] lg:px-16">
           <div>
             <p className="font-headline text-2xl font-black uppercase tracking-[0.18em] text-slate-900">
               Skill-Link
@@ -552,7 +552,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
         <div className="border-t border-slate-200/70">
-          <div className="mx-auto flex max-w-340 flex-col gap-2 px-6 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-16">
+          <div className="mx-auto flex max-w-340 flex-col gap-2 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-16">
             <p>2026 Skill-Link. All rights reserved.</p>
             <p>Built for modern service marketplaces.</p>
           </div>

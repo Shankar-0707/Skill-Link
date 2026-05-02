@@ -112,7 +112,7 @@ const KycSection: React.FC<{ workerKycStatus: Worker['kycStatus'] }> = ({ worker
   if (status === 'VERIFIED') {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <div className="p-8 bg-green-50 border border-green-100 rounded-2xl flex flex-col items-center text-center">
+        <div className="flex flex-col items-center rounded-2xl border border-green-100 bg-green-50 p-5 text-center sm:p-8">
           <div className="w-20 h-20 bg-green-500 text-white rounded-full flex items-center justify-center mb-5 shadow-lg shadow-green-200">
             <BadgeCheck className="w-10 h-10" />
           </div>
@@ -134,7 +134,7 @@ const KycSection: React.FC<{ workerKycStatus: Worker['kycStatus'] }> = ({ worker
   if (status === 'PENDING') {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <div className="p-8 bg-amber-50 border border-amber-100 rounded-2xl flex flex-col items-center text-center">
+        <div className="flex flex-col items-center rounded-2xl border border-amber-100 bg-amber-50 p-5 text-center sm:p-8">
           <div className="w-20 h-20 bg-amber-400 text-white rounded-full flex items-center justify-center mb-5 shadow-lg shadow-amber-200">
             <Clock className="w-10 h-10" />
           </div>
@@ -210,7 +210,7 @@ const KycSection: React.FC<{ workerKycStatus: Worker['kycStatus'] }> = ({ worker
           return (
             <div
               key={type}
-              className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
+              className={`flex flex-col gap-4 rounded-xl border p-4 transition-all sm:flex-row sm:items-center ${
                 draft 
                   ? 'bg-green-50/50 border-green-200' 
                   : 'bg-gray-50 border-gray-200 hover:border-gray-300'
@@ -232,7 +232,7 @@ const KycSection: React.FC<{ workerKycStatus: Worker['kycStatus'] }> = ({ worker
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="mb-0.5 flex flex-wrap items-center gap-2">
                   <p className="font-semibold text-sm text-gray-900">{label}</p>
                   {required && (
                     <span className="text-[9px] font-black text-red-500 uppercase tracking-wider bg-red-50 px-1.5 py-0.5 rounded">Required</span>
@@ -251,7 +251,7 @@ const KycSection: React.FC<{ workerKycStatus: Worker['kycStatus'] }> = ({ worker
               </div>
 
               {/* Upload button */}
-              <label className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+              <label className={`flex w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all sm:w-auto ${
                 isUploading 
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                   : draft 
@@ -476,7 +476,7 @@ export const WorkerSettingsPage: React.FC = () => {
 
   return (
     <WorkerLayout>
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         {toast && <Toast message={toast} />}
 
         <div className="mb-8">
@@ -484,10 +484,10 @@ export const WorkerSettingsPage: React.FC = () => {
           <p className="text-gray-500 mt-1">Manage your professional profile and preferences.</p>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col gap-6 md:flex-row md:gap-8">
           {/* Sidebar Nav */}
-          <div className="w-64 flex-shrink-0">
-            <nav className="flex flex-col gap-1">
+          <div className="w-full flex-shrink-0 md:w-64">
+            <nav className="flex gap-2 overflow-x-auto rounded-2xl border border-gray-100 bg-gray-50 p-1 md:flex-col md:overflow-visible md:border-0 md:bg-transparent md:p-0">
               {[
                 { id: 'profile',  label: 'Public Profile',    icon: User },
                 { id: 'service',  label: 'Work Preferences',  icon: MapPin },
@@ -497,7 +497,7 @@ export const WorkerSettingsPage: React.FC = () => {
                 <button
                   key={id}
                   onClick={() => setActiveSection(id as Section)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all
+                  className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all md:w-full
                     ${activeSection === id ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`}
                 >
                   <Icon className="w-4 h-4" />
@@ -517,19 +517,19 @@ export const WorkerSettingsPage: React.FC = () => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 bg-white border border-gray-200 rounded-2xl p-8 min-h-[500px] shadow-sm">
+          <div className="min-h-[500px] flex-1 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-8">
 
             {/* Profile Section */}
             {activeSection === 'profile' && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center gap-6 pb-6 border-b border-gray-100">
+                <div className="flex flex-col gap-5 border-b border-gray-100 pb-6 sm:flex-row sm:items-center sm:gap-6">
                   <div className="relative">
                     <img src={user.profileImage ?? `https://i.pravatar.cc/100?u=${user.id}`} className="w-24 h-24 rounded-2xl object-cover border-4 border-gray-50" alt={user.name} />
                     <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-gray-900 text-white rounded-lg flex items-center justify-center border-4 border-white shadow-lg">
                       <Camera className="w-4 h-4" />
                     </button>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="font-bold text-gray-900">{user.name}</h3>
                     <p className="text-sm text-gray-500">{profile?.skills.join(' • ') || 'No skills listed'}</p>
                     <div className="flex items-center gap-1.5 mt-1">
@@ -538,7 +538,7 @@ export const WorkerSettingsPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="col-span-2 space-y-1.5">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Full Name</label>
                     <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-400" />
@@ -553,7 +553,7 @@ export const WorkerSettingsPage: React.FC = () => {
                   </div>
                   <div className="col-span-2 space-y-1.5">
                     <div className="space-y-3">
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2 sm:flex-row">
                         <div className="relative flex-1">
                           <select 
                             value={selectedSkillValue} 
@@ -572,7 +572,7 @@ export const WorkerSettingsPage: React.FC = () => {
                           type="button" 
                           onClick={addSkill} 
                           disabled={!selectedSkillValue || (selectedSkillValue === 'Other' && !skillInput.trim())}
-                          className="px-5 bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm transition-all rounded-xl shadow-sm"
+                          className="rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 sm:py-0"
                         >
                           Add
                         </button>
@@ -615,9 +615,9 @@ export const WorkerSettingsPage: React.FC = () => {
             {/* Service Section */}
             {activeSection === 'service' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-4">
+                <div className="flex flex-col gap-4 rounded-2xl border border-amber-100 bg-amber-50 p-4 sm:flex-row sm:items-center">
                   <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center"><Briefcase className="w-5 h-5 text-amber-600" /></div>
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-amber-900 uppercase tracking-wider">Availability Status</p>
                     <p className="text-xs text-amber-700/70">When active, you'll receive new job alerts in your area.</p>
                   </div>
@@ -629,7 +629,7 @@ export const WorkerSettingsPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-end">
+                  <div className="flex items-end justify-between gap-4">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Service Radius</p>
                     <span className="text-sm font-bold text-gray-900">{formData.serviceRadius} km</span>
                   </div>
@@ -686,7 +686,7 @@ export const WorkerSettingsPage: React.FC = () => {
                           />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">New Password</label>
                             <input 
@@ -713,7 +713,7 @@ export const WorkerSettingsPage: React.FC = () => {
                           <p className="text-xs text-red-500 font-bold bg-red-50 p-2 rounded-lg border border-red-100">{resetError}</p>
                         )}
 
-                        <div className="flex gap-3 pt-2">
+                        <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                           <button
                             onClick={() => setPasswordResetSent(false)}
                             className="flex-1 py-3 border border-gray-200 text-gray-600 font-bold text-sm rounded-xl hover:bg-white transition-all"
@@ -748,8 +748,8 @@ export const WorkerSettingsPage: React.FC = () => {
 
             {/* Save button */}
             {(activeSection === 'profile' || activeSection === 'service') && (
-              <div className="mt-12 pt-8 border-t border-gray-100 flex justify-end">
-                <button onClick={handleSave} disabled={saving} className="px-8 py-3 bg-gray-900 text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50">
+              <div className="mt-12 flex justify-end border-t border-gray-100 pt-8">
+                <button onClick={handleSave} disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-8 py-3 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 sm:w-auto">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Settings'}
                 </button>
               </div>

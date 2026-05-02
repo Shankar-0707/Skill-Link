@@ -114,7 +114,7 @@ export const RefundPolicyPage: React.FC = () => {
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-slate-500">
                 Legal / Refund Policy
               </p>
-              <h1 className="mt-5 font-headline text-5xl font-extrabold leading-[0.98] tracking-[-0.04em] text-slate-950 sm:text-6xl lg:text-7xl">
+              <h1 className="mt-5 font-headline text-4xl font-extrabold leading-[1] tracking-[-0.04em] text-slate-950 sm:text-6xl lg:text-7xl">
                 Clear refund rules for jobs, reservations, and escrow.
               </h1>
             </div>

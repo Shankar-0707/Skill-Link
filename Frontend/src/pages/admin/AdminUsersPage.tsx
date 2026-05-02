@@ -67,7 +67,7 @@ export const AdminUsersPage = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-headline font-bold text-3xl text-foreground leading-tight">
             Users
@@ -103,7 +103,8 @@ export const AdminUsersPage = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-background rounded-xl border border-border overflow-hidden">
+        <div className="overflow-x-auto rounded-xl border border-border bg-background">
+          <div className="min-w-[1120px]">
           <div className="grid grid-cols-[1.25fr_1.05fr_0.75fr_0.95fr_0.75fr_0.55fr_0.8fr_0.8fr] gap-4 px-6 py-4 border-b border-border text-[11px] font-label uppercase tracking-wider text-muted-foreground">
             <span>User</span>
             <span>Contact</span>
@@ -199,6 +200,7 @@ export const AdminUsersPage = () => {
                 </div>
               </div>
             ))}
+          </div>
           </div>
         </div>
       )}
