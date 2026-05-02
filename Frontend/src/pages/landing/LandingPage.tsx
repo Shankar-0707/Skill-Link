@@ -77,11 +77,10 @@ export const LandingPage: React.FC = () => {
     {
       title: "Platform",
       links: [
-        "How it works",
-        "Verified workers",
-        "Reservations",
-        "Escrow payments",
-        "Safety standards",
+        { label: "How it works", href: "/platform/how-it-works" },
+        { label: "Verified workers", href: "/platform/verified-workers" },
+        { label: "Reservations", href: "/platform/reservations" },
+        { label: "Safety standards", href: "/platform/safety-standards" },
       ],
     },
     {
@@ -381,13 +380,22 @@ export const LandingPage: React.FC = () => {
                 </p>
                 <ul className="mt-4 space-y-2.5">
                   {column.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
-                        className="text-sm text-slate-600 transition-colors hover:text-slate-900"
-                      >
-                        {link}
-                      </a>
+                    <li key={typeof link === "string" ? link : link.label}>
+                      {typeof link === "string" ? (
+                        <a
+                          href="#"
+                          className="text-sm text-slate-600 transition-colors hover:text-slate-900"
+                        >
+                          {link}
+                        </a>
+                      ) : (
+                        <a
+                          href={link.href}
+                          className="text-sm text-slate-600 transition-colors hover:text-slate-900"
+                        >
+                          {link.label}
+                        </a>
+                      )}
                     </li>
                   ))}
                 </ul>
