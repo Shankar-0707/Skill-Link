@@ -1,6 +1,14 @@
 import React, { useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { LandingPage } from "../../pages/landing/LandingPage";
+import { HowItWorksPage } from "../../pages/platform/HowItWorks";
+import { ReservationsPage } from "../../pages/platform/Reservations";
+import { SafetyStandardsPage } from "../../pages/platform/SafetyStandards";
+import { VerifiedWorkersPage } from "../../pages/platform/VerifiedWorkers";
+import { AboutSkillLinkPage } from "../../pages/company/AboutSkillLink";
+import { CareersPage } from "../../pages/company/Careers";
+import { PrivacyPolicyPage } from "../../pages/legal/PrivacyPolicy";
+import { RefundPolicyPage } from "../../pages/legal/RefundPolicy";
 import { LoginPage } from "../../pages/auth/LoginPage";
 import { RegisterPage } from "../../pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "../../pages/auth/ForgotPasswordPage";
@@ -84,6 +92,23 @@ export const AppRoutes: React.FC = () => {
     <>
       <SuspendedNavigationHandler />
       <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/platform/how-it-works" element={<HowItWorksPage />} />
+        <Route
+          path="/platform/verified-workers"
+          element={<VerifiedWorkersPage />}
+        />
+        <Route path="/platform/reservations" element={<ReservationsPage />} />
+        <Route
+          path="/platform/safety-standards"
+          element={<SafetyStandardsPage />}
+        />
+        <Route path="/company/about" element={<AboutSkillLinkPage />} />
+        <Route path="/company/careers" element={<CareersPage />} />
+        <Route path="/legal/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/legal/refund-policy" element={<RefundPolicyPage />} />
+        <Route path="/about" element={<Navigate to="/#about" replace />} />
+
         <Route element={<PublicOnlyRoute />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -228,8 +253,6 @@ export const AppRoutes: React.FC = () => {
         </Route>
 
         <Route path="/preview" element={<ThemePreview />} />
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/about" element={<Navigate to="/#about" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </>
