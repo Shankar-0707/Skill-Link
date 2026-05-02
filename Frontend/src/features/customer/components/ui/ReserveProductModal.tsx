@@ -45,8 +45,9 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
         quantity
       });
 
-      // Instead of manual success state and redirect, we open Razorpay
-      const amountInPaise = Math.round(product.price * quantity * 100);
+      // Use the server-calculated totalAmount (which includes the service commission)
+      const serverTotal = response.totalAmount ?? (product.price * quantity * 1.05);
+      const amountInPaise = Math.round(serverTotal * 100);
 
       await openRazorpay({
         amount: amountInPaise,
@@ -56,6 +57,7 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
         prefill: {
           name: "Verified Customer", // This could be fetched from auth context
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handler: async (rzpRes: any) => {
           console.log("Razorpay success:", rzpRes);
           try {
@@ -73,7 +75,7 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
                 onClose();
               }
             }, 1500);
-          } catch (confirmErr: any) {
+          } catch (confirmErr: unknown) {
             console.error("Backend confirmation failed:", confirmErr);
             setError("Payment recorded but server update failed. Please contact support.");
             setIsSubmitting(false);
@@ -84,10 +86,12 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
             setIsSubmitting(false);
           }
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to create reservation. Please try again.");
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error?.response?.data?.message || "Failed to create reservation. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -152,7 +156,7 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
             <div className="flex flex-col justify-center">
               <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">{product.organisation?.businessName || "Local Shop"}</p>
               <h3 className="text-lg font-bold text-foreground line-clamp-1">{product.name}</h3>
-              <p className="text-xl font-black text-foreground mt-2">₹{product.price.toLocaleString()}</p>
+              <p className="text-xl font-black text-foreground mt-2">₹{(product.price * 1.05).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
             </div>
           </div>
 
@@ -183,8 +187,11 @@ export const ReserveProductModal: React.FC<ReserveProductModalProps> = ({
                 </button>
               </div>
               <div className="flex-1 text-right">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Amount</p>
-                <p className="text-3xl font-black text-primary tracking-tighter">₹{(product.price * quantity).toLocaleString()}</p>
+                {/* Fee breakdown */}
+                  <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Price</p>
+                    <p className="text-2xl font-black text-primary tracking-tighter">₹{(product.price * quantity * 1.05).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                  </div>
               </div>
             </div>
           </div>

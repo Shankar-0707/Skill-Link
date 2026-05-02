@@ -78,7 +78,7 @@ export const JobDetailPage: React.FC = () => {
       setError('Job ID is missing.');
       setLoading(false);
     }
-  }, [id]);
+  }, [id, job?.id]);
 
   useEffect(() => {
     if (job?.category) {

@@ -353,7 +353,9 @@ export class AuthService {
   async getProfile(userId: string) {
     const user = await this.findActiveUserById(userId);
     const publicUser = this.toPublicUser(user);
-    this.logger.debug(`Fetching profile for user ${userId}: ${JSON.stringify(publicUser)}`);
+    this.logger.debug(
+      `Fetching profile for user ${userId}: ${JSON.stringify(publicUser)}`,
+    );
     return publicUser;
   }
 
@@ -633,7 +635,10 @@ export class AuthService {
         to: email,
         name: name ?? undefined,
         token,
-        verificationUrl: this.buildActionUrl(process.env.VERIFY_EMAIL_URL, token),
+        verificationUrl: this.buildActionUrl(
+          process.env.VERIFY_EMAIL_URL,
+          token,
+        ),
         expiresInMinutes: Number(
           process.env.EMAIL_VERIFICATION_EXPIRES_MINUTES ?? '60',
         ),

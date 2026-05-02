@@ -53,7 +53,7 @@ const KycSection: React.FC<{ workerKycStatus: Worker['kycStatus'] }> = ({ worker
       const data = await kycService.getStatus();
       setKycData(data);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to load KYC status. Please try again.');
     } finally {
       setLoading(false);
@@ -73,8 +73,9 @@ const KycSection: React.FC<{ workerKycStatus: Worker['kycStatus'] }> = ({ worker
     try {
       await kycService.uploadDocument(file, docType);
       await fetchStatus();
-    } catch (err: any) {
-      setError(err?.response?.data?.message || `Failed to upload ${docType}. Please try again.`);
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error?.response?.data?.message || `Failed to upload ${docType}. Please try again.`);
     } finally {
       setUploading(null);
       e.target.value = '';
@@ -88,8 +89,9 @@ const KycSection: React.FC<{ workerKycStatus: Worker['kycStatus'] }> = ({ worker
       await kycService.submitKyc();
       setSubmitSuccess(true);
       await fetchStatus();
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to submit KYC. Please try again.');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error?.response?.data?.message || 'Failed to submit KYC. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -152,7 +154,7 @@ const KycSection: React.FC<{ workerKycStatus: Worker['kycStatus'] }> = ({ worker
 
   // ── NOT_STARTED / REJECTED — show upload form ──────────────────────────────
   const lastRejection = status === 'REJECTED' ? kycData?.lastRequest?.rejectionReason : null;
-  const requiredTypes = kycData?.requiredDocumentTypes ?? ['AADHAAR', 'PAN', 'PROFILE_PHOTO'];
+  const requiredTypes = (kycData?.requiredDocumentTypes ?? ['AADHAAR', 'PAN', 'PROFILE_PHOTO']) as DocumentType[];
   const allRequiredUploaded = requiredTypes.every(t => !!getDraftForType(t as DocumentType));
 
   return (
@@ -291,7 +293,7 @@ const KycSection: React.FC<{ workerKycStatus: Worker['kycStatus'] }> = ({ worker
           <>
             <div className={`flex items-start gap-3 p-4 rounded-xl mb-4 ${allRequiredUploaded ? 'bg-green-50 border border-green-100' : 'bg-gray-50 border border-gray-200'}`}>
               <div className={`w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${allRequiredUploaded ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>
-                {allRequiredUploaded ? <CheckCircle2 className="w-3 h-3" /> : <span className="text-[9px] font-bold text-gray-400">{kycData?.draftDocuments.filter(d => requiredTypes.includes(d.documentType as any)).length}/{requiredTypes.length}</span>}
+                {allRequiredUploaded ? <CheckCircle2 className="w-3 h-3" /> : <span className="text-[9px] font-bold text-gray-400">{kycData?.draftDocuments.filter(d => requiredTypes.includes(d.documentType as DocumentType)).length}/{requiredTypes.length}</span>}
               </div>
               <p className={`text-sm font-medium ${allRequiredUploaded ? 'text-green-700' : 'text-gray-500'}`}>
                 {allRequiredUploaded 
@@ -421,9 +423,10 @@ export const WorkerSettingsPage: React.FC = () => {
       setNewPassword('');
       setConfirmPassword('');
       showToast('Password updated successfully!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to reset password:', err);
-      const msg = err?.response?.data?.message || 'Failed to reset password. Check your token.';
+      const error = err as { response?: { data?: { message?: string } } };
+      const msg = error?.response?.data?.message || 'Failed to reset password. Check your token.';
       setResetError(msg);
       showToast(msg);
     } finally {
@@ -444,7 +447,7 @@ export const WorkerSettingsPage: React.FC = () => {
         setProfile(updated);
         setFormData(updatedFields);
         showToast(`You are now ${newStatus ? 'Online' : 'Offline'}`);
-      } catch (err) {
+      } catch {
         showToast('Failed to update availability. Please try again.');
       } finally {
         setSaving(false);

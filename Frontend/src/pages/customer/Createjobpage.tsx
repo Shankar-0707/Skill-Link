@@ -7,9 +7,7 @@ import { Layout } from '../../features/customer/components/layout/Layout';
 import { useRazorpay } from '../../shared/hooks/useRazorpay';
 import { paymentsApi } from '../../services/api/payments';
 
-interface CreateJobPageProps {
-  // onNavigate removed to use useNavigate hook
-}
+
 
 interface FormState {
   title: string;
@@ -29,7 +27,7 @@ const FORM_INITIAL: FormState = {
   scheduledAt: '',
 };
 
-export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
+export const CreateJobPage: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(FORM_INITIAL);
   const [errors, setErrors] = useState<Partial<FormState>>({});
@@ -81,7 +79,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
           currency: "INR",
           name: "Skill-Link",
           description: `Job Escrow: ${form.title}`,
-          handler: async (rzpRes: any) => {
+          handler: async (rzpRes: unknown) => {
             console.log("Job Razorpay success:", rzpRes);
             try {
               if (!job.providerPaymentId) {
@@ -93,7 +91,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
               } else {
                 navigate('/user/my-jobs');
               }
-            } catch (confirmErr: any) {
+            } catch (confirmErr: unknown) {
               console.error("Backend confirmation failed:", confirmErr);
               setApiError("Payment successful but failed to update status. Please check My Jobs later.");
             }
@@ -103,6 +101,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
               setLoading(false);
             }
           }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any);
       } else {
         setSubmitted(true);
@@ -110,9 +109,10 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
           navigate('/user/my-jobs');
         }, 1500);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to post job:', err);
-      setApiError(err.response?.data?.message || 'Failed to post job. Please try again.');
+      const error = err as { response?: { data?: { message?: string } } };
+      setApiError(error.response?.data?.message || 'Failed to post job. Please try again.');
     } finally {
       setLoading(false);
     }

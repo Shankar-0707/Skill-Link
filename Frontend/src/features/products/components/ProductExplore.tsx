@@ -36,8 +36,9 @@ export const ProductExplore: React.FC = () => {
         if (data.images && data.images.length > 0) {
           setActiveImage(data.images[0].imageUrl);
         }
-      } catch (err: any) {
-        setError(err?.response?.data?.message || "Failed to load product details.");
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { message?: string } } };
+        setError(error?.response?.data?.message || "Failed to load product details.");
       } finally {
         setIsLoading(false);
       }
@@ -146,7 +147,7 @@ export const ProductExplore: React.FC = () => {
               {product.name}
             </h1>
             <div className="flex items-center gap-4">
-              <span className="text-4xl font-black text-primary">₹{product.price.toLocaleString()}</span>
+              <span className="text-4xl font-black text-primary">₹{(product.price * 1.05).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
               <div className="h-6 w-px bg-border/50" />
               <div className="flex items-center gap-1.5 px-3 py-1 bg-secondary rounded-lg">
                 <Box size={14} className="text-primary" />

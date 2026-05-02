@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Prisma, PaymentStatus, EscrowStatus } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from './wallet.service';
 
@@ -24,14 +24,19 @@ export class PaymentsService {
    * Creates a Payment record in INITIATED state and returns a mock checkout URL.
    * Called when a customer creates a reservation or a job payment is triggered.
    */
-  async createPaymentOrder(data: {
-    userId: string;
-    amount: number;
-    type: string;
-    reservationId?: string;
-    jobId?: string;
-  }, tx?: Prisma.TransactionClient) {
-    const providerPaymentId = `mock_pay_${uuidv4()}`;
+  async createPaymentOrder(
+    data: {
+      userId: string;
+      amount: number;
+      originalAmount?: number;
+      platformFee?: number;
+      type: string;
+      reservationId?: string;
+      jobId?: string;
+    },
+    tx?: Prisma.TransactionClient,
+  ) {
+    const providerPaymentId = `mock_pay_${randomUUID()}`;
     const checkoutUrl = `/mock-checkout?paymentId=${providerPaymentId}`;
 
     const client = tx ?? this.prisma;
@@ -51,7 +56,7 @@ export class PaymentsService {
     });
 
     this.logger.log(
-      `Payment order created: ${providerPaymentId} for ₹${data.amount} [${data.type}]`,
+      `Payment order created: ${providerPaymentId} for ₹${data.amount} (base: ₹${data.originalAmount ?? data.amount}) [${data.type}]`,
     );
 
     return {
@@ -59,6 +64,8 @@ export class PaymentsService {
       providerPaymentId,
       checkoutUrl,
       amount: payment.amount,
+      originalAmount: data.originalAmount ?? data.amount,
+      platformFee: data.platformFee ?? 0,
     };
   }
 
@@ -142,10 +149,17 @@ export class PaymentsService {
           });
         } else {
           // Normal case — create fresh escrow
+          // Derive fee split: 5% of net = payment.amount / 1.05 * 0.05
+          const originalAmount =
+            Math.round((payment.amount / 1.05) * 100) / 100;
+          const platformFee =
+            Math.round((payment.amount - originalAmount) * 100) / 100;
           const escrow = await tx.escrow.create({
             data: {
               reservationId: payment.reservationId,
               amount: payment.amount,
+              originalAmount,
+              platformFee,
               status: EscrowStatus.HELD,
               paymentId: payment.id,
             },
@@ -267,7 +281,9 @@ export class PaymentsService {
   /**
    * Kept for backward compatibility with KycGate usage.
    */
-  async assertWithdrawAllowed(_userId: string): Promise<void> {
+  assertWithdrawAllowed(userId: string): Promise<void> {
     // Future: check KYC before allowing withdrawals
+    void userId;
+    return Promise.resolve();
   }
 }

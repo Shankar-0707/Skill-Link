@@ -1,0 +1,12 @@
+{
+  "name": "skill-link-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix Backend && npm install --prefix Frontend",
+    "lint:all": "npm run lint --prefix Backend && npm run lint --prefix Frontend",
+    "test:all": "npm run test --prefix Backend",
+    "build:all": "npm run build --prefix Backend && npm run build --prefix Frontend",
+    "check:all": "npm run lint:all && npm run test:all && npm run build:all"
+  }
+}

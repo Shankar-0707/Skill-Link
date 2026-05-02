@@ -24,9 +24,10 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ isOpen, 
       await productsApi.remove(product.id);
       onDeleted();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Delete error', err);
-      setError(err?.response?.data?.message || 'Failed to delete product. It may have active reservations.');
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error?.response?.data?.message || 'Failed to delete product. It may have active reservations.');
     } finally {
       setLoading(false);
     }
