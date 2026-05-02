@@ -31,7 +31,7 @@ export const WorkerSidebar: React.FC = () => {
     try {
       if (window.confirm('Are you sure you want to logout?')) {
         await logout();
-        navigate('/login');
+        window.location.href = '/login';
       }
     } catch (err) {
       console.error('Logout failed:', err);

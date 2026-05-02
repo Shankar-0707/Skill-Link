@@ -16,6 +16,7 @@ import { PingModule } from './ping/ping.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
 import { ReservationsModule } from './reservations/reservations.module';
+import { RealtimeModule } from './realtime/realtime.module';
 import { UsersModule } from './users/users.module';
 import { WorkersModule } from './workers/workers.module';
 
@@ -45,6 +46,7 @@ import { WorkersModule } from './workers/workers.module';
     PaymentsModule,
     PingModule,
     EscrowModule,
+    RealtimeModule,
     HelpModule,
     KycModule,
     AdminModule,
