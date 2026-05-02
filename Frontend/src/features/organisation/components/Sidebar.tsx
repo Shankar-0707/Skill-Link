@@ -66,11 +66,14 @@ export const Sidebar: React.FC = () => {
 
     setIsLoggingOut(true);
     try {
-      await logout();
-      window.location.href = "/login";
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
+      if (window.confirm('Are you sure you want to logout?')) {
+        await logout();
+        window.location.href = '/login';
+      }
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+     finally {
       setIsLoggingOut(false);
     }
   };

@@ -163,7 +163,16 @@ export class JobsService {
         },
       });
 
-<<<<<<< Updated upstream
+      if (eligibleWorkers.length > 0) {
+        await tx.jobOffer.createMany({
+          data: eligibleWorkers.map((worker) => ({
+            jobId: job.id,
+            workerId: worker.workerId,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
       // If a budget is set, create a payment order so customer can pay via mock checkout
       if (dto.budget && dto.budget > 0) {
         const paymentOrder = await this.paymentsService.createPaymentOrder(
@@ -181,16 +190,6 @@ export class JobsService {
           checkoutUrl: paymentOrder.checkoutUrl,
           providerPaymentId: paymentOrder.providerPaymentId,
         };
-=======
-      if (eligibleWorkers.length > 0) {
-        await tx.jobOffer.createMany({
-          data: eligibleWorkers.map((worker) => ({
-            jobId: job.id,
-            workerId: worker.workerId,
-          })),
-          skipDuplicates: true,
-        });
->>>>>>> Stashed changes
       }
 
       return job;
