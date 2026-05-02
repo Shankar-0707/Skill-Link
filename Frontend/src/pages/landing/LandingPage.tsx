@@ -86,11 +86,8 @@ export const LandingPage: React.FC = () => {
     {
       title: "Company",
       links: [
-        "About Skill-Link",
-        "Careers",
-        "Press",
-        "Newsroom",
-        "Investor updates",
+        { label: "About Skill-Link", href: "/company/about" },
+        { label: "Careers", href: "/company/careers" },
       ],
     },
     {

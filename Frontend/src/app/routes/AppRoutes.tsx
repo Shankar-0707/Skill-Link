@@ -5,6 +5,8 @@ import { HowItWorksPage } from "../../pages/platform/HowItWorks";
 import { ReservationsPage } from "../../pages/platform/Reservations";
 import { SafetyStandardsPage } from "../../pages/platform/SafetyStandards";
 import { VerifiedWorkersPage } from "../../pages/platform/VerifiedWorkers";
+import { AboutSkillLinkPage } from "../../pages/company/AboutSkillLink";
+import { CareersPage } from "../../pages/company/Careers";
 import { LoginPage } from "../../pages/auth/LoginPage";
 import { RegisterPage } from "../../pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "../../pages/auth/ForgotPasswordPage";
@@ -99,6 +101,8 @@ export const AppRoutes: React.FC = () => {
           path="/platform/safety-standards"
           element={<SafetyStandardsPage />}
         />
+        <Route path="/company/about" element={<AboutSkillLinkPage />} />
+        <Route path="/company/careers" element={<CareersPage />} />
         <Route path="/about" element={<Navigate to="/#about" replace />} />
 
         <Route element={<PublicOnlyRoute />}>
