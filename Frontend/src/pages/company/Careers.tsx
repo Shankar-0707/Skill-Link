@@ -12,7 +12,6 @@ import {
   UsersRound,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { LandingNavbar } from "../landing/sections/LandingNavbar";
 
 const joinPaths = [
   {
@@ -77,10 +76,7 @@ export const CareersPage: React.FC = () => {
         <div className="absolute right-[-10rem] top-[8rem] h-[32rem] w-[32rem] rounded-full bg-slate-200/75 blur-[120px]" />
         <div className="absolute left-[-12rem] top-[-8rem] h-[30rem] w-[30rem] rounded-full bg-blue-100/35 blur-[110px]" />
       </div>
-
-      <LandingNavbar />
-
-      <main className="mx-auto w-full max-w-340 px-6 pb-20 pt-32 sm:px-10 lg:px-16 lg:pt-36">
+      <main className="mx-auto w-full max-w-340 px-6 pb-20 pt-8 sm:px-10 sm:pt-10 lg:px-16 lg:pt-12">
         <Link
           to="/"
           className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-950"

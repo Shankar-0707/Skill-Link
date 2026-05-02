@@ -9,7 +9,6 @@ import {
   Users,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { LandingNavbar } from './sections/LandingNavbar';
 
 const manifestoPoints = [
   'Discovery should feel curated, not chaotic.',
@@ -62,10 +61,7 @@ export const AboutPage: React.FC = () => {
       <div className="absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(circle_at_top_right,rgba(191,219,254,0.35),transparent_28%),radial-gradient(circle_at_left,rgba(226,232,240,0.85),transparent_26%)]" />
       <div className="absolute left-[8%] top-[10rem] h-40 w-40 rounded-full border border-white/60 bg-white/30 blur-3xl" />
       <div className="absolute bottom-[18%] right-[6%] h-52 w-52 rounded-full bg-slate-200/60 blur-[120px]" />
-
-      <LandingNavbar />
-
-      <main className="relative z-10 mx-auto max-w-[85rem] px-6 pb-24 pt-32 sm:px-10 lg:px-16 lg:pt-36">
+      <main className="relative z-10 mx-auto max-w-[85rem] px-6 pb-24 pt-8 sm:px-10 sm:pt-10 lg:px-16 lg:pt-12">
         <section className="grid gap-10 border-b border-slate-200/70 pb-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
           <div className="max-w-4xl">
             <p className="mb-5 text-xs font-bold uppercase tracking-[0.32em] text-slate-500">
