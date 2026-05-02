@@ -91,23 +91,10 @@ export const LandingPage: React.FC = () => {
       ],
     },
     {
-      title: "Resources",
-      links: [
-        "Help center",
-        "Guides",
-        "Community",
-        "API documentation",
-        "Status",
-      ],
-    },
-    {
       title: "Legal",
       links: [
-        "Privacy policy",
-        "Terms of service",
-        "Cookie policy",
-        "Refund policy",
-        "Accessibility",
+        { label: "Privacy policy", href: "/legal/privacy-policy" },
+        { label: "Refund policy", href: "/legal/refund-policy" },
       ],
     },
   ];
@@ -369,7 +356,7 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-8 sm:grid-cols-3">
             {footerColumns.map((column) => (
               <div key={column.title}>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
