@@ -177,7 +177,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           isCollapsed={isCollapsed}
         />
         <button
-          onClick={() => logout()}
+          onClick={async () => {
+            await logout();
+            window.location.href = "/login";
+          }}
           className={cn(
             "w-full flex items-center rounded-lg text-sm font-label font-medium transition-all duration-150 group relative text-muted-foreground hover:text-red-600 hover:bg-red-50",
             isCollapsed ? "justify-center w-11 h-11 mx-auto" : "gap-3 px-3 py-2.5"

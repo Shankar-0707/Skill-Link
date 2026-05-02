@@ -19,6 +19,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { CreateJobContractDto } from './dto/create-job-contract.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('jobs')
@@ -59,6 +60,12 @@ export class JobsController {
     return this.jobsService.getMyAssignments(userId);
   }
 
+  @Get('offers/my')
+  @Roles('WORKER')
+  getMyJobOffers(@CurrentUser('sub') userId: string) {
+    return this.jobsService.getMyJobOffers(userId);
+  }
+
   // ─────────────────────────────────────────────
   // CUSTOMER — Job Posting
   // ─────────────────────────────────────────────
@@ -72,7 +79,6 @@ export class JobsController {
   @Roles('CUSTOMER')
   @HttpCode(HttpStatus.CREATED)
   createJob(@CurrentUser('sub') userId: string, @Body() dto: CreateJobDto) {
-    console.log(userId);
     return this.jobsService.createJob(userId, dto);
   }
 
@@ -84,6 +90,80 @@ export class JobsController {
   @Roles('CUSTOMER')
   getMyJobs(@CurrentUser('sub') userId: string) {
     return this.jobsService.getMyJobs(userId);
+  }
+
+  @Get(':id/offers')
+  @Roles('CUSTOMER')
+  getJobOffers(
+    @Param('id', ParseUUIDPipe) jobId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.jobsService.getJobOffers(jobId, userId);
+  }
+
+  @Patch(':id/offers/accept')
+  @Roles('WORKER')
+  acceptJobOffer(
+    @Param('id', ParseUUIDPipe) jobId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.jobsService.acceptJobOffer(jobId, userId);
+  }
+
+  @Patch(':id/offers/reject')
+  @Roles('WORKER')
+  rejectJobOffer(
+    @Param('id', ParseUUIDPipe) jobId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.jobsService.rejectJobOffer(jobId, userId);
+  }
+
+  @Get(':id/chat-rooms')
+  @Roles('CUSTOMER', 'WORKER')
+  getChatRoomsForJob(
+    @Param('id', ParseUUIDPipe) jobId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.jobsService.getChatRoomsForJob(jobId, userId);
+  }
+
+  @Get('chat-rooms/:chatRoomId/messages')
+  @Roles('CUSTOMER', 'WORKER')
+  getChatMessages(
+    @Param('chatRoomId', ParseUUIDPipe) chatRoomId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.jobsService.getChatMessages(chatRoomId, userId);
+  }
+
+  @Post(':id/contracts/:workerId')
+  @Roles('CUSTOMER')
+  createContract(
+    @Param('id', ParseUUIDPipe) jobId: string,
+    @Param('workerId', ParseUUIDPipe) workerId: string,
+    @CurrentUser('sub') userId: string,
+    @Body() dto: CreateJobContractDto,
+  ) {
+    return this.jobsService.createContract(jobId, workerId, userId, dto);
+  }
+
+  @Patch('contracts/:contractId/accept')
+  @Roles('WORKER')
+  acceptContract(
+    @Param('contractId', ParseUUIDPipe) contractId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.jobsService.acceptContract(contractId, userId);
+  }
+
+  @Patch('contracts/:contractId/reject')
+  @Roles('WORKER')
+  rejectContract(
+    @Param('contractId', ParseUUIDPipe) contractId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.jobsService.rejectContract(contractId, userId);
   }
 
   /**

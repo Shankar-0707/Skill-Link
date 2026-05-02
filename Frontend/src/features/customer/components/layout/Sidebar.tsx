@@ -44,12 +44,14 @@ export const Sidebar: React.FC = () => {
 
   const { logout } = useAuth();
    const handleLogout = async () => {
-      try {
+       try {
+      if (window.confirm('Are you sure you want to logout?')) {
         await logout();
-        navigate('/login');
-      } catch (err) {
-        console.error('Logout failed:', err);
+        window.location.href = '/login';
       }
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
     };
 
   const activePage = getActiveTab();

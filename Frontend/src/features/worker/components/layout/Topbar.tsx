@@ -1,27 +1,108 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { Bell, MessageSquare } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
+import type { JobNotificationPayload } from '../../../../services/socket/socket';
 
 interface WorkerTopbarProps {
   workerName: string;
   profileImage?: string;
-
+  jobNotifications?: JobNotificationPayload[];
+  onDismissJobNotification?: (jobId: string) => void;
 }
 
-export const WorkerTopbar: React.FC<WorkerTopbarProps> = ({ workerName, profileImage }) => {
+export const WorkerTopbar: React.FC<WorkerTopbarProps> = ({
+  workerName,
+  profileImage,
+  jobNotifications = [],
+  onDismissJobNotification,
+}) => {
   const navigate = useNavigate();
+  const [showNotifications, setShowNotifications] = useState(false);
+  const unreadCount = jobNotifications.length;
+
+  const viewJob = (jobId: string) => {
+    setShowNotifications(false);
+    navigate(`/worker/job/${jobId}`);
+  };
+
   return (
   <header className="fixed top-0 left-[200px] right-0 h-[64px] bg-white border-b border-gray-100 z-10 flex items-center px-6">
     <div className="ml-auto flex items-center gap-3">
 
-      {/* <button className="relative w-9 h-9 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
+      <div className="relative">
+      <button
+        type="button"
+        onClick={() => setShowNotifications((current) => !current)}
+        className="relative w-9 h-9 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
+        aria-label="Job notifications"
+      >
         <Bell className="w-4.5 h-4.5 text-gray-400" />
-        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
       </button>
 
-      <button className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
-        <MessageSquare className="w-4.5 h-4.5 text-gray-400" />
-      </button> */}
+      {showNotifications && (
+        <div className="absolute right-0 top-11 w-80 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <p className="text-sm font-semibold text-gray-900">Job requests</p>
+            <p className="text-xs text-gray-400">New matching jobs appear here in real time.</p>
+          </div>
+
+          {jobNotifications.length === 0 ? (
+            <div className="px-4 py-6 text-center">
+              <p className="text-sm font-medium text-gray-700">No new requests</p>
+              <p className="text-xs text-gray-400 mt-1">You are connected and ready.</p>
+            </div>
+          ) : (
+            <div className="max-h-96 overflow-y-auto">
+              {jobNotifications.map((notification) => (
+                <div
+                  key={notification.jobId}
+                  className="px-4 py-3 border-b border-gray-100 last:border-b-0"
+                >
+                  <div className="flex items-start gap-3">
+                    <button
+                      type="button"
+                      onClick={() => viewJob(notification.jobId)}
+                      className="flex-1 text-left"
+                    >
+                      <p className="text-sm font-semibold text-gray-900 line-clamp-1">
+                        {notification.title}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                        {notification.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="text-[11px] text-gray-500 bg-gray-50 border border-gray-100 rounded-md px-2 py-1">
+                          {notification.category}
+                        </span>
+                        {notification.budget !== null && (
+                          <span className="text-[11px] text-gray-500 bg-gray-50 border border-gray-100 rounded-md px-2 py-1">
+                            Rs {notification.budget.toLocaleString('en-IN')}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => onDismissJobNotification?.(notification.jobId)}
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:text-gray-700"
+                      aria-label="Dismiss notification"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      </div>
 
       <div className="flex items-center gap-2.5 pl-2 border-l border-gray-100">
         <div className="text-right">
