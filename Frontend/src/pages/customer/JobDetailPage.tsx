@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, IndianRupee, Calendar, Shield, Loader2, MessageSquare, FileText } from 'lucide-react';
+import { ArrowLeft, IndianRupee, Calendar, Shield, Loader2, MessageSquare, FileText, AlertCircle } from 'lucide-react';
 import type { ChatRoom, Job, JobOffer } from '../../features/customer/types';
 import { StatusBadge, SectionHeader, EmptyState } from '../../features/customer/components/ui';
 import { Layout } from '../../features/customer/components/layout/Layout';
@@ -8,12 +8,15 @@ import { jobService } from '../../features/customer/services/jobService';
 import { JobChatPanel } from '../../features/customer/components/JobChatPanel';
 import { JobContractDocument } from '../../features/customer/components/JobContractDocument';
 import { useAuth } from '../../app/context/useAuth';
+import { useRazorpay } from '../../shared/hooks/useRazorpay';
+import { paymentsApi } from '../../services/api/payments';
 
 export const JobDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { openRazorpay } = useRazorpay();
   
   const [job, setJob] = useState<Job | null>(location.state as Job || null);
   const [offers, setOffers] = useState<JobOffer[]>([]);
@@ -87,6 +90,41 @@ export const JobDetailPage: React.FC = () => {
       await fetchJob(job.id);
     } catch (err) {
       console.error('Failed to confirm job:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handlePayment = async () => {
+    if (!job) return;
+    try {
+      setRefreshing(true);
+      const paymentData = await jobService.createJobPayment(job.id);
+      
+      await openRazorpay({
+        amount: paymentData.amount * 100, // to paise
+        currency: "INR",
+        name: "Skill-Link",
+        description: `Payment for: ${job.title}`,
+        handler: async (rzpRes: any) => {
+          console.log("Job payment success:", rzpRes);
+          try {
+            await paymentsApi.confirmPayment(paymentData.providerPaymentId);
+            await fetchJob(job.id);
+          } catch (confirmErr) {
+            console.error("Failed to confirm payment on backend:", confirmErr);
+            alert("Payment successful but verification failed. Please refresh.");
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setRefreshing(false);
+          }
+        }
+      } as any);
+    } catch (err: any) {
+      console.error('Failed to initiate payment:', err);
+      alert(err.response?.data?.message || 'Failed to initiate payment.');
     } finally {
       setRefreshing(false);
     }
@@ -252,6 +290,25 @@ export const JobDetailPage: React.FC = () => {
           </div>
         )}
 
+        {/* Payment Alert for Completed Unpaid Jobs */}
+        {job.status === 'COMPLETED' && !job.escrow && (
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600" />
+            <div className="flex-1">
+              <p className="text-sm font-label font-bold text-amber-700">Payment Pending</p>
+              <p className="text-xs font-body text-amber-600">
+                The worker has marked the job as completed. Please pay to finalize the request.
+              </p>
+            </div>
+            <button
+              onClick={handlePayment}
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg text-xs font-label font-bold hover:bg-amber-700 transition-colors"
+            >
+              Pay Now
+            </button>
+          </div>
+        )}
+
         {/* Assigned Worker */}
         {assignedWorker && (
           <div className="mb-6">
@@ -272,12 +329,23 @@ export const JobDetailPage: React.FC = () => {
                 <p className="text-xs font-body text-muted-foreground">Successfully assigned to your request.</p>
                 <p className="text-xs font-label text-green-600 mt-0.5">KYC Verified</p>
               </div>
-              <button
-                disabled
-                className="px-4 py-2 border border-border rounded-lg text-xs font-label font-medium opacity-50 cursor-not-allowed"
-              >
-                In Progress
-              </button>
+              {!job.escrow ? (
+                <button
+                  onClick={handlePayment}
+                  disabled={refreshing}
+                  className="px-4 py-2 bg-foreground text-background rounded-lg text-xs font-label font-semibold hover:opacity-90 transition-opacity flex items-center gap-2"
+                >
+                  {refreshing ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                  Pay Now
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className="px-4 py-2 border border-border rounded-lg text-xs font-label font-medium opacity-50 cursor-not-allowed"
+                >
+                  {job.status === 'COMPLETED' ? 'Work Done' : 'In Progress'}
+                </button>
+              )}
             </div>
           </div>
         )}

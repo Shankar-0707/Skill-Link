@@ -19,6 +19,7 @@ export const WorkerDashboardPage: React.FC = () => {
   const [profile, setProfile] = useState<Worker | null>(null);
   const [assignments, setAssignments] = useState<Job[]>([]);
   const [offers, setOffers] = useState<JobOffer[]>([]);
+  const [availableJobs, setAvailableJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,14 +27,16 @@ export const WorkerDashboardPage: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [profileData, assignmentsData, offerData] = await Promise.all([
+        const [profileData, assignmentsData, offerData, availableData] = await Promise.all([
           workerService.getMe(),
           jobService.getMyAssignments(),
           jobService.getMyJobOffers(),
+          jobService.getAvailableJobs(),
         ]);
         setProfile(profileData);
         setAssignments(assignmentsData);
         setOffers(offerData);
+        setAvailableJobs(availableData);
         setError(null);
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
@@ -80,6 +83,19 @@ export const WorkerDashboardPage: React.FC = () => {
   const activeJobs    = assignments.filter(j => ['ASSIGNED', 'IN_PROGRESS'].includes(j.status));
   const acceptedOffers = offers.filter(offer => offer.status === 'ACCEPTED');
   const completedJobs = assignments.filter(j => j.status === 'COMPLETED');
+  
+  // Filter matching jobs based on worker skills
+  const normalize = (cat: string) => cat?.toLowerCase().trim().replace(/s$/, '') || '';
+  const workerSkills = profile?.skills.map(s => normalize(s)) || [];
+  
+  const matchingJobs = availableJobs.filter(j => {
+    // Only show if not already assigned/offered (though status POSTED should handle this)
+    if (j.status !== 'POSTED') return false;
+    
+    const jobCategory = normalize(j.category);
+    return workerSkills.some(skill => jobCategory === skill || jobCategory.includes(skill) || skill.includes(jobCategory));
+  }).slice(0, 3); // Show top 3 matches
+
   const totalEarned   = assignments
     .filter(j => j.status === 'COMPLETED' && j.escrow?.status === 'RELEASED')
     .reduce((sum, j) => sum + (j.budget || 0), 0);
@@ -152,6 +168,38 @@ export const WorkerDashboardPage: React.FC = () => {
                   </span>
                 </div>
               </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── New Opportunities (Matching Jobs) ── */}
+      {matchingJobs.length > 0 && (
+        <div className="mb-8">
+          <SectionHeader 
+            title="Jobs for You" 
+            action={{ label: 'See All →', onClick: () => navigate('/worker/available-jobs') }}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {matchingJobs.map((job) => (
+              <div 
+                key={job.id}
+                onClick={() => navigate(`/worker/job/${job.id}`)}
+                className="p-4 bg-white border border-gray-200 rounded-xl hover:border-gray-900 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    {job.category}
+                  </span>
+                  <span className="text-xs font-bold text-gray-900">₹{job.budget?.toLocaleString()}</span>
+                </div>
+                <h3 className="font-bold text-sm text-gray-900 mb-1 group-hover:text-blue-600 transition-colors line-clamp-1">{job.title}</h3>
+                <p className="text-xs text-gray-400 line-clamp-2 mb-3 h-8">{job.description}</p>
+                <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                   <span className="text-[10px] text-gray-400 font-medium italic">Matched to your skills</span>
+                   <span className="text-[10px] font-bold text-gray-900">View Detail →</span>
+                </div>
+              </div>
             ))}
           </div>
         </div>

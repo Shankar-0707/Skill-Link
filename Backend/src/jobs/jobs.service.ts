@@ -136,6 +136,21 @@ export class JobsService {
     const customerId = await this.getCustomerId(userId);
     const eligibleWorkers = await this.getEligibleWorkers(dto.category);
 
+    // Block if there are unpaid completed jobs
+    const unpaidCompletedJob = await this.prisma.job.findFirst({
+      where: {
+        customerId,
+        status: 'COMPLETED',
+        escrow: null,
+      },
+    });
+
+    if (unpaidCompletedJob) {
+      throw new BadRequestException(
+        'You have an unpaid completed job. Please pay for it before creating a new one.'
+      );
+    }
+
     const result = await this.prisma.$transaction(async (tx) => {
       const job = await tx.job.create({
         data: {
@@ -171,25 +186,6 @@ export class JobsService {
           })),
           skipDuplicates: true,
         });
-      }
-
-      // If a budget is set, create a payment order so customer can pay via mock checkout
-      if (dto.budget && dto.budget > 0) {
-        const paymentOrder = await this.paymentsService.createPaymentOrder(
-          {
-            userId,
-            amount: dto.budget,
-            type: 'JOB',
-            jobId: job.id,
-          },
-          tx,
-        );
-
-        return {
-          ...job,
-          checkoutUrl: paymentOrder.checkoutUrl,
-          providerPaymentId: paymentOrder.providerPaymentId,
-        };
       }
 
       return job;
@@ -1250,5 +1246,52 @@ export class JobsService {
         escrowReleased: !!job.escrow,
       };
     });
+  }
+
+  /**
+   * Customer initiates payment for a job.
+   * Typically called when the job is COMPLETED or during contract negotiation.
+   */
+  async createJobPayment(jobId: string, userId: string) {
+    const customerId = await this.getCustomerId(userId);
+
+    const job = await this.prisma.job.findUnique({
+      where: { id: jobId, deletedAt: null },
+      include: { escrow: true },
+    });
+
+    if (!job) throw new NotFoundException('Job not found');
+    if (job.customerId !== customerId)
+      throw new ForbiddenException('You do not own this job');
+
+    if (job.escrow) {
+      throw new BadRequestException('This job already has an active payment or has been completed.');
+    }
+
+    // Cleanup any existing failed/stale payment records for this jobId to avoid unique constraint error
+    await this.prisma.payment.deleteMany({
+      where: {
+        jobId: job.id,
+        status: { not: 'SUCCESS' }
+      }
+    });
+
+    const budget = job.budget;
+    if (!budget || budget <= 0) {
+      throw new BadRequestException('Job has no budget set');
+    }
+
+    const paymentOrder = await this.paymentsService.createPaymentOrder({
+      userId,
+      amount: budget,
+      type: 'JOB',
+      jobId: job.id,
+    });
+
+    return {
+      checkoutUrl: paymentOrder.checkoutUrl,
+      providerPaymentId: paymentOrder.providerPaymentId,
+      amount: budget,
+    };
   }
 }

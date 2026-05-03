@@ -135,4 +135,9 @@ export const jobService = {
     const response = await api.patch<ApiResponse<Job>>(`/jobs/${id}/complete`);
     return response.data.data;
   },
+
+  createJobPayment: async (id: string): Promise<{ checkoutUrl: string; providerPaymentId: string; amount: number }> => {
+    const response = await api.post<ApiResponse<{ checkoutUrl: string; providerPaymentId: string; amount: number }>>(`/jobs/${id}/pay`);
+    return response.data.data;
+  },
 };

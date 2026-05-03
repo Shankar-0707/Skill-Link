@@ -271,4 +271,17 @@ export class JobsController {
   ) {
     return this.jobsService.confirmJobCompletion(jobId, userId);
   }
+
+  /**
+   * POST /jobs/:id/payment
+   * Customer initiates payment for a job (e.g. after completion).
+   */
+  @Post(':id/pay')
+  @Roles('CUSTOMER')
+  async createJobPayment(
+    @Param('id') jobId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return await this.jobsService.createJobPayment(jobId, userId);
+  }
 }

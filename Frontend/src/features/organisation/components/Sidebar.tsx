@@ -10,7 +10,7 @@ import {
   ClipboardList,
   Wallet,
 } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/app/context/useAuth";
 import { cn } from "@/shared/utils/cn";
 
@@ -54,7 +54,6 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
 export const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [isReservationsOpen, setIsReservationsOpen] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);

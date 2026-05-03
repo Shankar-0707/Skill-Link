@@ -227,7 +227,7 @@ export const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = (
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-border text-base font-bold">
                 <span className="text-emerald-600 uppercase tracking-wider text-[10px] font-black">Net Earnings</span>
-                <span className="text-xl font-black text-emerald-600">₹{baseAmount.toLocaleString('en-IN', { minimumFractionDigits: 0 })}</span>
+                <span className="text-xl font-black text-emerald-600">₹{(reservation.originalAmount ?? (reservation.product.price * reservation.quantity)).toLocaleString('en-IN', { minimumFractionDigits: 0 })}</span>
               </div>
               {reservation.escrow && (
                 <div className="flex justify-between items-center text-sm font-medium pt-1">
