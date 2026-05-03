@@ -4,10 +4,6 @@ import { ArrowLeft, IndianRupee, Calendar, Tag, AlignLeft, Type, Loader2, AlertC
 import { CATEGORIES } from '../../shared/constants/categories';
 import { jobService } from '../../features/customer/services/jobService';
 import { Layout } from '../../features/customer/components/layout/Layout';
-import { useRazorpay } from '../../shared/hooks/useRazorpay';
-import { paymentsApi } from '../../services/api/payments';
-
-
 
 interface FormState {
   title: string;
@@ -34,7 +30,6 @@ export const CreateJobPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const { openRazorpay } = useRazorpay();
 
   const update = (field: keyof FormState, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -62,53 +57,20 @@ export const CreateJobPage: React.FC = () => {
       setLoading(true);
       setApiError(null);
       
-      const job = await jobService.createJob({
+      const payload = {
         title: form.title,
         description: form.description,
         category: form.category === 'Others' ? form.customCategory : form.category,
         budget: form.budget ? Number(form.budget) : undefined,
         scheduledAt: form.scheduledAt || undefined,
-      });
+      };
 
-      if (job.checkoutUrl && form.budget) {
-        setSubmitted(true);
-        const amountInPaise = Math.round(Number(form.budget) * 100);
-        
-        await openRazorpay({
-          amount: amountInPaise,
-          currency: "INR",
-          name: "Skill-Link",
-          description: `Job Escrow: ${form.title}`,
-          handler: async (rzpRes: unknown) => {
-            console.log("Job Razorpay success:", rzpRes);
-            try {
-              if (!job.providerPaymentId) {
-                throw new Error("Missing Payment ID from server");
-              }
-              const confirmRes = await paymentsApi.confirmPayment(job.providerPaymentId);
-              if (confirmRes.redirectUrl) {
-                navigate(confirmRes.redirectUrl);
-              } else {
-                navigate('/user/my-jobs');
-              }
-            } catch (confirmErr: unknown) {
-              console.error("Backend confirmation failed:", confirmErr);
-              setApiError("Payment successful but failed to update status. Please check My Jobs later.");
-            }
-          },
-          modal: {
-            ondismiss: () => {
-              setLoading(false);
-            }
-          }
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any);
-      } else {
-        setSubmitted(true);
-        setTimeout(() => {
-          navigate('/user/my-jobs');
-        }, 1500);
-      }
+      await jobService.createJob(payload);
+
+      setSubmitted(true);
+      setTimeout(() => {
+        navigate('/user/my-jobs');
+      }, 1500);
     } catch (err: unknown) {
       console.error('Failed to post job:', err);
       const error = err as { response?: { data?: { message?: string } } };

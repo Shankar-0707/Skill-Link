@@ -5,7 +5,6 @@ import {
   ArrowLeft, 
   Github, 
   Linkedin, 
-  Twitter, 
   Mail, 
   Code2, 
   Database, 

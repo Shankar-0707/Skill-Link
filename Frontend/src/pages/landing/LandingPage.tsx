@@ -398,7 +398,9 @@ export const LandingPage: React.FC = () => {
                   <Phone className="h-5 w-5 text-slate-700" />
                   <p className="text-sm font-semibold text-slate-900">Phone</p>
                 </div>
-                <p className="mt-3 text-sm text-slate-600">+91 88829 30649</p>
+                <p className="mt-3 text-sm text-slate-600">+91 9310433267</p>
+                <p className="mt-3 text-sm text-slate-600">+91 8882930649</p>
+                <p className="mt-3 text-sm text-slate-600">+91 8287976458</p>
               </div>
               <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
                 <div className="flex items-center gap-3">
