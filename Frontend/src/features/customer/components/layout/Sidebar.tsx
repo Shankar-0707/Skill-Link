@@ -5,8 +5,7 @@ import {
   Package,
   Calendar,
   ShoppingBag,
-  // Users,
-  // BarChart2,
+  Wallet,
   Settings,
   HelpCircle,
   Zap,
@@ -23,9 +22,8 @@ const NAV_ITEMS = [
   { id: 'my-jobs',        label: 'My Jobs',           icon: Briefcase,   path: '/user/my-jobs' },
   { id: 'products',       label: 'Products',          icon: Package,     path: '/user/products' },
   { id: 'reservations',   label: 'My Reservations',   icon: ShoppingBag, path: '/user/products/reservations' },
+  { id: 'wallet',         label: 'My Wallet',         icon: Wallet,      path: '/user/wallet' },
   { id: 'schedule',       label: 'Schedule',          icon: Calendar,    path: '/user/schedule' },
-  // { id: 'staff',       label: 'Staff',             icon: Users,       path: '/user/staff' },
-  // { id: 'analytics',   label: 'Analytics',         icon: BarChart2,   path: '/user/analytics' },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -46,18 +44,20 @@ export const Sidebar: React.FC = () => {
 
   const { logout } = useAuth();
    const handleLogout = async () => {
-      try {
+       try {
+      if (window.confirm('Are you sure you want to logout?')) {
         await logout();
-        navigate('/login');
-      } catch (err) {
-        console.error('Logout failed:', err);
+        window.location.href = '/login';
       }
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
     };
 
   const activePage = getActiveTab();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[200px] bg-background border-r border-border flex flex-col z-20">
+    <aside className="fixed left-0 top-0 z-20 hidden h-screen w-[200px] flex-col border-r border-border bg-background md:flex">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-border">
         <div className="flex items-center gap-2.5">

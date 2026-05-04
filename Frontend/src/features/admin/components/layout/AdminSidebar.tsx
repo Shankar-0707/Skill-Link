@@ -4,12 +4,15 @@ import {
   Briefcase, 
   CalendarCheck, 
   Users, 
+  BarChart3,
   HelpCircle,
   LogOut, 
   ShieldCheck,
   PanelLeftClose,
   PanelLeftOpen,
   Zap,
+  Gavel,
+  Wallet
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/app/context/useAuth";
@@ -61,7 +64,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-0 h-screen bg-background border-r border-border flex flex-col transition-all duration-300 ease-in-out z-20",
+        "fixed left-0 top-0 z-20 hidden h-screen flex-col border-r border-border bg-background transition-all duration-300 ease-in-out md:flex",
         "overflow-hidden",
         isCollapsed ? "w-20" : "w-[200px]"
       )}
@@ -134,10 +137,31 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           isCollapsed={isCollapsed}
         />
         <SidebarItem 
+          icon={BarChart3} 
+          label="Analytics" 
+          href="/admin/analytics" 
+          isActive={location.pathname.startsWith("/admin/analytics")}
+          isCollapsed={isCollapsed}
+        />
+        <SidebarItem 
           icon={ShieldCheck} 
           label="KYC Approvals" 
           href="/admin/kyc" 
           isActive={location.pathname.startsWith("/admin/kyc")}
+          isCollapsed={isCollapsed}
+        />
+        <SidebarItem 
+          icon={Gavel} 
+          label="Escrow Control" 
+          href="/admin/escrows" 
+          isActive={location.pathname === "/admin/escrows"}
+          isCollapsed={isCollapsed}
+        />
+        <SidebarItem 
+          icon={Wallet} 
+          label="Platform Wallet" 
+          href="/admin/wallet" 
+          isActive={location.pathname === "/admin/wallet"}
           isCollapsed={isCollapsed}
         />
         </div>
@@ -153,7 +177,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           isCollapsed={isCollapsed}
         />
         <button
-          onClick={() => logout()}
+          onClick={async () => {
+            await logout();
+            window.location.href = "/login";
+          }}
           className={cn(
             "w-full flex items-center rounded-lg text-sm font-label font-medium transition-all duration-150 group relative text-muted-foreground hover:text-red-600 hover:bg-red-50",
             isCollapsed ? "justify-center w-11 h-11 mx-auto" : "gap-3 px-3 py-2.5"

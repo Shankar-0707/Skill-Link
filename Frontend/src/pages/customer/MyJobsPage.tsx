@@ -21,7 +21,7 @@ export const MyJobsPage: React.FC = () => {
       setError(null);
       const data = await jobService.getMyJobs();
       setJobs(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch jobs:', err);
       setError('Failed to load your jobs. Please check your connection and try again.');
     } finally {

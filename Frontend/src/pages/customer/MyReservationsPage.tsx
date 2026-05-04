@@ -97,17 +97,6 @@ export const MyReservationsPage: React.FC = () => {
   const organisations = Array.from(new Set(reservations.map(r => r.product?.organisation?.businessName))).filter(Boolean) as string[];
   const activeFiltersCount = (filters.dateRange !== "all" ? 1 : 0) + (filters.category !== "all" ? 1 : 0) + (filters.organisation !== "all" ? 1 : 0);
 
-  const handlePickUp = async (id: string) => {
-    setIsActionLoading(id);
-    try {
-      await customerReservationService.markPickedUp(id);
-      await fetchReservations();
-    } catch (err) {
-      console.error("Failed to mark picked up:", err);
-    } finally {
-      setIsActionLoading(null);
-    }
-  };
 
   const handleCancelByCustomer = async (id: string) => {
     if (!window.confirm("Are you sure you want to cancel this reservation?")) return;
@@ -305,30 +294,30 @@ export const MyReservationsPage: React.FC = () => {
                   <p className="text-sm font-black text-foreground">{res.quantity} units</p>
                 </div>
                 <div>
-                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Price / Unit</p>
-                  <p className="text-sm font-black text-foreground">₹{(res.product?.price || 0).toLocaleString()}</p>
+                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Unit Price</p>
+                  <p className="text-sm font-black text-foreground">₹{((res.product?.price || 0) * 1.05).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
                 </div>
               </div>
 
               {/* Right Section: Total & Actions */}
               <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 shrink-0 transition-all">
                 <div className="text-left md:text-right">
-                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Total Paid</p>
+                  <p className="text-[9px] font-label text-muted-foreground uppercase tracking-widest mb-0.5">Total Amount</p>
                   <p className="text-xl font-black text-primary tracking-tight">
-                    ₹{(res.quantity * (res.product?.price || 0)).toLocaleString()}
+                    ₹{(
+                      res.escrow?.amount ||
+                      res.payment?.amount ||
+                      (res.quantity * (res.product?.price || 0) * 1.05)
+                    ).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {res.status === "CONFIRMED" && (
-                    <button 
-                      onClick={() => handlePickUp(res.id)}
-                      disabled={!!isActionLoading}
-                      className="px-5 py-2.5 bg-foreground text-background rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-sm"
-                    >
-                      {isActionLoading === res.id ? <Loader2 size={12} className="animate-spin" /> : <Package size={12} />}
-                      Pick Up
-                    </button>
+                  {res.status === "CONFIRMED" && res.pickupOtp && (
+                    <div className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-center shadow-inner border border-emerald-100">
+                      <p className="text-[9px] font-black uppercase tracking-widest opacity-80 mb-0.5">Pickup Code</p>
+                      <p className="text-xl font-black tracking-widest">{res.pickupOtp}</p>
+                    </div>
                   )}
                   {["PENDING", "CONFIRMED"].includes(res.status) && (
                     <button 

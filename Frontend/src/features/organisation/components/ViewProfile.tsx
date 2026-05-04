@@ -6,6 +6,25 @@ interface ViewProfileProps {
   organisation: Organisation;
 }
 
+const InfoItem = ({ icon: Icon, label, value, badge }: { icon: React.ElementType, label: string, value?: string | null, badge?: string }) => (
+  <div className="flex items-start gap-4 rounded-2xl border border-transparent bg-secondary/10 p-4 transition-all hover:border-border sm:p-5">
+    <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-border/50 shrink-0 mt-0.5">
+      <Icon size={22} />
+    </div>
+    <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
+          {badge && (
+              <span className="text-[8px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                  {badge}
+              </span>
+          )}
+      </div>
+      <span className="mt-0.5 break-words text-lg font-bold leading-tight text-foreground">{value || "Not provided"}</span>
+    </div>
+  </div>
+);
+
 export const ViewProfile: React.FC<ViewProfileProps> = ({ organisation }) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
@@ -15,27 +34,8 @@ export const ViewProfile: React.FC<ViewProfileProps> = ({ organisation }) => {
     });
   };
 
-  const InfoItem = ({ icon: Icon, label, value, badge }: { icon: any, label: string, value?: string | null, badge?: string }) => (
-    <div className="flex items-start gap-4 p-5 rounded-2xl bg-secondary/10 border border-transparent hover:border-border transition-all">
-      <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-border/50 shrink-0 mt-0.5">
-        <Icon size={22} />
-      </div>
-      <div className="flex flex-col flex-1">
-        <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
-            {badge && (
-                <span className="text-[8px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-tighter">
-                    {badge}
-                </span>
-            )}
-        </div>
-        <span className="text-foreground font-bold text-lg mt-0.5 leading-tight">{value || "Not provided"}</span>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="bg-white rounded-[2.5rem] border border-border shadow-sm p-8 md:p-10 space-y-10 animate-in fade-in duration-500 min-h-[500px]">
+    <div className="min-h-[500px] space-y-8 rounded-[2rem] border border-border bg-white p-5 shadow-sm animate-in fade-in duration-500 sm:space-y-10 sm:rounded-[2.5rem] sm:p-8 md:p-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-border/30">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">General Information</h2>
@@ -77,7 +77,7 @@ export const ViewProfile: React.FC<ViewProfileProps> = ({ organisation }) => {
                 <FileText size={14} className="text-primary" />
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">About the Organisation</span>
             </div>
-            <div className="bg-secondary/10 p-8 rounded-3xl border border-border/50 text-foreground leading-relaxed font-medium relative overflow-hidden group">
+            <div className="group relative overflow-hidden rounded-3xl border border-border/50 bg-secondary/10 p-5 font-medium leading-relaxed text-foreground sm:p-8">
                 <div className="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl pointer-events-none select-none">“</div>
                 <p className={organisation.description ? "" : "italic text-muted-foreground"}>
                     {organisation.description || "No description provided yet. Update your profile to help customers understand your services better."}

@@ -1,10 +1,32 @@
 import { api } from '../../../services/api/api';
 import type {
+  AdminAnalyticsData,
   AdminUserSummary,
   RecentJob,
   RecentReservation,
   UserMetrics,
 } from '../types';
+
+interface EscrowItemRaw {
+  id: string;
+  status: string;
+  amount: number;
+  originalAmount: number;
+  platformFee: number;
+  jobTitle?: string;
+  productName?: string;
+  createdAt: string;
+  releasedAt?: string | null;
+  customerName?: string;
+  customerEmail?: string;
+  workerName?: string;
+  workerEmail?: string;
+  organisationName?: string;
+  type: string;
+  paymentStatus?: string | null;
+}
+
+export type { EscrowItemRaw };
 
 type ApiEnvelope<T> = {
   success: boolean;
@@ -27,12 +49,12 @@ function unwrapResponse<T>(response: ApiEnvelope<T> | T): T {
 
 export const adminApi = {
   getDashboardMetrics: async (): Promise<UserMetrics> => {
-    const response = await api.get('/admin/dashboard/metrics');
+    const response = await api.get('/admin/dashboard');
     return unwrapResponse<UserMetrics>(response.data);
   },
 
   getActiveJobs: async (): Promise<RecentJob[]> => {
-    const response = await api.get('/admin/dashboard/active-jobs');
+    const response = await api.get('/admin/jobs');
 
     const jobs = unwrapResponse<
       Array<{
@@ -63,7 +85,7 @@ export const adminApi = {
   },
 
   getReservations: async (): Promise<RecentReservation[]> => {
-    const response = await api.get('/admin/dashboard/reservations');
+    const response = await api.get('/admin/reservations');
 
     const reservations = unwrapResponse<
       Array<{
@@ -94,5 +116,54 @@ export const adminApi = {
   getUsers: async (): Promise<AdminUserSummary[]> => {
     const response = await api.get('/admin/users');
     return unwrapResponse<AdminUserSummary[]>(response.data);
+  },
+
+  blacklistUser: async (userId: string, reason?: string): Promise<AdminUserSummary> => {
+    const response = await api.post(`/admin/users/${userId}/blacklist`, {
+      reason,
+    });
+    return unwrapResponse<AdminUserSummary>(response.data);
+  },
+
+  unblacklistUser: async (userId: string): Promise<AdminUserSummary> => {
+    const response = await api.delete(`/admin/users/${userId}/blacklist`);
+    return unwrapResponse<AdminUserSummary>(response.data);
+  },
+
+  getAnalytics: async (): Promise<AdminAnalyticsData> => {
+    const response = await api.get('/admin/analytics');
+    return unwrapResponse<AdminAnalyticsData>(response.data);
+  },
+
+  getHeldEscrows: async (): Promise<EscrowItemRaw[]> => {
+    const response = await api.get('/admin/escrows');
+    return unwrapResponse<EscrowItemRaw[]>(response.data);
+  },
+
+  releaseEscrow: async (id: string) => {
+    const response = await api.post(`/admin/escrows/${id}/release`);
+    return response.data;
+  },
+
+  refundEscrow: async (id: string) => {
+    const response = await api.post(`/admin/escrows/${id}/refund`);
+    return response.data;
+  },
+
+  getAdminWallet: async () => {
+    const response = await api.get('/admin/wallet');
+    return unwrapResponse<{
+      adminEmail: string;
+      balance: number;
+      totalFeeIncome: number;
+      transactions: Array<{
+        id: string;
+        type: string;
+        amount: number;
+        note: string | null;
+        escrowId: string | null;
+        createdAt: string;
+      }>;
+    }>(response.data);
   },
 };

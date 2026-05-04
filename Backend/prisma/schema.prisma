@@ -34,6 +34,20 @@ enum JobStatus {
   CANCELLED
 }
 
+enum JobOfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum JobContractStatus {
+  SENT
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
 enum ReservationStatus {
   PENDING
   CONFIRMED
@@ -53,6 +67,11 @@ enum EscrowStatus {
   HELD
   RELEASED
   REFUNDED
+}
+
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
 }
 
 enum DocumentType {
@@ -99,6 +118,10 @@ model User {
   profileImage String?
 
   isActive Boolean @default(true)
+  isBlacklisted Boolean @default(false)
+  blacklistedReason String?
+  blacklistedAt DateTime?
+  blacklistedByUserId String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -108,12 +131,14 @@ model User {
   worker       Worker?
   organisation Organisation?
 
+  wallet                  Wallet?
   payments                Payment[]
   refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens     PasswordResetToken[]
   submittedHelpTickets    HelpTicket[] @relation("HelpTicketCreatedBy")
   reviewedHelpTickets     HelpTicket[] @relation("HelpTicketReviewedBy")
+  sentChatMessages         ChatMessage[]
 
   @@index([role])
 }
@@ -173,6 +198,8 @@ model Customer {
 
   jobs         Job[]
   reservations Reservation[]
+  chatRooms    ChatRoom[]
+  jobContracts JobContract[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -202,6 +229,9 @@ model Worker {
   kycStatus KycStatus @default(NOT_STARTED)
 
   jobs Job[]
+  jobOffers    JobOffer[]
+  chatRooms    ChatRoom[]
+  jobContracts JobContract[]
 
   documents   WorkerDocument[]
   kycRequests KycRequest[]
@@ -262,13 +292,114 @@ model Job {
 
   scheduledAt DateTime?
 
-  escrow Escrow?
+  payment     Payment?
+  escrow      Escrow?
   helpTickets HelpTicket[]
+  offers      JobOffer[]
+  chatRooms   ChatRoom[]
+  contracts   JobContract[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
+  @@index([customerId])
+  @@index([workerId])
+  @@index([status])
+}
+
+model JobOffer {
+  id String @id @default(uuid())
+
+  jobId    String
+  workerId String
+
+  job    Job    @relation(fields: [jobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  status JobOfferStatus @default(PENDING)
+
+  respondedAt DateTime?
+
+  chatRoom ChatRoom?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([jobId, workerId])
+  @@index([workerId])
+  @@index([status])
+}
+
+model ChatRoom {
+  id String @id @default(uuid())
+
+  jobId      String
+  customerId String
+  workerId   String
+  jobOfferId String? @unique
+
+  job      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  worker   Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  jobOffer JobOffer? @relation(fields: [jobOfferId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  messages ChatMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([jobId, workerId])
+  @@index([customerId])
+  @@index([workerId])
+}
+
+model ChatMessage {
+  id String @id @default(uuid())
+
+  chatRoomId   String
+  senderUserId String
+
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sender   User     @relation(fields: [senderUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  message String
+  readAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([chatRoomId])
+  @@index([senderUserId])
+}
+
+model JobContract {
+  id String @id @default(uuid())
+
+  jobId      String
+  customerId String
+  workerId   String
+
+  job      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  worker   Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  cost        Float
+  timing      String
+  scheduledAt DateTime
+  scope       String
+  notes       String?
+  template    String
+
+  status JobContractStatus @default(SENT)
+
+  sentAt     DateTime  @default(now())
+  acceptedAt DateTime?
+  rejectedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([jobId, workerId])
   @@index([customerId])
   @@index([workerId])
   @@index([status])
@@ -336,7 +467,12 @@ model Reservation {
 
   expiresAt DateTime?
 
-  escrow Escrow?
+  /// 4-digit OTP generated when org confirms. Customer shows this to the org on pickup.
+  pickupOtp          String?
+  pickupOtpExpiresAt DateTime?
+
+  payment     Payment?
+  escrow      Escrow?
   helpTickets HelpTicket[]
 
   createdAt DateTime @default(now())
@@ -361,15 +497,34 @@ model Payment {
 
   status PaymentStatus @default(INITIATED)
 
+  /// Internal mock gateway payment ID (e.g. mock_pay_uuid)
+  providerPaymentId String? @unique
+
+  /// URL for the mock checkout page
+  checkoutUrl String?
+
+  /// Legacy field kept for compatibility
   providerReference String?
 
   idempotencyKey String @unique
+
+  /// Link to the reservation this payment is for
+  reservationId String? @unique
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+
+  /// Link to the job this payment is for
+  jobId String? @unique
+  job   Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  /// Back-reference to the escrow this payment funded
+  escrow Escrow?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
+  @@index([providerPaymentId])
 }
 
 //// ESCROW
@@ -383,7 +538,18 @@ model Escrow {
   job         Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
+  /// The payment that funded this escrow
+  paymentId String? @unique
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  /// Total amount charged to customer (originalAmount + platformFee)
   amount Float
+
+  /// Pre-fee amount that goes to the org/worker on release
+  originalAmount Float @default(0)
+
+  /// 5% platform service charge — credited to admin wallet on release
+  platformFee Float @default(0)
 
   status EscrowStatus @default(HELD)
 
@@ -394,6 +560,45 @@ model Escrow {
 
   @@index([jobId])
   @@index([reservationId])
+  @@index([status])
+}
+
+//// VIRTUAL WALLET
+
+model Wallet {
+  id     String @id @default(uuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Current balance in INR (rupees). Never goes negative.
+  balance Float @default(0)
+
+  transactions WalletTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WalletTransaction {
+  id String @id @default(uuid())
+
+  walletId String
+  wallet   Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  type   WalletTransactionType
+  amount Float
+
+  /// Human-readable description, e.g. "Reservation payout #abc"
+  note String?
+
+  /// Which escrow triggered this transaction
+  escrowId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([walletId])
+  @@index([escrowId])
 }
 
 //// WORKER DOCUMENTS

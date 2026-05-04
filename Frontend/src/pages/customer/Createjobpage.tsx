@@ -5,10 +5,6 @@ import { CATEGORIES } from '../../shared/constants/categories';
 import { jobService } from '../../features/customer/services/jobService';
 import { Layout } from '../../features/customer/components/layout/Layout';
 
-interface CreateJobPageProps {
-  // onNavigate removed to use useNavigate hook
-}
-
 interface FormState {
   title: string;
   description: string;
@@ -27,7 +23,7 @@ const FORM_INITIAL: FormState = {
   scheduledAt: '',
 };
 
-export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
+export const CreateJobPage: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(FORM_INITIAL);
   const [errors, setErrors] = useState<Partial<FormState>>({});
@@ -61,21 +57,24 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
       setLoading(true);
       setApiError(null);
       
-      await jobService.createJob({
+      const payload = {
         title: form.title,
         description: form.description,
         category: form.category === 'Others' ? form.customCategory : form.category,
         budget: form.budget ? Number(form.budget) : undefined,
         scheduledAt: form.scheduledAt || undefined,
-      });
+      };
+
+      await jobService.createJob(payload);
 
       setSubmitted(true);
       setTimeout(() => {
-        navigate('/user/home');
+        navigate('/user/my-jobs');
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to post job:', err);
-      setApiError(err.response?.data?.message || 'Failed to post job. Please try again.');
+      const error = err as { response?: { data?: { message?: string } } };
+      setApiError(error.response?.data?.message || 'Failed to post job. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -88,7 +87,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
           <span className="text-2xl text-green-600">✓</span>
         </div>
         <h2 className="font-headline font-bold text-xl text-foreground mb-2">Job Posted!</h2>
-        <p className="text-muted-foreground font-body text-sm">Redirecting to your dashboard...</p>
+        <p className="text-muted-foreground font-body text-sm">Redirecting you to the next step...</p>
       </div>
     );
   }
@@ -217,7 +216,7 @@ export const CreateJobPage: React.FC<CreateJobPageProps> = () => {
         </div>
 
         {/* Budget + Scheduled Date — two columns */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-label font-medium text-foreground mb-1.5">
               <span className="flex items-center gap-1.5"><IndianRupee className="w-3.5 h-3.5" /> Budget</span>

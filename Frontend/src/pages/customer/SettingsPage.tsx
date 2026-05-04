@@ -51,7 +51,7 @@ export const SettingsPage: React.FC = () => {
       setResetError(null);
       await authApi.forgotPassword(user.email);
       setPasswordResetSent(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to send password reset:', err);
       setResetError('Failed to send reset link. Please try again.');
     } finally {
@@ -82,9 +82,10 @@ export const SettingsPage: React.FC = () => {
       setNewPassword('');
       setConfirmPassword('');
       alert('Password updated successfully!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to reset password:', err);
-      setResetError(err?.response?.data?.message || 'Failed to reset password. Please check your token.');
+      const error = err as { response?: { data?: { message?: string } } };
+      setResetError(error?.response?.data?.message || 'Failed to reset password. Please check your token.');
     } finally {
       setIsResettingPassword(false);
     }
@@ -98,10 +99,10 @@ export const SettingsPage: React.FC = () => {
           <p className="text-muted-foreground font-body mt-1">Manage your account preferences and security.</p>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col gap-6 md:flex-row md:gap-8">
           {/* Sidebar Nav */}
-          <div className="w-64 flex-shrink-0">
-            <nav className="flex flex-col gap-1">
+          <div className="w-full flex-shrink-0 md:w-64">
+            <nav className="flex gap-2 overflow-x-auto rounded-2xl border border-border bg-surface-container/30 p-1 md:flex-col md:overflow-visible md:border-0 md:bg-transparent md:p-0">
               {[
                 { id: 'profile', label: 'My Profile', icon: User },
                 { id: 'security', label: 'Security', icon: Lock },
@@ -110,8 +111,8 @@ export const SettingsPage: React.FC = () => {
               ].map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
-                  onClick={() => setActiveSection(id as any)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-label font-medium transition-all
+                  onClick={() => setActiveSection(id as 'profile' | 'security' | 'notifications' | 'appearance')}
+                  className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-label font-medium transition-all md:w-full
                     ${activeSection === id
                       ? 'bg-foreground text-background shadow-md'
                       : 'text-muted-foreground hover:bg-surface-container hover:text-foreground'
@@ -142,7 +143,7 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 bg-background border border-border rounded-2xl p-8 min-h-[500px] shadow-sm">
+          <div className="min-h-[500px] flex-1 rounded-2xl border border-border bg-background p-5 shadow-sm sm:p-8">
             
             {/* Profile Section */}
             {activeSection === 'profile' && (
@@ -152,7 +153,7 @@ export const SettingsPage: React.FC = () => {
                   <p className="text-sm text-muted-foreground font-body">Update your photo and personal info.</p>
                 </div>
 
-                <div className="flex items-center gap-6 pb-8 border-b border-border">
+                <div className="flex flex-col gap-5 border-b border-border pb-8 sm:flex-row sm:items-center sm:gap-6">
                   <div className="relative group">
                     <img
                       src={user.profileImage ?? `https://i.pravatar.cc/100?u=${user.id}`}
@@ -170,7 +171,7 @@ export const SettingsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
                   <div className="space-y-1.5">
                     <label className="text-xs font-label font-bold text-muted-foreground uppercase tracking-wider">Full Name</label>
                     <div className="relative">
@@ -189,7 +190,7 @@ export const SettingsPage: React.FC = () => {
 
                 <div className="pt-4 flex justify-end">
                   <button
-                    className="px-6 py-2.5 bg-foreground text-background text-sm font-label font-semibold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-foreground px-6 py-2.5 text-sm font-label font-semibold text-background transition-opacity hover:opacity-90 sm:w-auto"
                   >
                     Save Changes
                   </button>
@@ -205,7 +206,7 @@ export const SettingsPage: React.FC = () => {
                   <p className="text-sm text-muted-foreground font-body text-left">Ensuring your account remains protected.</p>
                 </div>
 
-                <div className="p-4 bg-surface-container border border-border rounded-xl flex items-center gap-4">
+                <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface-container p-4 sm:flex-row sm:items-center">
                   <div className="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
                     <Shield className="w-5 h-5" />
                   </div>
@@ -213,7 +214,7 @@ export const SettingsPage: React.FC = () => {
                     <p className="text-sm font-label font-semibold text-foreground text-left">Two-Factor Authentication</p>
                     <p className="text-xs text-muted-foreground font-body text-left">Currently disabled. Enable for maximum security.</p>
                   </div>
-                  <button className="ml-auto text-xs font-label font-bold text-foreground hover:underline">Enable</button>
+                  <button className="text-xs font-label font-bold text-foreground hover:underline sm:ml-auto">Enable</button>
                 </div>
 
                 <div className="space-y-4">
@@ -253,7 +254,7 @@ export const SettingsPage: React.FC = () => {
                           />
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <div className="space-y-1.5">
                             <label className="text-xs font-label font-bold text-muted-foreground uppercase tracking-wider">New Password</label>
                             <input 
@@ -280,7 +281,7 @@ export const SettingsPage: React.FC = () => {
                           <p className="text-xs text-destructive font-medium bg-red-50 p-2 rounded-lg">{resetError}</p>
                         )}
 
-                        <div className="flex gap-3 pt-2">
+                        <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                           <button
                             onClick={() => setPasswordResetSent(false)}
                             className="flex-1 px-4 py-2.5 border border-border text-foreground text-sm font-label font-semibold rounded-xl hover:bg-surface-container transition-all"
@@ -325,7 +326,7 @@ export const SettingsPage: React.FC = () => {
                     { title: 'Marketplace Trends', desc: 'Alerts for popular services and new supply arrivals.' },
                     { title: 'Transaction Receipts', desc: 'Emailed directly to you after every payment release.' },
                   ].map(item => (
-                    <div key={item.title} className="flex items-start justify-between py-2 border-b border-border/50">
+                    <div key={item.title} className="flex flex-col gap-3 border-b border-border/50 py-2 sm:flex-row sm:items-start sm:justify-between">
                       <div className="text-left">
                         <p className="text-sm font-label font-semibold text-foreground text-left">{item.title}</p>
                         <p className="text-xs text-muted-foreground font-body text-left">{item.desc}</p>
@@ -348,7 +349,7 @@ export const SettingsPage: React.FC = () => {
                   <p className="text-sm text-muted-foreground font-body text-left">Personalize your Skill-Link dashboard experience.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="p-4 border-2 border-foreground rounded-2xl bg-background cursor-pointer text-left">
                     <div className="w-full h-24 bg-surface-container rounded-lg mb-3 flex flex-col gap-2 p-3">
                       <div className="h-2 w-1/2 bg-foreground/20 rounded-full" />

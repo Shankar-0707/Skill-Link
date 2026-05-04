@@ -96,6 +96,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
+    this.assertNotBlacklisted(user);
+
     if (!user.passwordHash) {
       throw new UnauthorizedException(
         'This account uses Google sign-in. Please continue with Google.',
@@ -141,6 +143,8 @@ export class AuthService {
     if (!tokenRecord.user.isActive || tokenRecord.user.deletedAt) {
       throw new UnauthorizedException('User account is inactive.');
     }
+
+    this.assertNotBlacklisted(tokenRecord.user);
 
     await this.prisma.refreshToken.update({
       where: { id: tokenRecord.id },
@@ -285,6 +289,7 @@ export class AuthService {
         if (!existingByGoogleId.isActive || existingByGoogleId.deletedAt) {
           throw new UnauthorizedException('User account is inactive.');
         }
+        this.assertNotBlacklisted(existingByGoogleId);
         return existingByGoogleId;
       }
 
@@ -297,6 +302,7 @@ export class AuthService {
         if (!existingByEmail.isActive || existingByEmail.deletedAt) {
           throw new UnauthorizedException('User account is inactive.');
         }
+        this.assertNotBlacklisted(existingByEmail);
 
         await tx.user.update({
           where: { id: existingByEmail.id },
@@ -347,7 +353,9 @@ export class AuthService {
   async getProfile(userId: string) {
     const user = await this.findActiveUserById(userId);
     const publicUser = this.toPublicUser(user);
-    this.logger.debug(`Fetching profile for user ${userId}: ${JSON.stringify(publicUser)}`);
+    this.logger.debug(
+      `Fetching profile for user ${userId}: ${JSON.stringify(publicUser)}`,
+    );
     return publicUser;
   }
 
@@ -507,7 +515,19 @@ export class AuthService {
       throw new NotFoundException('User not found.');
     }
 
+    this.assertNotBlacklisted(user);
+
     return user;
+  }
+
+  private assertNotBlacklisted(user: UserWithProfiles) {
+    if (user.isBlacklisted) {
+      throw new UnauthorizedException({
+        message:
+          'Account has been suspended. Please contact linkskillofficial@gmail.com for support.',
+        code: 'ACCOUNT_SUSPENDED',
+      });
+    }
   }
 
   private async buildAuthResponse(user: UserWithProfiles) {
@@ -615,7 +635,10 @@ export class AuthService {
         to: email,
         name: name ?? undefined,
         token,
-        verificationUrl: this.buildActionUrl(process.env.VERIFY_EMAIL_URL, token),
+        verificationUrl: this.buildActionUrl(
+          process.env.VERIFY_EMAIL_URL,
+          token,
+        ),
         expiresInMinutes: Number(
           process.env.EMAIL_VERIFICATION_EXPIRES_MINUTES ?? '60',
         ),
@@ -738,6 +761,9 @@ export class AuthService {
       emailVerified: user.emailVerified,
       profileImage: user.profileImage,
       isActive: user.isActive,
+      isBlacklisted: user.isBlacklisted,
+      blacklistedReason: user.blacklistedReason,
+      blacklistedAt: user.blacklistedAt,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       customer: user.customer,

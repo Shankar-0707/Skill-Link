@@ -17,6 +17,9 @@ export interface User {
   emailVerified: boolean;
   authProvider?: 'LOCAL' | 'GOOGLE';
   isActive?: boolean;
+  isBlacklisted?: boolean;
+  blacklistedReason?: string | null;
+  blacklistedAt?: string | null;
   businessName?: string;
   businessType?: string;
   customer?: {
@@ -62,4 +65,5 @@ export interface ApiError {
   message: string | string[];
   error: string;
   statusCode: number;
+  code?: string;
 }

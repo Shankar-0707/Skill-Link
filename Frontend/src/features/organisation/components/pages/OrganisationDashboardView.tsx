@@ -39,6 +39,7 @@ export const OrganisationDashboardView = () => {
         
         // Handle products
         let items: Product[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res = productsRes as any;
         if (Array.isArray(res)) {
           items = res;

@@ -43,7 +43,22 @@ export interface Reservation {
   updatedAt: string;
   product: Product;
   customer: Customer;
+  pickupOtp?: string; // added back from BE
+  pickupOtpExpiresAt?: string;
+  checkoutUrl?: string; // returning from BE creation
+  providerPaymentId?: string;
+  totalAmount?: number;       // customer total (incl. 5% fee)
+  originalAmount?: number;    // base amount (org payout)
+  platformFee?: number;       // 5% admin fee
+  payment?: {
+    id: string;
+    amount: number;
+    status: string;
+    checkoutUrl?: string;
+    providerPaymentId?: string;
+  };
   escrow?: {
+    id: string;
     amount: number;
     status: string;
   };

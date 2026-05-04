@@ -10,17 +10,17 @@ export const LandingHero: React.FC = () => {
 
       <div className="relative z-10 flex flex-col lg:flex-row items-center">
         {/* Left Hero Side */}
-        <div className="w-full lg:w-[55%] flex flex-col items-start relative z-20">
-          <h1 className="font-headline text-5xl sm:text-7xl lg:text-[5.5rem] font-extrabold tracking-[-0.04em] text-slate-950 leading-[0.95] mb-8 drop-shadow-sm">
+        <div className="relative z-20 flex w-full flex-col items-start lg:w-[55%]">
+          <h1 className="mb-6 font-headline text-4xl font-extrabold leading-[0.98] tracking-[-0.04em] text-slate-950 drop-shadow-sm sm:mb-8 sm:text-7xl lg:text-[5.5rem]">
             Connect talent <br />
             with confidence.
           </h1>
 
-          <p className="text-lg sm:text-xl leading-[1.6] text-slate-500 max-w-[34rem] font-medium mb-12">
+          <p className="mb-8 max-w-[34rem] text-base font-medium leading-[1.65] text-slate-500 sm:mb-12 sm:text-xl">
             Transforming how businesses hire in India. Verified professionals, seamless project management, and guaranteed quality all in one unified platform.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto">
+          <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:gap-5">
             <button
               onClick={() => navigate('/register')}
               className="group relative flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-slate-900 px-8 py-4 text-base font-semibold text-white transition-all duration-300 hover:bg-slate-800 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:-translate-y-1"
@@ -38,7 +38,7 @@ export const LandingHero: React.FC = () => {
           </div>
 
           {/* Stats/Social Proof */}
-          <div className="mt-16 flex items-center gap-8">
+          <div className="mt-10 flex flex-wrap items-center gap-5 sm:mt-16 sm:gap-8">
             <div className="flex -space-x-3">
               {[...Array(4)].map((_, i) => (
                 <img key={i} className="w-10 h-10 rounded-full border-2 border-[#fafbfc] shadow-sm" src={`https://randomuser.me/api/portraits/men/${i + 20}.jpg`} alt="avatar" />
@@ -54,12 +54,12 @@ export const LandingHero: React.FC = () => {
         </div>
 
         {/* Right Hero Side - Dynamic App Preview */}
-        <div className="w-full lg:w-[45%] mt-20 lg:mt-0 relative flex justify-center lg:justify-end xl:translate-x-10">
+        <div className="relative mt-14 flex w-full justify-center lg:mt-0 lg:w-[45%] lg:justify-end xl:translate-x-10">
 
           {/* Main Floating Card */}
-          <div className="relative w-full max-w-[480px] bg-white/70 backdrop-blur-2xl rounded-3xl border border-white shadow-[0_30px_80px_-20px_rgba(0,0,0,0.12)] p-6 z-20 transition-transform duration-700 hover:-translate-y-2 lg:hover:-rotate-2">
+          <div className="relative z-20 w-full max-w-[480px] rounded-3xl border border-white bg-white/70 p-4 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.12)] backdrop-blur-2xl transition-transform duration-700 hover:-translate-y-2 sm:p-6 lg:hover:-rotate-2">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 sm:mb-8">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
                   <Search className="w-5 h-5 text-slate-600" />
@@ -106,7 +106,7 @@ export const LandingHero: React.FC = () => {
             </div>
           </div>
 
-          <div className="absolute -bottom-8 -left-8 lg:-left-12 w-48 bg-white/60 backdrop-blur-xl border border-white/60 rounded-2xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.1)] p-4 flex items-center gap-4 z-30 transition-transform hover:scale-105 duration-300">
+          <div className="absolute -bottom-8 left-2 z-30 flex w-44 items-center gap-3 rounded-2xl border border-white/60 bg-white/70 p-3 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-transform duration-300 hover:scale-105 sm:-left-8 sm:w-48 sm:gap-4 sm:p-4 lg:-left-12">
             <div className="flex -space-x-2">
               <div className="w-10 h-10 rounded-full bg-slate-900 border-2 border-white flex items-center justify-center shadow-md">
                 <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>

@@ -20,9 +20,85 @@ export interface Job {
   scheduledAt?: string;
   createdAt: string;
   worker?: WorkerSummary;
+  offers?: JobOffer[];
+  contracts?: JobContract[];
+  checkoutUrl?: string;
+  providerPaymentId?: string;
   escrow?: {
     amount: number;
     status: 'HELD' | 'RELEASED' | 'REFUNDED';
+  };
+}
+
+export type JobOfferStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
+
+export type JobContractStatus = 'SENT' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED';
+
+export interface JobOffer {
+  id: string;
+  status: JobOfferStatus;
+  workerId?: string;
+  respondedAt?: string | null;
+  createdAt?: string;
+  chatRoom?: { id: string } | null;
+  worker?: Worker;
+  job?: Job & {
+    customer?: {
+      user: {
+        id: string;
+        name?: string;
+        profileImage?: string;
+      };
+    };
+  };
+}
+
+export interface JobContract {
+  id: string;
+  workerId: string;
+  cost: number;
+  timing: string;
+  scheduledAt: string;
+  scope: string;
+  notes?: string | null;
+  template: string;
+  status: JobContractStatus;
+  sentAt?: string;
+  acceptedAt?: string | null;
+  rejectedAt?: string | null;
+}
+
+export interface ChatRoom {
+  id: string;
+  jobId: string;
+  workerId: string;
+  worker?: {
+    user: {
+      id: string;
+      name?: string;
+      profileImage?: string;
+    };
+  };
+  customer?: {
+    user: {
+      id: string;
+      name?: string;
+      profileImage?: string;
+    };
+  };
+  messages?: ChatMessage[];
+}
+
+export interface ChatMessage {
+  id: string;
+  chatRoomId: string;
+  senderUserId: string;
+  message: string;
+  createdAt: string;
+  sender?: {
+    id: string;
+    name?: string;
+    role?: string;
   };
 }
 
@@ -91,4 +167,4 @@ export type {
   CreateReservationPayload,
   ListReservationsParams,
   CancelReservationPayload
-};
+};

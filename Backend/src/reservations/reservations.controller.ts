@@ -30,14 +30,15 @@ import {
   CancelReservationDto,
   ListReservationsDto,
   ListIncomingReservationsDto,
+  VerifyPickupDto,
+  RejectReservationDto,
 } from './dto/reservation.dto';
 import * as common from '../common';
 import { RolesGuard, Roles } from '../common';
 
 @ApiTags('Reservations')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard) // All reservation endpoints require auth
-// @UseGuards(MockAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
@@ -51,9 +52,12 @@ export class ReservationsController {
   @ApiOperation({
     summary: 'Create a reservation for a product',
     description:
-      'Atomically: checks stock, decrements it, creates the reservation, and holds escrow.',
+      'Atomically: checks stock, decrements it, creates the reservation, and returns a mock checkout URL for payment.',
   })
-  @ApiCreatedResponse({ description: 'Reservation created, escrow held' })
+  @ApiCreatedResponse({
+    description:
+      'Reservation created. Response includes checkoutUrl to redirect customer for payment.',
+  })
   @ApiConflictResponse({ description: 'Insufficient stock' })
   @ApiBadRequestResponse({ description: 'Product unavailable' })
   create(
@@ -77,27 +81,19 @@ export class ReservationsController {
     return this.reservationsService.findMyReservations(user.sub, query);
   }
 
-  @Patch(':id/pickup')
+  @Get('my/:id')
   @UseGuards(RolesGuard)
   @Roles(Role.CUSTOMER)
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Mark a reservation as picked up',
-    description:
-      'Transitions CONFIRMED → PICKED_UP and releases escrow to the organisation.',
+    summary:
+      'Get a single reservation detail (customer view — includes OTP when CONFIRMED)',
   })
-  @ApiOkResponse({
-    description: 'Reservation marked as picked up, escrow released',
-  })
-  @ApiBadRequestResponse({
-    description: 'Reservation is not in CONFIRMED state',
-  })
-  @ApiForbiddenResponse({ description: 'Reservation does not belong to you' })
-  markPickedUp(
+  @ApiNotFoundResponse({ description: 'Reservation not found' })
+  findMyById(
     @Param('id', ParseUUIDPipe) id: string,
     @common.CurrentUser() user: common.JwtPayload,
   ) {
-    return this.reservationsService.markPickedUp(id, user.sub);
+    return this.reservationsService.findMyReservationById(id, user.sub);
   }
 
   // ─── Organisation endpoints ───────────────────────────────────────────────
@@ -121,18 +117,55 @@ export class ReservationsController {
   @ApiOperation({
     summary: 'Confirm a pending reservation',
     description:
-      'Transitions PENDING → CONFIRMED. Only the owning org can do this.',
+      'Transitions PENDING → CONFIRMED. Generates a 4-digit pickup OTP for the customer. Only the owning org can do this.',
   })
-  @ApiOkResponse({ description: 'Reservation confirmed' })
-  @ApiBadRequestResponse({ description: 'Reservation is not in PENDING state' })
-  @ApiForbiddenResponse({
-    description: 'You do not own the product for this reservation',
-  })
+  @ApiOkResponse({ description: 'Reservation confirmed, OTP generated' })
   confirm(
     @Param('id', ParseUUIDPipe) id: string,
     @common.CurrentUser() user: common.JwtPayload,
   ) {
     return this.reservationsService.confirm(id, user.sub);
+  }
+
+  @Patch(':id/reject')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ORGANISATION)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reject a pending reservation',
+    description:
+      'Org rejects a PENDING reservation. Restores stock and refunds escrow to customer virtual wallet.',
+  })
+  @ApiOkResponse({
+    description: 'Reservation rejected, stock restored, escrow refunded',
+  })
+  reject(
+    @Param('id', ParseUUIDPipe) id: string,
+    @common.CurrentUser() user: common.JwtPayload,
+    @Body() dto: RejectReservationDto,
+  ) {
+    return this.reservationsService.reject(id, user.sub, dto);
+  }
+
+  @Patch(':id/verify-pickup')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ORGANISATION)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Verify customer OTP and mark reservation as picked up',
+    description:
+      'Org enters the 4-digit OTP provided by the customer. On success: CONFIRMED → PICKED_UP and escrow released to org virtual wallet.',
+  })
+  @ApiOkResponse({
+    description: 'Pickup verified, escrow released to org wallet',
+  })
+  @ApiBadRequestResponse({ description: 'Invalid or expired OTP' })
+  verifyPickup(
+    @Param('id', ParseUUIDPipe) id: string,
+    @common.CurrentUser() user: common.JwtPayload,
+    @Body() dto: VerifyPickupDto,
+  ) {
+    return this.reservationsService.verifyOtpAndPickup(id, user.sub, dto);
   }
 
   // ─── Shared: cancel (customer or org) ────────────────────────────────────
@@ -142,12 +175,12 @@ export class ReservationsController {
   @ApiOperation({
     summary: 'Cancel a reservation',
     description:
-      'Either customer or org can cancel. Restores stock and refunds escrow to customer.',
+      'Either customer or org can cancel. Restores stock and refunds escrow to customer virtual wallet.',
   })
   @ApiOkResponse({
-    description: 'Reservation cancelled, stock restored, escrow refunded',
+    description:
+      'Reservation cancelled, stock restored, escrow refunded to wallet',
   })
-  @ApiBadRequestResponse({ description: 'Cannot cancel from current state' })
   cancel(
     @Param('id', ParseUUIDPipe) id: string,
     @common.CurrentUser() user: common.JwtPayload,
@@ -161,7 +194,8 @@ export class ReservationsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a single reservation by ID' })
   @ApiOkResponse({
-    description: 'Reservation detail with product, customer, and escrow info',
+    description:
+      'Reservation detail with product, customer, escrow, and payment info',
   })
   @ApiNotFoundResponse({ description: 'Reservation not found' })
   @ApiForbiddenResponse({ description: 'Access denied to this reservation' })

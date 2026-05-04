@@ -75,6 +75,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleForcedLogout = () => {
+      clearAuthTokens();
+      setUser(null);
+    };
+
+    window.addEventListener('auth:suspended', handleForcedLogout);
+    window.addEventListener('auth:logout', handleForcedLogout);
+
+    return () => {
+      window.removeEventListener('auth:suspended', handleForcedLogout);
+      window.removeEventListener('auth:logout', handleForcedLogout);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const syncSession = async () => {
+      try {
+        const profile = await authApi.getProfile();
+        setUser(profile);
+      } catch {
+        clearAuthTokens();
+        setUser(null);
+      }
+    };
+
+    const handleFocus = () => {
+      void syncSession();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void syncSession();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,

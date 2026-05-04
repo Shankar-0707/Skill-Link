@@ -12,10 +12,9 @@ export class MockAuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<MockRequest>();
 
-    const headers = request.headers;
-    const sub = headers['x-mock-user-id'];
-    const email = headers['x-mock-email'];
-    const role = headers['x-mock-role'];
+    const sub = request.get('x-mock-user-id');
+    const email = request.get('x-mock-email');
+    const role = request.get('x-mock-role');
 
     request.user = {
       sub: (typeof sub === 'string' ? sub : undefined) ?? 'user-uuid-cust',

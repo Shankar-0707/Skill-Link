@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  BarChart3,
   Briefcase,
   Building2,
   CheckCircle2,
@@ -11,11 +12,19 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../../features/admin/api/admin';
 import type {
+  AdminAnalyticsData,
   AdminDashboardData,
   MetricSummary,
   UserMetrics,
 } from '../../features/admin/types';
 import { cn } from '@/shared/utils/cn';
+import {
+  AnalyticsBarChart,
+  AnalyticsChartCard,
+  AnalyticsLineChart,
+  AnalyticsPieChart,
+  analyticsPalette,
+} from '@/features/admin/components/analytics/AdminAnalyticsWidgets';
 
 const formatTrend = (trend: number) => {
   const absoluteValue = Math.abs(trend).toFixed(1);
@@ -123,17 +132,23 @@ export const AdminDashboard = () => {
   const [metricsError, setMetricsError] = useState<string | null>(null);
   const [jobsError, setJobsError] = useState<string | null>(null);
   const [reservationsError, setReservationsError] = useState<string | null>(null);
+  const [analytics, setAnalytics] = useState<AdminAnalyticsData | null>(null);
 
   useEffect(() => {
     let active = true;
 
     const loadDashboard = async () => {
       try {
-        const [metricsResponse, activeJobsResponse, reservationsResponse] =
-          await Promise.all([
+        const [
+          metricsResponse,
+          activeJobsResponse,
+          reservationsResponse,
+          analyticsResponse,
+        ] = await Promise.all([
           adminApi.getDashboardMetrics(),
           adminApi.getActiveJobs(),
           adminApi.getReservations(),
+          adminApi.getAnalytics(),
         ]);
 
         if (!active) {
@@ -143,6 +158,7 @@ export const AdminDashboard = () => {
         setMetrics(metricsResponse);
         setRecentJobs(activeJobsResponse.slice(0, 4));
         setRecentReservations(reservationsResponse.slice(0, 4));
+        setAnalytics(analyticsResponse);
         setMetricsError(null);
         setJobsError(null);
         setReservationsError(null);
@@ -218,6 +234,122 @@ export const AdminDashboard = () => {
               icon={Building2}
             />
           </div>
+
+          {analytics ? (
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <AnalyticsChartCard
+                title="Platform Momentum"
+                description="The fastest read on monthly users, jobs, and reservations."
+                className="xl:col-span-2"
+              >
+                <AnalyticsLineChart
+                  data={analytics.monthlyActivity.map((month) => ({
+                    month: month.label,
+                    users: month.users,
+                    jobs: month.jobs,
+                    reservations: month.reservations,
+                  }))}
+                  xKey="month"
+                  lines={[
+                    { dataKey: 'users', name: 'Users', color: analyticsPalette[1] },
+                    { dataKey: 'jobs', name: 'Jobs', color: analyticsPalette[0] },
+                    {
+                      dataKey: 'reservations',
+                      name: 'Reservations',
+                      color: analyticsPalette[2],
+                    },
+                  ]}
+                />
+              </AnalyticsChartCard>
+
+              <AnalyticsChartCard
+                title="Jobs by Status"
+                description="Live operational split across the full job pipeline."
+              >
+                <AnalyticsPieChart
+                  data={analytics.jobsByStatus.map((item) => ({
+                    name: item.label,
+                    value: item.value,
+                  }))}
+                  dataKey="value"
+                  nameKey="name"
+                />
+              </AnalyticsChartCard>
+
+              <AnalyticsChartCard
+                title="Top Job Categories"
+                description="The categories creating the most demand right now."
+              >
+                <AnalyticsBarChart
+                  data={analytics.jobsByCategory.map((item) => ({
+                    name: item.label,
+                    value: item.value,
+                  }))}
+                  xKey="name"
+                  bars={[{ dataKey: 'value', name: 'Jobs', color: analyticsPalette[3] }]}
+                />
+              </AnalyticsChartCard>
+
+              <AnalyticsChartCard
+                title="Reservation Flow"
+                description="Reservation movement from pending to pickup, including churn."
+              >
+                <AnalyticsBarChart
+                  data={analytics.reservationFlow.map((item) => ({
+                    name: item.label,
+                    value: item.value,
+                  }))}
+                  xKey="name"
+                  bars={[
+                    { dataKey: 'value', name: 'Reservations', color: analyticsPalette[5] },
+                  ]}
+                />
+              </AnalyticsChartCard>
+
+              <div className="rounded-2xl border border-border bg-background p-5 shadow-sm shadow-slate-950/5">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-headline font-bold text-foreground">
+                      Quick Insights
+                    </h3>
+                    <p className="mt-1 text-sm font-body text-muted-foreground">
+                      A few key analytics pulled forward for the main admin view.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigate('/admin/analytics')}
+                    className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-label font-semibold text-foreground hover:bg-surface-container transition-colors"
+                  >
+                    <BarChart3 size={15} />
+                    Explore
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {analytics.highlights.map((highlight, index) => (
+                    <div
+                      key={highlight.label}
+                      className="rounded-xl border border-border px-4 py-3"
+                    >
+                      <p
+                        className="text-[11px] font-label uppercase tracking-wider"
+                        style={{
+                          color: analyticsPalette[index % analyticsPalette.length],
+                        }}
+                      >
+                        {highlight.label}
+                      </p>
+                      <p className="mt-1 text-base font-headline font-bold text-foreground">
+                        {highlight.value}
+                      </p>
+                      <p className="mt-1 text-sm font-body text-muted-foreground">
+                        {highlight.detail}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-background rounded-xl border border-border overflow-hidden flex flex-col">

@@ -27,13 +27,6 @@ export const customerReservationService = {
     return response.data.data || response.data;
   },
 
-  /**
-   * Mark a reservation as picked up (CONFIRMED -> PICKED_UP).
-   */
-  markPickedUp: async (id: string): Promise<Reservation> => {
-    const response = await api.patch(`/reservations/${id}/pickup`);
-    return response.data.data || response.data;
-  },
 
   /**
    * Cancel a reservation with a reason.

@@ -13,9 +13,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       <Sidebar />
 
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Navbar />
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto p-4 pb-24 sm:p-6 md:p-8">
           <div className="max-w-7xl mx-auto space-y-8">
             {children}
           </div>

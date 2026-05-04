@@ -87,9 +87,10 @@ export const CreateProduct: React.FC = () => {
       } as CreateProductPayload);
       setIsSuccess(true);
       setTimeout(() => navigate("/organisation/products/see_all"), 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to create product", err);
-      setError(err?.response?.data?.message || "An error occurred while creating the product. Please check your inputs.");
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error?.response?.data?.message || "An error occurred while creating the product. Please check your inputs.");
     } finally {
       setIsSubmitting(false);
     }

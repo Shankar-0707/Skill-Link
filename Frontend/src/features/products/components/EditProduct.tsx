@@ -90,9 +90,10 @@ export const EditProduct: React.FC = () => {
       } as UpdateProductPayload);
       setIsSuccess(true);
       setTimeout(() => navigate("/organisation/products/see_all"), 1800);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
       setError(
-        err?.response?.data?.message ||
+        error?.response?.data?.message ||
           "An error occurred while updating the product."
       );
     } finally {

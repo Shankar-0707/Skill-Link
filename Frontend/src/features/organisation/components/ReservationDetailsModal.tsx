@@ -45,7 +45,6 @@ export const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = (
     }
   };
 
-  const totalAmount = reservation.product.price * reservation.quantity;
   const productImages = reservation.product.images ?? [];
 
   return (
@@ -227,14 +226,14 @@ export const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = (
                 <span className="font-bold">× {reservation.quantity}</span>
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-border text-base font-bold">
-                <span>Total</span>
-                <span className="text-xl font-black text-foreground">₹{totalAmount.toLocaleString()}</span>
+                <span className="text-emerald-600 uppercase tracking-wider text-[10px] font-black">Net Earnings</span>
+                <span className="text-xl font-black text-emerald-600">₹{(reservation.originalAmount ?? (reservation.product.price * reservation.quantity)).toLocaleString('en-IN', { minimumFractionDigits: 0 })}</span>
               </div>
               {reservation.escrow && (
                 <div className="flex justify-between items-center text-sm font-medium pt-1">
-                  <span className="text-muted-foreground">Escrow</span>
+                  <span className="text-muted-foreground">Payment Status</span>
                   <Badge variant={reservation.escrow.status === 'HELD' ? 'info' : 'success'} className="font-bold text-xs">
-                    {reservation.escrow.status}
+                    {reservation.escrow.status === 'HELD' ? 'SECURED' : reservation.escrow.status}
                   </Badge>
                 </div>
               )}

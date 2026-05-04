@@ -4,7 +4,7 @@ import {
   LayoutGrid,
   Search,
   Briefcase,
-  IndianRupee,
+  Wallet,
   HelpCircle,
   Settings,
   Zap,
@@ -13,18 +13,16 @@ import {
 
 import { useAuth } from '../../../../app/context/useAuth';
 
-interface WorkerSidebarProps {
-  // Add any needed props here if any remain
-}
+
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/worker/dashboard' },
   { id: 'available-jobs', label: 'Find Jobs', icon: Search, path: '/worker/available-jobs' },
   { id: 'my-assignments', label: 'My Work', icon: Briefcase, path: '/worker/my-assignments' },
-  { id: 'earnings', label: 'Earnings', icon: IndianRupee, path: '/worker/earnings' },
+  { id: 'wallet', label: 'My Wallet', icon: Wallet, path: '/worker/wallet' },
 ];
 
-export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
+export const WorkerSidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
@@ -33,7 +31,7 @@ export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
     try {
       if (window.confirm('Are you sure you want to logout?')) {
         await logout();
-        navigate('/login');
+        window.location.href = '/login';
       }
     } catch (err) {
       console.error('Logout failed:', err);
@@ -41,7 +39,7 @@ export const WorkerSidebar: React.FC<WorkerSidebarProps> = () => {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[200px] bg-white border-r border-gray-100 flex flex-col z-20">
+    <aside className="fixed left-0 top-0 z-20 hidden h-screen w-[200px] flex-col border-r border-gray-100 bg-white md:flex">
       <div className="px-5 py-5 border-b border-gray-100">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">

@@ -5,6 +5,7 @@ import {
   getRefreshToken,
   setAuthTokens,
 } from "../../features/auth/utils/tokenStorage";
+import { setAuthNotice } from "../../features/auth/utils/authNotice";
 
 function normalizeApiUrl(rawUrl?: string) {
   const fallbackUrl = "http://localhost:3000/api/v1";
@@ -31,6 +32,17 @@ type RetriableRequestConfig = Parameters<typeof api.request>[0] & {
   _retry?: boolean;
 };
 
+function handleSuspendedSession(message?: string) {
+  clearAuthTokens();
+  setAuthNotice({
+    type: 'suspended',
+    message:
+      message ||
+      'Account has been suspended. Please contact linkskillofficial@gmail.com for support.',
+  });
+  window.dispatchEvent(new CustomEvent('auth:suspended'));
+}
+
 api.interceptors.request.use((config) => {
   const token = getAccessToken();
 
@@ -46,6 +58,15 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config as RetriableRequestConfig | undefined;
     const refreshToken = getRefreshToken();
+    const errorCode = error.response?.data?.code;
+    const errorMessage = error.response?.data?.message;
+
+    if (errorCode === 'ACCOUNT_SUSPENDED') {
+      handleSuspendedSession(
+        Array.isArray(errorMessage) ? errorMessage[0] : errorMessage,
+      );
+      throw error;
+    }
 
     if (
       error.response?.status !== 401 ||
@@ -79,7 +100,24 @@ api.interceptors.response.use(
 
       return api(originalRequest);
     } catch (refreshError) {
-      clearAuthTokens();
+      const refreshErrorCode = axios.isAxiosError(refreshError)
+        ? refreshError.response?.data?.code
+        : undefined;
+      const refreshErrorMessage = axios.isAxiosError(refreshError)
+        ? refreshError.response?.data?.message
+        : undefined;
+
+      if (refreshErrorCode === 'ACCOUNT_SUSPENDED') {
+        handleSuspendedSession(
+          Array.isArray(refreshErrorMessage)
+            ? refreshErrorMessage[0]
+            : refreshErrorMessage,
+        );
+      } else {
+        clearAuthTokens();
+        window.dispatchEvent(new CustomEvent('auth:logout'));
+      }
+
       throw refreshError;
     }
   },

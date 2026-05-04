@@ -5,11 +5,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '../../prisma/prisma.service';
 import { JwtPayload } from '../types/jwt-payload.type';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<{
@@ -23,11 +27,40 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      request.user = await this.jwtService.verifyAsync<JwtPayload>(token, {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
         secret: process.env.JWT_ACCESS_SECRET ?? 'replace-this-access-secret',
       });
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+        select: {
+          id: true,
+          role: true,
+          isActive: true,
+          deletedAt: true,
+          isBlacklisted: true,
+        },
+      });
+
+      if (!user || !user.isActive || user.deletedAt) {
+        throw new UnauthorizedException('User account is inactive.');
+      }
+
+      if (user.isBlacklisted) {
+        throw new UnauthorizedException({
+          message:
+            'Account has been suspended. Please contact linkskillofficial@gmail.com for support.',
+          code: 'ACCOUNT_SUSPENDED',
+        });
+      }
+
+      request.user = payload;
       return true;
-    } catch {
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new UnauthorizedException('Invalid or expired access token.');
     }
   }

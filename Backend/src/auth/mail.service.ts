@@ -1,14 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
 
 // Extend global process.env types with custom environment variables
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
     interface ProcessEnv {
       // Email Configuration
-      MAIL_MODE?: 'resend' | 'log';
+      MAIL_MODE?: 'resend' | 'smtp' | 'log';
       RESEND_API_KEY?: string;
       MAIL_FROM?: string;
+      CONTACT_INBOX_EMAIL?: string;
+
+      // SMTP Configuration
+      SMTP_HOST?: string;
+      SMTP_PORT?: string;
+      SMTP_SECURE?: string; // 'true' or 'false'
+      SMTP_USER?: string;
+      SMTP_PASS?: string;
 
       // Email URLs & Expiration
       VERIFY_EMAIL_URL?: string;
@@ -58,24 +68,53 @@ type ResetMailInput = {
   expiresInMinutes: number;
 };
 
+type ContactInquiryMailInput = {
+  fullName: string;
+  email: string;
+  message: string;
+};
+
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private resend: Resend | null = null;
+  private transporter: nodemailer.Transporter | null = null;
 
   constructor() {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (apiKey) {
-      this.resend = new Resend(apiKey);
+    this.initClients();
+  }
+
+  private initClients() {
+    const mode = process.env.MAIL_MODE ?? 'log';
+
+    if (mode === 'resend') {
+      const apiKey = process.env.RESEND_API_KEY;
+      if (apiKey) {
+        this.resend = new Resend(apiKey);
+      } else {
+        this.logger.warn('MAIL_MODE=resend but RESEND_API_KEY is missing');
+      }
+    } else if (mode === 'smtp') {
+      const host = process.env.SMTP_HOST;
+      const user = process.env.SMTP_USER;
+      const pass = process.env.SMTP_PASS;
+
+      if (host && user && pass) {
+        this.transporter = nodemailer.createTransport({
+          host,
+          port: parseInt(process.env.SMTP_PORT ?? '587', 10),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: { user, pass },
+        });
+      } else {
+        this.logger.warn('MAIL_MODE=smtp but SMTP credentials are incomplete');
+      }
     }
   }
 
   async sendEmailVerification(input: VerificationMailInput) {
     const subject = 'Verify your Skill-Link email';
     const greeting = input.name ? `Hi ${input.name},` : 'Hi,';
-    const verificationLink = input.verificationUrl
-      ? `<a href="${input.verificationUrl}">Verify your email</a>`
-      : `<strong>${input.token}</strong>`;
     const plainVerificationLink = input.verificationUrl
       ? `Verification link: ${input.verificationUrl}`
       : `Verification token: ${input.token}`;
@@ -129,6 +168,40 @@ export class MailService {
     });
   }
 
+  async sendContactInquiry(input: ContactInquiryMailInput) {
+    const inboxEmail =
+      process.env.CONTACT_INBOX_EMAIL ?? 'linkskillofficial@gmail.com';
+    const submittedAt = new Date().toISOString();
+
+    await this.sendMail({
+      to: inboxEmail,
+      subject: `New Skill-Link contact inquiry from ${input.fullName}`,
+      text: [
+        'A new contact inquiry was submitted on the Skill-Link landing page.',
+        '',
+        `Name: ${input.fullName}`,
+        `Email: ${input.email}`,
+        `Submitted At (UTC): ${submittedAt}`,
+        '',
+        'Message:',
+        input.message,
+      ].join('\n'),
+      html: this.buildHtmlEmail({
+        greeting: 'Hi Team,',
+        bodyHtml: `
+          <p>A new contact inquiry was submitted on the Skill-Link landing page.</p>
+          <p><strong>Name:</strong> ${this.escapeHtml(input.fullName)}</p>
+          <p><strong>Email:</strong> ${this.escapeHtml(input.email)}</p>
+          <p><strong>Submitted At (UTC):</strong> ${submittedAt}</p>
+          <p style="margin:20px 0 8px;"><strong>Message:</strong></p>
+          <div style="padding:14px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;white-space:pre-wrap;">${this.escapeHtml(
+            input.message,
+          )}</div>
+        `,
+      }),
+    });
+  }
+
   private async sendMail(options: {
     to: string;
     subject: string;
@@ -145,7 +218,34 @@ export class MailService {
       return;
     }
 
+    if (mode === 'smtp') {
+      return this.sendMailViaSmtp(options);
+    }
+
     return this.sendMailViaResend(options);
+  }
+
+  private async sendMailViaSmtp(options: {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+  }) {
+    if (!this.transporter) {
+      throw new Error('SMTP transporter not initialised. Check credentials.');
+    }
+
+    const from = process.env.MAIL_FROM ?? process.env.SMTP_USER;
+    
+    await this.transporter.sendMail({
+      from,
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+    });
+
+    this.logger.log(`Email sent via SMTP to ${options.to}`);
   }
 
   private async sendMailViaResend(options: {
@@ -243,5 +343,14 @@ export class MailService {
   </table>
 </body>
 </html>`.trim();
+  }
+
+  private escapeHtml(value: string) {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 }

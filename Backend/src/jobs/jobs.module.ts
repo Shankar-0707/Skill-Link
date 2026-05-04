@@ -4,9 +4,19 @@ import { JobsService } from './jobs.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { KycModule } from '../kyc/kyc.module';
+import { PaymentsModule } from '../payments/payments.module';
+import { EscrowModule } from '../escrow/escrow.module';
+import { RealtimeModule } from '../realtime/realtime.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, KycModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    KycModule,
+    PaymentsModule,
+    EscrowModule,
+    RealtimeModule,
+  ],
   controllers: [JobsController],
   providers: [JobsService],
   exports: [JobsService],
