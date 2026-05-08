@@ -1240,6 +1240,18 @@ export class JobsService {
         });
       }
 
+      // Cleanup temporary negotiation data (no longer needed after payment)
+      // Deletion order: ChatMessage → ChatRoom → JobContract (FK constraints)
+      await tx.chatMessage.deleteMany({
+        where: { chatRoom: { jobId } },
+      });
+      await tx.chatRoom.deleteMany({
+        where: { jobId },
+      });
+      await tx.jobContract.deleteMany({
+        where: { jobId },
+      });
+
       return {
         message: 'Job confirmed. Escrow released to worker wallet.',
         jobId,
