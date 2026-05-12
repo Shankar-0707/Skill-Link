@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
 
 // Extend global process.env types with custom environment variables
 declare global {
@@ -7,10 +8,17 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       // Email Configuration
-      MAIL_MODE?: 'resend' | 'log';
+      MAIL_MODE?: 'resend' | 'smtp' | 'log';
       RESEND_API_KEY?: string;
       MAIL_FROM?: string;
       CONTACT_INBOX_EMAIL?: string;
+
+      // SMTP Configuration
+      SMTP_HOST?: string;
+      SMTP_PORT?: string;
+      SMTP_SECURE?: string; // 'true' or 'false'
+      SMTP_USER?: string;
+      SMTP_PASS?: string;
 
       // Email URLs & Expiration
       VERIFY_EMAIL_URL?: string;
@@ -70,11 +78,37 @@ type ContactInquiryMailInput = {
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private resend: Resend | null = null;
+  private transporter: nodemailer.Transporter | null = null;
 
   constructor() {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (apiKey) {
-      this.resend = new Resend(apiKey);
+    this.initClients();
+  }
+
+  private initClients() {
+    const mode = process.env.MAIL_MODE ?? 'log';
+
+    if (mode === 'resend') {
+      const apiKey = process.env.RESEND_API_KEY;
+      if (apiKey) {
+        this.resend = new Resend(apiKey);
+      } else {
+        this.logger.warn('MAIL_MODE=resend but RESEND_API_KEY is missing');
+      }
+    } else if (mode === 'smtp') {
+      const host = process.env.SMTP_HOST;
+      const user = process.env.SMTP_USER;
+      const pass = process.env.SMTP_PASS;
+
+      if (host && user && pass) {
+        this.transporter = nodemailer.createTransport({
+          host,
+          port: parseInt(process.env.SMTP_PORT ?? '587', 10),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: { user, pass },
+        });
+      } else {
+        this.logger.warn('MAIL_MODE=smtp but SMTP credentials are incomplete');
+      }
     }
   }
 
@@ -184,7 +218,34 @@ export class MailService {
       return;
     }
 
+    if (mode === 'smtp') {
+      return this.sendMailViaSmtp(options);
+    }
+
     return this.sendMailViaResend(options);
+  }
+
+  private async sendMailViaSmtp(options: {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+  }) {
+    if (!this.transporter) {
+      throw new Error('SMTP transporter not initialised. Check credentials.');
+    }
+
+    const from = process.env.MAIL_FROM ?? process.env.SMTP_USER;
+    
+    await this.transporter.sendMail({
+      from,
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+    });
+
+    this.logger.log(`Email sent via SMTP to ${options.to}`);
   }
 
   private async sendMailViaResend(options: {

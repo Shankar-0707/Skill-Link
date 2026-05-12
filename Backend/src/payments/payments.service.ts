@@ -151,7 +151,8 @@ export class PaymentsService {
     if (
       payment.jobId &&
       payment.job?.status !== JobStatus.POSTED &&
-      payment.job?.status !== JobStatus.ASSIGNED
+      payment.job?.status !== JobStatus.ASSIGNED &&
+      payment.job?.status !== JobStatus.COMPLETED
     ) {
       await this.prisma.payment.update({
         where: { id: payment.id },

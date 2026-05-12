@@ -274,6 +274,19 @@ export class JobsController {
   }
 
   /**
+   * POST /jobs/:id/pay
+   * Customer initiates payment for a job (e.g. after completion).
+   */
+  @Post(':id/pay')
+  @Roles('CUSTOMER')
+  async createJobPayment(
+    @Param('id') jobId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return await this.jobsService.createJobPayment(jobId, userId);
+  }
+
+  /**
    * PATCH /jobs/:id/report-no-show
    * Customer cancels an assigned job when the worker does not arrive/start.
    * Refunds held escrow and frees the worker after a scheduled-time grace window.

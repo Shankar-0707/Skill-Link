@@ -122,6 +122,7 @@ export const ReservationDetailView: React.FC = () => {
   }
 
   const productImages = reservation.product.images ?? [];
+  const baseAmount = reservation.product.price * reservation.quantity;
 
   return (
     <div className="max-w-5xl mx-auto pb-20 px-4 sm:px-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
