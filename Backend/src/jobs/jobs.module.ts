@@ -7,6 +7,7 @@ import { KycModule } from '../kyc/kyc.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { EscrowModule } from '../escrow/escrow.module';
 import { RealtimeModule } from '../realtime/realtime.module';
+import { JobLifecycleTask } from './job-lifecycle.task';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { RealtimeModule } from '../realtime/realtime.module';
     RealtimeModule,
   ],
   controllers: [JobsController],
-  providers: [JobsService],
+  providers: [JobsService, JobLifecycleTask],
   exports: [JobsService],
 })
 export class JobsModule {}
