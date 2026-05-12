@@ -3,7 +3,9 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
+import { EscrowStatus, PaymentStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { KycGateService } from '../kyc/kyc-gate.service';
 import { PaymentsService } from '../payments/payments.service';
@@ -13,9 +15,15 @@ import { REALTIME_EVENTS } from '../realtime/realtime.events';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { CreateJobContractDto } from './dto/create-job-contract.dto';
+import { ReportJobNoShowDto } from './dto/report-job-no-show.dto';
+
+const OPEN_JOB_TTL_MS = 72 * 60 * 60 * 1000;
+const JOB_NO_SHOW_GRACE_MS = 2 * 60 * 60 * 1000;
 
 @Injectable()
 export class JobsService {
+  private readonly logger = new Logger(JobsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly kycGate: KycGateService,
@@ -122,6 +130,18 @@ export class JobsService {
     ]
       .filter(Boolean)
       .join('\n');
+  }
+
+  private getOpenJobExpiryDate(job: {
+    createdAt: Date;
+    scheduledAt: Date | null;
+  }) {
+    return job.scheduledAt ?? new Date(job.createdAt.getTime() + OPEN_JOB_TTL_MS);
+  }
+
+  private canReportNoShow(job: { scheduledAt: Date | null; updatedAt: Date }) {
+    const anchor = job.scheduledAt ?? job.updatedAt;
+    return Date.now() >= anchor.getTime() + JOB_NO_SHOW_GRACE_MS;
   }
 
   // ─────────────────────────────────────────────
@@ -440,12 +460,30 @@ export class JobsService {
         'Only POSTED jobs can be cancelled. Contact support for assigned jobs.',
       );
 
-    return this.prisma.job.update({
-      where: { id: jobId },
-      data: {
-        status: 'CANCELLED',
-        deletedAt: new Date(),
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.job.update({
+        where: { id: jobId },
+        data: {
+          status: 'CANCELLED',
+        },
+      });
+
+      await tx.jobOffer.updateMany({
+        where: { jobId, status: { in: ['PENDING', 'ACCEPTED'] } },
+        data: { status: 'WITHDRAWN' },
+      });
+
+      await tx.jobContract.updateMany({
+        where: { jobId, status: 'SENT' },
+        data: { status: 'CANCELLED' },
+      });
+
+      await tx.payment.updateMany({
+        where: { jobId, status: PaymentStatus.INITIATED },
+        data: { status: PaymentStatus.FAILED },
+      });
+
+      return updated;
     });
   }
 
@@ -1250,5 +1288,155 @@ export class JobsService {
         escrowReleased: !!job.escrow,
       };
     });
+  }
+
+  async reportWorkerNoShow(
+    jobId: string,
+    userId: string,
+    dto: ReportJobNoShowDto,
+  ) {
+    const customerId = await this.getCustomerId(userId);
+
+    const job = await this.prisma.job.findUnique({
+      where: { id: jobId, deletedAt: null },
+      include: { escrow: true, worker: { select: { userId: true } } },
+    });
+
+    if (!job) throw new NotFoundException('Job not found');
+    if (job.customerId !== customerId)
+      throw new ForbiddenException('You do not own this job');
+    if (job.status !== 'ASSIGNED')
+      throw new BadRequestException(
+        'Only assigned jobs can be cancelled as worker no-show',
+      );
+    if (!this.canReportNoShow(job)) {
+      throw new BadRequestException(
+        'You can report a no-show after the scheduled time plus a 2 hour grace period',
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.job.update({
+        where: { id: jobId },
+        data: {
+          status: 'CANCELLED',
+        },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          workerId: true,
+          updatedAt: true,
+        },
+      });
+
+      if (job.workerId) {
+        await tx.worker.update({
+          where: { id: job.workerId },
+          data: { isAvailable: true },
+        });
+      }
+
+      if (job.escrow?.status === EscrowStatus.HELD) {
+        await this.escrowService.refundEscrow(job.escrow.id, tx);
+      }
+
+      await tx.payment.updateMany({
+        where: { jobId, status: PaymentStatus.INITIATED },
+        data: { status: PaymentStatus.FAILED },
+      });
+
+      await tx.jobOffer.updateMany({
+        where: { jobId, status: { in: ['PENDING', 'ACCEPTED'] } },
+        data: { status: 'WITHDRAWN' },
+      });
+
+      await tx.jobContract.updateMany({
+        where: { jobId, status: 'SENT' },
+        data: { status: 'CANCELLED' },
+      });
+
+      this.logger.log(
+        `Job ${jobId} cancelled as worker no-show by customer ${userId}. Reason: ${dto.reason ?? 'none'}.`,
+      );
+
+      if (job.worker?.userId) {
+        this.realtime.emitToUser(job.worker.userId, REALTIME_EVENTS.JOB_UPDATED, {
+          jobId,
+          status: 'CANCELLED',
+          reason: 'NO_SHOW',
+        });
+      }
+
+      return {
+        ...updated,
+        message:
+          'Job cancelled as worker no-show. Any held escrow has been refunded to your wallet.',
+      };
+    });
+  }
+
+  async cancelStaleOpenJobs(): Promise<number> {
+    const candidates = await this.prisma.job.findMany({
+      where: {
+        status: 'POSTED',
+        deletedAt: null,
+      },
+      include: {
+        escrow: true,
+        offers: { select: { status: true } },
+      },
+    });
+
+    const overdueJobs = candidates.filter((job) => {
+      const hasAcceptedWorker = job.offers.some(
+        (offer) => offer.status === 'ACCEPTED',
+      );
+      if (hasAcceptedWorker) return false;
+      return this.getOpenJobExpiryDate(job) < new Date();
+    });
+
+    let cancelledCount = 0;
+
+    for (const job of overdueJobs) {
+      try {
+        await this.prisma.$transaction(async (tx) => {
+          await tx.job.update({
+            where: { id: job.id },
+            data: {
+              status: 'CANCELLED',
+            },
+          });
+
+          await tx.jobOffer.updateMany({
+            where: { jobId: job.id, status: { in: ['PENDING', 'ACCEPTED'] } },
+            data: { status: 'WITHDRAWN' },
+          });
+
+          await tx.jobContract.updateMany({
+            where: { jobId: job.id, status: 'SENT' },
+            data: { status: 'CANCELLED' },
+          });
+
+          await tx.payment.updateMany({
+            where: { jobId: job.id, status: PaymentStatus.INITIATED },
+            data: { status: PaymentStatus.FAILED },
+          });
+
+          if (job.escrow?.status === EscrowStatus.HELD) {
+            await this.escrowService.refundEscrow(job.escrow.id, tx);
+          }
+        });
+
+        cancelledCount++;
+        this.logger.log(`Stale open job ${job.id} cancelled automatically.`);
+      } catch (err) {
+        this.logger.error(
+          `Failed to cancel stale job ${job.id}: ${(err as Error).message}`,
+        );
+      }
+    }
+
+    return cancelledCount;
   }
 }

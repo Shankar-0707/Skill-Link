@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, IndianRupee, Calendar, Shield, Loader2, MessageSquare, FileText } from 'lucide-react';
+import { ArrowLeft, IndianRupee, Calendar, Shield, Loader2, MessageSquare, FileText, AlertTriangle } from 'lucide-react';
 import type { ChatRoom, Job, JobOffer } from '../../features/customer/types';
 import { StatusBadge, SectionHeader, EmptyState } from '../../features/customer/components/ui';
 import { Layout } from '../../features/customer/components/layout/Layout';
@@ -101,6 +101,29 @@ export const JobDetailPage: React.FC = () => {
       navigate('/user/my-jobs');
     } catch (err) {
       console.error('Failed to cancel job:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleReportNoShow = async () => {
+    if (!job) return;
+    const reason = window.prompt(
+      'Tell us what happened. This will cancel the job and refund any held escrow if the grace period has passed.',
+      'Worker did not arrive or start the job.',
+    );
+    if (reason === null) return;
+
+    try {
+      setRefreshing(true);
+      await jobService.reportWorkerNoShow(job.id, reason.trim() || undefined);
+      await fetchJob(job.id);
+    } catch (err: any) {
+      console.error('Failed to report no-show:', err);
+      window.alert(
+        err.response?.data?.message ||
+          'Could not report this job yet. Please try again later.',
+      );
     } finally {
       setRefreshing(false);
     }
@@ -279,6 +302,27 @@ export const JobDetailPage: React.FC = () => {
                 In Progress
               </button>
             </div>
+            {job.status === 'ASSIGNED' && (
+              <div className="mt-3 p-4 border border-red-100 bg-red-50 rounded-xl flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex items-start gap-2 flex-1">
+                  <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-label font-bold text-red-700">Worker did not show?</p>
+                    <p className="text-xs font-body text-red-600">
+                      You can cancel as no-show after the scheduled time plus a 2 hour grace period.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={refreshing}
+                  onClick={handleReportNoShow}
+                  className="px-4 py-2 border border-red-200 bg-white text-red-700 text-xs font-label font-semibold rounded-lg hover:bg-red-100 disabled:opacity-60"
+                >
+                  Report No-Show
+                </button>
+              </div>
+            )}
           </div>
         )}
 

@@ -20,6 +20,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { CreateJobContractDto } from './dto/create-job-contract.dto';
+import { ReportJobNoShowDto } from './dto/report-job-no-show.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('jobs')
@@ -270,5 +271,20 @@ export class JobsController {
     @CurrentUser('sub') userId: string,
   ) {
     return this.jobsService.confirmJobCompletion(jobId, userId);
+  }
+
+  /**
+   * PATCH /jobs/:id/report-no-show
+   * Customer cancels an assigned job when the worker does not arrive/start.
+   * Refunds held escrow and frees the worker after a scheduled-time grace window.
+   */
+  @Patch(':id/report-no-show')
+  @Roles('CUSTOMER')
+  reportNoShow(
+    @Param('id', ParseUUIDPipe) jobId: string,
+    @CurrentUser('sub') userId: string,
+    @Body() dto: ReportJobNoShowDto,
+  ) {
+    return this.jobsService.reportWorkerNoShow(jobId, userId, dto);
   }
 }

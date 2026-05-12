@@ -67,6 +67,13 @@ export const jobService = {
     return response.data.data;
   },
 
+  reportWorkerNoShow: async (id: string, reason?: string): Promise<Job> => {
+    const response = await api.patch<ApiResponse<Job>>(`/jobs/${id}/report-no-show`, {
+      reason,
+    });
+    return response.data.data;
+  },
+
   getAvailableJobs: async (): Promise<Job[]> => {
     const response = await api.get<ApiResponse<Job[]>>("/jobs/available");
     return response.data.data || [];
