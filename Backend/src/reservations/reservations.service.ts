@@ -6,7 +6,12 @@ import {
   ConflictException,
   Logger,
 } from '@nestjs/common';
-import { ReservationStatus, EscrowStatus, Role } from '@prisma/client';
+import {
+  ReservationStatus,
+  EscrowStatus,
+  Role,
+  PaymentStatus,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EscrowService } from '../escrow/escrow.service';
 import { PaymentsService } from '../payments/payments.service';
@@ -564,6 +569,14 @@ export class ReservationsService {
           if (reservation.escrow?.status === EscrowStatus.HELD) {
             await this.escrowService.refundEscrow(reservation.escrow.id, tx);
           }
+
+          await tx.payment.updateMany({
+            where: {
+              reservationId: reservation.id,
+              status: PaymentStatus.INITIATED,
+            },
+            data: { status: PaymentStatus.FAILED },
+          });
         });
 
         expiredCount++;

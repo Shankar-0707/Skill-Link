@@ -1,6 +1,7 @@
 export const REALTIME_EVENTS = {
   CONNECTED: 'realtime:connected',
   JOB_CREATED: 'job:created',
+  JOB_UPDATED: 'job:updated',
   JOB_NOTIFICATION: 'job:notification',
   JOB_OFFER_ACCEPTED: 'job:offerAccepted',
   JOB_OFFER_REJECTED: 'job:offerRejected',

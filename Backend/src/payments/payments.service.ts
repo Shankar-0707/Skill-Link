@@ -4,7 +4,13 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { Prisma, PaymentStatus, EscrowStatus } from '@prisma/client';
+import {
+  Prisma,
+  PaymentStatus,
+  EscrowStatus,
+  ReservationStatus,
+  JobStatus,
+} from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from './wallet.service';
@@ -126,6 +132,34 @@ export class PaymentsService {
     if (payment.status !== PaymentStatus.INITIATED) {
       throw new BadRequestException(
         `Payment ${providerPaymentId} is already ${payment.status}`,
+      );
+    }
+
+    if (
+      payment.reservationId &&
+      payment.reservation?.status !== ReservationStatus.PENDING
+    ) {
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: PaymentStatus.FAILED },
+      });
+      throw new BadRequestException(
+        `Reservation is ${payment.reservation?.status}. Payment cannot be completed.`,
+      );
+    }
+
+    if (
+      payment.jobId &&
+      payment.job?.status !== JobStatus.POSTED &&
+      payment.job?.status !== JobStatus.ASSIGNED &&
+      payment.job?.status !== JobStatus.COMPLETED
+    ) {
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: PaymentStatus.FAILED },
+      });
+      throw new BadRequestException(
+        `Job is ${payment.job?.status}. Payment cannot be completed.`,
       );
     }
 
