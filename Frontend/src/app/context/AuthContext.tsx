@@ -12,6 +12,7 @@ type AuthContextValue = {
   user: User | null;
   isAuthenticated: boolean;
   isBootstrapping: boolean;
+  rateLimitMessage: string | null;
   login: (email: string, password: string) => Promise<AuthResponse>;
   completeAuthSession: (authResponse: AuthResponse) => Promise<void>;
   logout: () => Promise<void>;
@@ -46,6 +47,7 @@ async function restoreSession() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
+  const [rateLimitMessage, setRateLimitMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -90,6 +92,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Listen for rate-limit events — show a banner without logging out
+  useEffect(() => {
+    const handleRateLimit = (e: Event) => {
+      const { message, retryAfter } = (e as CustomEvent<{ message: string; retryAfter: number }>).detail;
+      setRateLimitMessage(message);
+      // Auto-clear after the retry-after window
+      window.setTimeout(() => setRateLimitMessage(null), retryAfter * 1000);
+    };
+
+    window.addEventListener('auth:rate-limited', handleRateLimit);
+    return () => window.removeEventListener('auth:rate-limited', handleRateLimit);
+  }, []);
+
   useEffect(() => {
     if (!user) {
       return;
@@ -99,7 +114,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const profile = await authApi.getProfile();
         setUser(profile);
-      } catch {
+      } catch (err) {
+        // Don't log out on 429 — the user is still authenticated
+        const status = (err as { status?: number })?.status;
+        if (status === 429) return;
         clearAuthTokens();
         setUser(null);
       }
@@ -129,6 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       isAuthenticated: Boolean(user),
       isBootstrapping,
+      rateLimitMessage,
       login: async (email: string, password: string) => {
         const response = await authApi.login({ email, password });
         setAuthTokens(response.accessToken, response.refreshToken);
@@ -168,7 +187,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       },
     }),
-    [isBootstrapping, user],
+    [isBootstrapping, user, rateLimitMessage],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

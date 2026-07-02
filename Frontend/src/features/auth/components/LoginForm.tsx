@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Mail, Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, CheckCircle2, Clock } from 'lucide-react';
 import { GoogleAuthButton } from './GoogleAuthButton';
 import { useAuth } from '../../../app/context/useAuth';
 import { getHomeRouteForRole } from '../utils/authHelpers';
@@ -12,7 +12,7 @@ import { cn } from '../../../shared/utils/cn';
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, rateLimitMessage } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -52,6 +52,13 @@ export const LoginForm: React.FC = () => {
 
       navigate(destination, { replace: true });
     } catch (error) {
+      // 429 — rate limit: the global interceptor already fired auth:rate-limited
+      // so AuthContext will show the banner; just clear the loading state.
+      const status = (error as { status?: number })?.status;
+      if (status === 429) {
+        return;
+      }
+
       const errorCode = axios.isAxiosError(error)
         ? error.response?.data?.code
         : undefined;
@@ -146,6 +153,15 @@ export const LoginForm: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {rateLimitMessage && (
+        <div className="animate-in fade-in slide-in-from-top-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 flex items-start gap-3">
+          <Clock className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-sm font-semibold text-amber-700">
+            {rateLimitMessage}
+          </p>
+        </div>
+      )}
 
       {errorMessage && (
         <div className="rounded-xl border border-red-300 bg-red-50 px-3 py-3 text-sm text-red-700">

@@ -61,6 +61,27 @@ api.interceptors.response.use(
     const errorCode = error.response?.data?.code;
     const errorMessage = error.response?.data?.message;
 
+    // ── 429 Too Many Requests ────────────────────────────────────────────────
+    if (error.response?.status === 429) {
+      const retryAfter = Number(error.response.headers?.['retry-after'] ?? 10);
+      const message: string =
+        typeof errorMessage === 'string'
+          ? errorMessage
+          : `Too many requests. Please wait ${retryAfter} second(s) before trying again.`;
+
+      window.dispatchEvent(
+        new CustomEvent('auth:rate-limited', {
+          detail: { retryAfter, message },
+        }),
+      );
+
+      // Re-throw with a clean message so UI catch blocks can display it
+      const rateLimitError = new Error(message) as Error & { status: number };
+      rateLimitError.status = 429;
+      throw rateLimitError;
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     if (errorCode === 'ACCOUNT_SUSPENDED') {
       handleSuspendedSession(
         Array.isArray(errorMessage) ? errorMessage[0] : errorMessage,
