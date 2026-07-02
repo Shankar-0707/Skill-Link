@@ -16,7 +16,7 @@ import { SKIP_RATE_LIMIT_KEY } from '../decorators/skip-rate-limit.decorator';
 /**
  * Global rate-limit guard backed by Upstash Redis.
  *
- * Limit: 10 requests per 60 seconds per IP address (sliding window).
+ * Limit: 50 requests per 10 seconds per IP address (sliding window).
  * Exceeding the limit returns HTTP 429 with Retry-After and X-RateLimit-* headers.
  *
  * Usage: registered globally via APP_GUARD in AppModule.
@@ -41,7 +41,7 @@ export class UpstashRateLimitGuard implements CanActivate {
 
     this.ratelimit = new Ratelimit({
       redis: new Redis({ url: url ?? '', token: token ?? '' }),
-      limiter: Ratelimit.slidingWindow(6, '10 s'),
+      limiter: Ratelimit.slidingWindow(50, '10 s'),
       analytics: true,
       prefix: 'skilllink:rl',
     });
