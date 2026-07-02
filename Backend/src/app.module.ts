@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { UpstashRateLimitGuard } from './common/guards/upstash-rate-limit.guard';
 import { AuthModule } from './auth/auth.module';
 import { ContactModule } from './contact/contact.module';
 import { EscrowModule } from './escrow/escrow.module';
@@ -26,12 +27,7 @@ import { WorkersModule } from './workers/workers.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60_000,
-        limit: 100,
-      },
-    ]),
+
     ScheduleModule.forRoot(),
     StorageModule,
     PrismaModule,
@@ -52,6 +48,11 @@ import { WorkersModule } from './workers/workers.module';
     AdminModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: UpstashRateLimitGuard,
+    },
+  ],
 })
 export class AppModule {}

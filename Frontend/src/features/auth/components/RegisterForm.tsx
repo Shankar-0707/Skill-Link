@@ -7,11 +7,13 @@ import {
   Phone,
   Building2,
   Briefcase,
+  Clock,
 } from 'lucide-react';
 import { authApi } from '../api/auth';
 import { GoogleAuthButton } from './GoogleAuthButton';
 import { Role } from '../types';
 import { resolveApiErrorMessage } from '../utils/errorMessage';
+import { useAuth } from '../../../app/context/useAuth';
 import { cn } from '../../../shared/utils/cn';
 
 const roleOptions = [
@@ -22,6 +24,7 @@ const roleOptions = [
 
 export const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
+  const { rateLimitMessage } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     role: Role.CUSTOMER as Role,
@@ -55,7 +58,10 @@ export const RegisterForm: React.FC = () => {
         replace: true 
       });
     } catch (error) {
-      setErrorMessage(resolveApiErrorMessage(error, 'Registration failed. Please try again.'));
+      const status = (error as { status?: number })?.status;
+      if (status !== 429) {
+        setErrorMessage(resolveApiErrorMessage(error, 'Registration failed. Please try again.'));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -63,6 +69,12 @@ export const RegisterForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 animate-in fade-in duration-500">
+      {rateLimitMessage && (
+        <div className="animate-in fade-in slide-in-from-top-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 flex items-start gap-3">
+          <Clock className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-sm font-semibold text-amber-700">{rateLimitMessage}</p>
+        </div>
+      )}
       {/* Segmented Control for Role */}
       <div className="flex bg-slate-100/80 p-1.5 rounded-[1.1rem] w-full mt-1">
         {roleOptions.map((option) => (

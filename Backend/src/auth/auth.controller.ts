@@ -26,6 +26,7 @@ import { GoogleOauthGuard } from './guards/google-oauth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { GoogleOauthUser } from './types/google-oauth-user.type';
 import type { JwtPayload } from './types/jwt-payload.type';
+import { SkipRateLimit } from '../common/decorators/skip-rate-limit.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -71,12 +72,14 @@ export class AuthController {
     return this.authService.resetPassword(resetPasswordDto);
   }
 
+  @SkipRateLimit()
   @UseGuards(GoogleOauthGuard)
   @Get('google')
   googleLogin() {
     return;
   }
 
+  @SkipRateLimit()
   @UseGuards(GoogleOauthGuard)
   @Get('google/callback')
   async googleCallback(
