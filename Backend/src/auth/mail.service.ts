@@ -12,6 +12,7 @@ declare global {
       RESEND_API_KEY?: string;
       MAIL_FROM?: string;
       CONTACT_INBOX_EMAIL?: string;
+      CORS_ORIGIN?: string;
 
       // SMTP Configuration
       SMTP_HOST?: string;
@@ -202,6 +203,109 @@ export class MailService {
     });
   }
 
+  async sendMailWithAttachments(options: {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+    attachments: Array<{ filename: string; content: Buffer; contentType: string }>;
+  }) {
+    const mode = process.env.MAIL_MODE ?? 'log';
+
+    if (mode === 'log') {
+      this.logger.log(
+        `MAIL_MODE=log | To: ${options.to} | Subject: ${options.subject} | Attachments: ${options.attachments.map((a) => a.filename).join(', ')}`,
+      );
+      this.logger.log(options.text);
+      return;
+    }
+
+    if (mode === 'smtp') {
+      return this.sendMailWithAttachmentsViaSmtp(options);
+    }
+
+    return this.sendMailWithAttachmentsViaResend(options);
+  }
+
+  private async sendMailWithAttachmentsViaSmtp(options: {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+    attachments: Array<{ filename: string; content: Buffer; contentType: string }>;
+  }) {
+    if (!this.transporter) {
+      throw new Error('SMTP transporter not initialised. Check credentials.');
+    }
+
+    const from = process.env.MAIL_FROM ?? process.env.SMTP_USER;
+
+    await this.transporter.sendMail({
+      from,
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+      attachments: options.attachments.map((a) => ({
+        filename: a.filename,
+        content: a.content,
+        contentType: a.contentType,
+      })),
+    });
+
+    this.logger.log(`Email with attachments sent via SMTP to ${options.to}`);
+  }
+
+  private async sendMailWithAttachmentsViaResend(options: {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+    attachments: Array<{ filename: string; content: Buffer; contentType: string }>;
+  }) {
+    if (!this.resend) {
+      throw new Error(
+        'Resend client is not initialised. Ensure RESEND_API_KEY is set.',
+      );
+    }
+
+    const from = process.env.MAIL_FROM;
+    if (!from) {
+      throw new Error('MAIL_FROM is not set. Set it in environment variables.');
+    }
+
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from,
+        to: options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+        attachments: options.attachments.map((a) => ({
+          filename: a.filename,
+          content: a.content,
+        })),
+      });
+
+      if (error) {
+        this.logger.error(
+          `Resend API error sending to ${options.to}: ${JSON.stringify(error)}`,
+        );
+        throw new Error(`Resend error: ${JSON.stringify(error)}`);
+      }
+
+      this.logger.log(
+        `Email with attachments sent via Resend to ${options.to} | id: ${data?.id}`,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed to send email with attachments via Resend to ${options.to}. Subject: ${options.subject}`,
+        err instanceof Error ? err.message : String(err),
+      );
+      throw err;
+    }
+  }
+
   private async sendMail(options: {
     to: string;
     subject: string;
@@ -224,6 +328,7 @@ export class MailService {
 
     return this.sendMailViaResend(options);
   }
+
 
   private async sendMailViaSmtp(options: {
     to: string;

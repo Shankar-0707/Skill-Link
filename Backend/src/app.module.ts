@@ -20,6 +20,7 @@ import { ReservationsModule } from './reservations/reservations.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { UsersModule } from './users/users.module';
 import { WorkersModule } from './workers/workers.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { WorkersModule } from './workers/workers.module';
     HelpModule,
     KycModule,
     AdminModule,
+    InvoiceModule,
   ],
   controllers: [],
   providers: [

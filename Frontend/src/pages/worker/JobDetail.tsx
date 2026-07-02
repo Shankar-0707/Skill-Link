@@ -8,6 +8,7 @@ import { WorkerLayout } from '../../features/worker/components/layout/Layout';
 import { useAuth } from '../../app/context/useAuth';
 import { JobChatPanel } from '../../features/customer/components/JobChatPanel';
 import { JobContractDocument } from '../../features/customer/components/JobContractDocument';
+import { JobInvoiceSection } from '../../features/customer/components/JobInvoiceSection';
 
 const getSteps = (job: Job) => [
   {
@@ -426,6 +427,11 @@ export const WorkerJobDetailPage: React.FC = () => {
                 ₹{job.escrow.amount.toLocaleString()} has been credited to your account.
               </p>
             </div>
+          )}
+
+          {/* Invoice section — visible after payment released */}
+          {isCompleted && job.escrow?.status === 'RELEASED' && (
+            <JobInvoiceSection jobId={job.id} showWorkerPayout />
           )}
         </div>
 
