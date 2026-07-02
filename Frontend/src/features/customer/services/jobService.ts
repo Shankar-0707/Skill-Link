@@ -147,4 +147,29 @@ export const jobService = {
     const response = await api.post<ApiResponse<{ checkoutUrl: string; providerPaymentId: string; amount: number }>>(`/jobs/${id}/pay`);
     return response.data.data;
   },
+
+  getInvoiceByJobId: async (jobId: string) => {
+    const response = await api.get<ApiResponse<{
+      id: string;
+      invoiceNumber: string;
+      jobId: string;
+      amount: number;
+      workerPayout: number;
+      platformFee: number;
+      jobTitle: string;
+      jobCategory: string;
+      completedAt: string;
+      customerName: string | null;
+      workerName: string | null;
+      createdAt: string;
+    }>>(`/invoices/job/${jobId}`);
+    return response.data.data;
+  },
+
+  downloadInvoice: async (jobId: string): Promise<Blob> => {
+    const response = await api.get(`/invoices/job/${jobId}/download`, {
+      responseType: 'blob',
+    });
+    return response.data as Blob;
+  },
 };

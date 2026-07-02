@@ -7,6 +7,7 @@ import { Layout } from '../../features/customer/components/layout/Layout';
 import { jobService } from '../../features/customer/services/jobService';
 import { JobChatPanel } from '../../features/customer/components/JobChatPanel';
 import { JobContractDocument } from '../../features/customer/components/JobContractDocument';
+import { JobInvoiceSection } from '../../features/customer/components/JobInvoiceSection';
 import { useAuth } from '../../app/context/useAuth';
 import { useRazorpay } from '../../shared/hooks/useRazorpay';
 import { paymentsApi } from '../../services/api/payments';
@@ -586,6 +587,11 @@ export const JobDetailPage: React.FC = () => {
           >
             Confirm Completion & Release Payment
           </button>
+        )}
+
+        {/* Invoice section — visible after job confirmation (escrow released) */}
+        {job.status === 'COMPLETED' && job.escrow?.status === 'RELEASED' && (
+          <JobInvoiceSection jobId={job.id} />
         )}
       </div>
     </Layout>

@@ -200,6 +200,7 @@ model Customer {
   reservations Reservation[]
   chatRooms    ChatRoom[]
   jobContracts JobContract[]
+  invoices     Invoice[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -232,6 +233,7 @@ model Worker {
   jobOffers    JobOffer[]
   chatRooms    ChatRoom[]
   jobContracts JobContract[]
+  invoices     Invoice[]
 
   documents   WorkerDocument[]
   kycRequests KycRequest[]
@@ -298,6 +300,7 @@ model Job {
   offers      JobOffer[]
   chatRooms   ChatRoom[]
   contracts   JobContract[]
+  invoices    Invoice[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -702,4 +705,49 @@ model HelpTicket {
   @@index([reservationId])
   @@index([workerId])
   @@index([organisationId])
+}
+
+//// INVOICES
+
+model Invoice {
+  id            String @id @default(uuid())
+  invoiceNumber String @unique
+
+  jobId      String
+  customerId String
+  workerId   String
+
+  job      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  worker   Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  /// Total amount charged to customer
+  amount       Float
+  /// Amount paid to worker (amount - platformFee)
+  workerPayout Float
+  /// 5% platform fee
+  platformFee  Float
+
+  /// Snapshot of job details at time of invoice generation
+  jobTitle       String
+  jobDescription String
+  jobCategory    String
+  jobScope       String?
+  scheduledAt    DateTime?
+  completedAt    DateTime
+
+  customerName  String?
+  customerEmail String
+  customerPhone String?
+  workerName    String?
+  workerEmail   String
+  workerPhone   String?
+  workerSkills  String[]
+
+  createdAt DateTime @default(now())
+
+  @@index([jobId])
+  @@index([customerId])
+  @@index([workerId])
+  @@index([invoiceNumber])
 }

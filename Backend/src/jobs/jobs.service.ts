@@ -16,6 +16,7 @@ import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { CreateJobContractDto } from './dto/create-job-contract.dto';
 import { ReportJobNoShowDto } from './dto/report-job-no-show.dto';
+import { InvoiceService } from '../invoice/invoice.service';
 
 const OPEN_JOB_TTL_MS = 72 * 60 * 60 * 1000;
 const JOB_NO_SHOW_GRACE_MS = 2 * 60 * 60 * 1000;
@@ -30,6 +31,7 @@ export class JobsService {
     private readonly paymentsService: PaymentsService,
     private readonly escrowService: EscrowService,
     private readonly realtime: RealtimeService,
+    private readonly invoiceService: InvoiceService,
   ) {}
 
   // ─────────────────────────────────────────────
@@ -1277,6 +1279,9 @@ export class JobsService {
           data: { isAvailable: true },
         });
       }
+
+      // Generate invoice BEFORE cleaning up contracts (invoice needs contract data)
+      await this.invoiceService.generateInvoice(jobId, tx);
 
       // Cleanup temporary negotiation data (no longer needed after payment)
       // Deletion order: ChatMessage → ChatRoom → JobContract (FK constraints)
