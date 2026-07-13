@@ -203,6 +203,29 @@ export const SkillsBanner: React.FC<{ onAction: () => void }> = ({ onAction }) =
   );
 };
 
+// ── Platform Contract Banner ──────────────────────────────────────────────────
+// Shown when KYC is verified but platform contract is not signed
+
+export const PlatformContractBanner: React.FC<{ onAction: () => void }> = ({ onAction }) => {
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 border border-indigo-200 bg-indigo-50 rounded-xl">
+      <span className="text-xl flex-shrink-0">📄</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-bold text-indigo-700">Platform Agreement Required</p>
+        <p className="text-xs text-indigo-600">
+          Sign the platform fee contract to unlock job discovery and start earning.
+        </p>
+      </div>
+      <button
+        onClick={onAction}
+        className="flex-shrink-0 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white transition-colors"
+      >
+        Review & Sign
+      </button>
+    </div>
+  );
+};
+
 // ── Progress Step ─────────────────────────────────────────────────────────────
 // Used in the job detail timeline
 

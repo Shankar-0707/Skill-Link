@@ -37,8 +37,8 @@ export class JobsController {
    */
   @Get('available')
   @Roles('WORKER')
-  getAvailableJobs() {
-    return this.jobsService.getAvailableJobs();
+  getAvailableJobs(@CurrentUser('sub') userId: string) {
+    return this.jobsService.getAvailableJobs(userId);
   }
 
   /**
@@ -47,8 +47,11 @@ export class JobsController {
    */
   @Get('available/category/:category')
   @Roles('WORKER')
-  getAvailableJobsByCategory(@Param('category') category: string) {
-    return this.jobsService.getAvailableJobsByCategory(category);
+  getAvailableJobsByCategory(
+    @Param('category') category: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.jobsService.getAvailableJobsByCategory(category, userId);
   }
 
   /**

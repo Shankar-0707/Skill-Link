@@ -209,17 +209,31 @@ export class PaymentsService {
         };
       } else if (payment.jobId) {
         // 2b. Job flow — create escrow and link payment
+        const platformFeeRate = 0.1;
+        const platformFee =
+          Math.round(payment.amount * platformFeeRate * 100) / 100;
+        const originalAmount =
+          Math.round((payment.amount - platformFee) * 100) / 100;
+
         if (payment.job?.escrow) {
           escrowId = payment.job.escrow.id;
           await tx.escrow.update({
             where: { id: escrowId },
-            data: { status: EscrowStatus.HELD, paymentId: payment.id },
+            data: {
+              status: EscrowStatus.HELD,
+              paymentId: payment.id,
+              amount: payment.amount,
+              originalAmount,
+              platformFee,
+            },
           });
         } else {
           const escrow = await tx.escrow.create({
             data: {
               jobId: payment.jobId,
               amount: payment.amount,
+              originalAmount,
+              platformFee,
               status: EscrowStatus.HELD,
               paymentId: payment.id,
             },

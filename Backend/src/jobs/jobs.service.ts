@@ -8,6 +8,7 @@ import {
 import { EscrowStatus, PaymentStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { KycGateService } from '../kyc/kyc-gate.service';
+import { PlatformContractGateService } from '../workers/platform-contract-gate.service';
 import { PaymentsService } from '../payments/payments.service';
 import { EscrowService } from '../escrow/escrow.service';
 import { RealtimeService } from '../realtime/realtime.service';
@@ -28,6 +29,7 @@ export class JobsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly kycGate: KycGateService,
+    private readonly platformContractGate: PlatformContractGateService,
     private readonly paymentsService: PaymentsService,
     private readonly escrowService: EscrowService,
     private readonly realtime: RealtimeService,
@@ -77,6 +79,7 @@ export class JobsService {
         isAvailable: true,
         kycStatus: 'VERIFIED',
         deletedAt: null,
+        platformContract: { isSigned: true },
         user: {
           isActive: true,
           isBlacklisted: false,
@@ -490,9 +493,13 @@ export class JobsService {
   // ─────────────────────────────────────────────
 
   /**
-   * Returns all open (POSTED) jobs — visible to all workers.
+   * Returns all open (POSTED) jobs — visible only to workers with a signed platform contract.
    */
-  async getAvailableJobs() {
+  async getAvailableJobs(userId: string) {
+    const canViewJobs =
+      await this.platformContractGate.isUserWorkerContractSigned(userId);
+    if (!canViewJobs) return [];
+
     return this.prisma.job.findMany({
       where: {
         status: 'POSTED',
@@ -520,7 +527,11 @@ export class JobsService {
   /**
    * Returns open jobs filtered by category.
    */
-  async getAvailableJobsByCategory(category: string) {
+  async getAvailableJobsByCategory(category: string, userId: string) {
+    const canViewJobs =
+      await this.platformContractGate.isUserWorkerContractSigned(userId);
+    if (!canViewJobs) return [];
+
     return this.prisma.job.findMany({
       where: {
         category,
@@ -674,6 +685,7 @@ export class JobsService {
 
   async acceptJobOffer(jobId: string, userId: string) {
     const workerId = await this.getWorkerId(userId);
+    await this.platformContractGate.assertWorkerContractSigned(workerId);
 
     // Try to find existing offer, or find the job to create an offer on the fly
     let offer = await this.prisma.jobOffer.findUnique({

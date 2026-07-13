@@ -45,6 +45,7 @@ import { WorkerSettingsPage as WorkerSettings } from "@/pages/worker/Settings";
 import { WorkerHelpCenterPage } from "@/pages/worker/HelpCenterPage";
 import { WorkerHelpTicketPage } from "@/pages/worker/HelpTicketPage";
 import { WorkerWalletPage } from "@/pages/worker/WorkerWalletPage";
+import { PlatformFeeContractPage } from "@/pages/worker/PlatformFeeContractPage";
 import OrganisationSettingsPage from "@/pages/organisation/SettingsPage";
 import OrganisationLayout from "@/pages/organisation/OrganisationLayout";
 import OrganisationPage from "@/pages/organisation/OrganisationPage";
@@ -159,6 +160,7 @@ export const AppRoutes: React.FC = () => {
             <Route path="/worker/earnings" element={<ComingSoonPage />} />
             <Route path="/worker/schedule" element={<ComingSoonPage />} />
             <Route path="/worker/wallet" element={<WorkerWalletPage />} />
+            <Route path="/worker/platform-contract" element={<PlatformFeeContractPage />} />
             <Route path="/worker/help" element={<WorkerHelpCenterPage />} />
             <Route
               path="/worker/help/ticket"

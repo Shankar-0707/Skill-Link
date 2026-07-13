@@ -580,11 +580,13 @@ export const JobDetailPage: React.FC = () => {
           </div>
         )}
 
-        {job.status === 'COMPLETED' && (
+        {job.status === 'COMPLETED' && job.escrow?.status === 'HELD' && (
           <button
             onClick={handleConfirm}
-            className="w-full px-5 py-3 bg-green-600 text-white text-sm font-label font-semibold rounded-xl hover:bg-green-700 transition-colors"
+            disabled={refreshing}
+            className="w-full px-5 py-3 bg-green-600 text-white text-sm font-label font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
+            {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             Confirm Completion & Release Payment
           </button>
         )}
