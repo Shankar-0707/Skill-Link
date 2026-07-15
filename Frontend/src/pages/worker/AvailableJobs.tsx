@@ -60,6 +60,9 @@ export const AvailableJobsPage: React.FC = () => {
   };
 
   const hasActiveFilters = search || maxBudget;
+  const hasSignedContract = profile?.platformContract?.isSigned === true;
+  const needsKyc = profile?.kycStatus !== 'VERIFIED';
+  const needsContract = profile?.kycStatus === 'VERIFIED' && !hasSignedContract;
 
   if (loading) {
     return (
@@ -159,7 +162,21 @@ export const AvailableJobsPage: React.FC = () => {
       </p>
 
       {/* ── Job list ── */}
-      {!profile || profile.skills.length === 0 ? (
+      {needsKyc ? (
+        <EmptyState
+          icon="🛡️"
+          title="KYC verification required"
+          description="Complete identity verification in settings before you can browse available jobs."
+          action={{ label: 'Complete KYC', onClick: () => navigate('/worker/settings') }}
+        />
+      ) : needsContract ? (
+        <EmptyState
+          icon="📄"
+          title="Platform agreement required"
+          description="Sign the platform fee contract to unlock job discovery. No jobs are shown until the agreement is accepted."
+          action={{ label: 'Review & Sign Contract', onClick: () => navigate('/worker/platform-contract') }}
+        />
+      ) : !profile || profile.skills.length === 0 ? (
         <EmptyState
           icon="⚡"
           title="Skills mandatory"

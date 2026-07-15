@@ -4,7 +4,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { workerService } from '../../features/customer/services/workerService';
 import { jobService } from '../../features/customer/services/jobService';
 import type { Worker, Job, JobOffer } from '../../features/customer/types';
-import { StatCard, SectionHeader, KycBanner, SkillsBanner } from '../../features/worker/components/ui';
+import { StatCard, SectionHeader, KycBanner, SkillsBanner, PlatformContractBanner } from '../../features/worker/components/ui';
 import { DashboardJobRow } from '../../features/worker/components/jobs/JobsCard';
 import { WorkerLayout } from '../../features/worker/components/layout/Layout';
 
@@ -101,6 +101,7 @@ export const WorkerDashboardPage: React.FC = () => {
     .reduce((sum, j) => sum + (j.budget || 0), 0);
 
   const firstName = profile.user.name?.split(' ')[0] ?? 'Worker';
+  const hasSignedContract = profile.platformContract?.isSigned === true;
 
   return (
     <WorkerLayout>
@@ -124,6 +125,12 @@ export const WorkerDashboardPage: React.FC = () => {
             <KycBanner
               status={profile.kycStatus}
               onAction={() => navigate('/worker/settings')}
+            />
+          </div>
+        ) : !hasSignedContract ? (
+          <div className="flex-shrink-0 max-w-sm w-full">
+            <PlatformContractBanner
+              onAction={() => navigate('/worker/platform-contract')}
             />
           </div>
         ) : profile.skills.length === 0 ? (
@@ -174,7 +181,7 @@ export const WorkerDashboardPage: React.FC = () => {
       )}
 
       {/* ── New Opportunities (Matching Jobs) ── */}
-      {matchingJobs.length > 0 && (
+      {hasSignedContract && matchingJobs.length > 0 && (
         <div className="mb-8">
           <SectionHeader 
             title="Jobs for You" 

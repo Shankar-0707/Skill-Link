@@ -238,6 +238,7 @@ model Worker {
   documents   WorkerDocument[]
   kycRequests KycRequest[]
   helpTickets HelpTicket[]
+  platformContract WorkerPlatformContract?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -245,6 +246,22 @@ model Worker {
 
   @@index([isAvailable])
   @@index([kycStatus])
+}
+
+model WorkerPlatformContract {
+  id String @id @default(uuid())
+
+  workerId String @unique
+  worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  isSigned Boolean @default(false)
+  platformFeePercent Float @default(10)
+  signedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isSigned])
 }
 
 //// ORGANISATIONS

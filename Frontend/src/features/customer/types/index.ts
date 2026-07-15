@@ -126,6 +126,11 @@ export interface Worker {
   ratingCount: number;
   serviceRadius?: number;
   kycStatus: KycStatus;
+  platformContract?: {
+    isSigned: boolean;
+    platformFeePercent: number;
+    signedAt?: string | null;
+  };
   user: {
     id: string;
     phone: string;

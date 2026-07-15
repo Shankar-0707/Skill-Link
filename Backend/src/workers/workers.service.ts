@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { PlatformContractService } from './platform-contract.service';
 
 @Injectable()
 export class WorkersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly platformContractService: PlatformContractService,
+  ) {}
 
   async findAll() {
     return this.prisma.worker.findMany({
@@ -41,7 +45,7 @@ export class WorkersService {
   }
 
   async getProfileByUserId(userId: string) {
-    return this.prisma.worker.findUnique({
+    const worker = await this.prisma.worker.findUnique({
       where: { userId },
       include: {
         user: {
@@ -52,8 +56,31 @@ export class WorkersService {
             profileImage: true,
           },
         },
+        platformContract: {
+          select: {
+            isSigned: true,
+            platformFeePercent: true,
+            signedAt: true,
+          },
+        },
       },
     });
+
+    if (!worker) return null;
+
+    if (!worker.platformContract) {
+      const contract = await this.platformContractService.ensureContract(worker.id);
+      return {
+        ...worker,
+        platformContract: {
+          isSigned: contract.isSigned,
+          platformFeePercent: contract.platformFeePercent,
+          signedAt: contract.signedAt,
+        },
+      };
+    }
+
+    return worker;
   }
 
   async updateProfileByUserId(userId: string, data: Record<string, unknown>) {
